@@ -13,13 +13,13 @@ const { Text, Title } = Typography;
 
 export default function ChatWindow() {
     return (
-        <div style={{}}>
+        <div style={{ height:'95vh'}}>
             <Row>
                 <Col span={18}>
-                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
+                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height:'85vh' }}>
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
-                                <div style={{ width: "65px", height: "65px", position: "relative" }}>
+                                <div style={{ width: "65px", height: "7vh", position: "relative" }}>
                                     <img src='./images/avt.jpg' style={{ width: "100%", height: "100%", borderRadius: '100%' }} />
                                     <div style={{ position: "absolute", width: "10px", height: "10px", backgroundColor: "#F24E1E", borderRadius: "100%", bottom: 0, right: 10, borderColor: '#FFF', border: '1px solid #FFF' }}></div>
                                 </div>
@@ -37,11 +37,12 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ background: '#1B1B1B', width: '100%', height: '700px' }}>
+                        <div style={{ background: '#1B1B1B', width: '100%', height: '74vh' }}>
+                            
 
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                             <AiFillCamera style={{fontSize: '50', margin: '10', color: '#F24E1E'}} />
                             <BsImage style={{fontSize: '40', margin: '10', color: '#F24E1E'}} />
                             <div style={{ display: 'flex', background: '#36373A', borderRadius: '25px', justifyContent: 'space-between', alignaItems: 'center', width: '100%', margin: '10px' }}>
@@ -54,15 +55,15 @@ export default function ChatWindow() {
 
                 </Col>
 
-                <Col span={6} style={{display: 'flex', flexDirection: 'column'}}>
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E'}}>
+                <Col span={6} style={{display: 'flex', flexDirection: 'column', height:'93.5vh'}}>
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45vh', borderColor: '#2E2E2E', border: '1px solid #2E2E2E'}}>
                         <img src='./images/avt.jpg' style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center'}}>
                             <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>Nguyễn Nhật Sang</Text>
                             <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#F24E1E', width: '100%' }}>Đang hoạt động</Text>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '70%'}}>
+                        <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%'}}>
                             <div style={{ display: 'flex',width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
                                 <HiBell style={{fontSize: '30', color: '#FFF'}} />
                             </div>
@@ -75,7 +76,7 @@ export default function ChatWindow() {
                         </div>
                     </div>
 
-                    <div style={{paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '55%'}}>
+                    <div style={{paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '55vh', padding:'20px'}}>
                         <Text style={{color: '#FFF', fontSize: '20px', fontWeight: '700'}}>File, phương tiện và liên kết</Text>
                     </div>
                 </Col>

@@ -29,7 +29,7 @@ const data = [{
 export default function ChatList() {
 
   return (
-    <div style={{ marginTop: '20px', marginLeft: '10px' }}>
+    <div style={{ marginTop:'20px', marginLeft: '10px', height:'79.5vh' }}>
       {data.map(item => (
         <div key={item.id} style={{ marginBottom: '10px', display: 'flex' }}>
           <img src={item.avt} style={{ width: '60px', height: '60px', borderRadius: '100%' }}></img>

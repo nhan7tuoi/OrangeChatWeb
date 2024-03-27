@@ -5,14 +5,14 @@ import { AiOutlineUsergroupAdd } from "react-icons/ai";
 
 export default function Find() {
     return (
-        <div style={{ marginTop: '30px', marginLeft: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '30%' }}>
+        <div style={{  marginLeft: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '11.3vh' }}>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#36373A', paddingLeft: '10px', width: '380px', borderRadius: '8px' }}>
                 <IoIosSearch style={{fontSize: '18', color: '#FFF'}} />
-                <input type='text' placeholder='Tìm kiếm' style={{ width: '90%', height: '40px', background: '#36373A', marginLeft: '5px', border: 'hidden', outline: 'none', color: '#FFF' }}></input>
+                <input type='text' placeholder='Tìm kiếm' style={{ width: '90%', height: '40px', background: '#36373A', marginLeft: '5px', border: 'hidden', outline: 'none', color: '#FFF' , borderRadius:'10px'}}></input>
             </div>
-            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center'}}> 
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', marginLeft:'10px'}}> 
                 <BsPersonAdd style={{fontSize: "24", color: '#FFF'}} />
-                <AiOutlineUsergroupAdd style={{fontSize: 24, color: '#FFF', margin: '10'}} />
+                <AiOutlineUsergroupAdd style={{fontSize: 24, color: '#FFF', margin: '10px'}} />
             </div>
         </div>
     )
