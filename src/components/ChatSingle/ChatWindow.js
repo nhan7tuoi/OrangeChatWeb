@@ -15,7 +15,7 @@ export default function ChatWindow() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <img src='./images/Hello.svg' style={{ height: '300px', width: '100%' }}></img>
-            <Text style={{fontSize: '32px', fontWeight: '700px', color: '#F24E1E'}}>Chào mừng đến với OrangeC Web</Text>
+            <Text style={{fontSize: '32px', fontWeight: '700', color: '#F24E1E'}}>Chào mừng đến với OrangeC Web</Text>
             <Text style={{fontSize: '20px', fontWeight: '700px', color: '#FFF', textAlign: 'center'}}>Khám phát những tiện ích hỗ trợ làm việc và trò chuyện cùng người thân, bạn bè được tối ưu hóa cho máy tính của bạn.</Text>
 
 
@@ -42,12 +42,7 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-<<<<<<< HEAD:src/components/ChatSingle/ChatWindow.js
                         <div style={{ background: '#1B1B1B', width: '100%', height: '80%' }}>
-=======
-                        <div style={{ background: '#1B1B1B', width: '100%', height: '74vh' }}>
-                            
->>>>>>> d2c13c61cb976d02e52bd73382c548ffc9e45601:src/components/ChatRoom/ChatWindow.js
 
                         </div>
 
@@ -64,13 +59,8 @@ export default function ChatWindow() {
 
                 </Col>
 
-<<<<<<< HEAD:src/components/ChatSingle/ChatWindow.js
                 <Col span={6} style={{display: 'flex', flexDirection: 'column', height: '90vh'}}>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E'}}>
-=======
-                <Col span={6} style={{display: 'flex', flexDirection: 'column', height:'93.5vh'}}>
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45vh', borderColor: '#2E2E2E', border: '1px solid #2E2E2E'}}>
->>>>>>> d2c13c61cb976d02e52bd73382c548ffc9e45601:src/components/ChatRoom/ChatWindow.js
                         <img src='./images/avt.jpg' style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center'}}>
                             <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>Nguyễn Nhật Sang</Text>

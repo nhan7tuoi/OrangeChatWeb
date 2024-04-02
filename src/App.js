@@ -15,7 +15,12 @@ import SideBar from './components/ChatSingle/SideBar';
 import ChatWindow from './components/ChatSingle/ChatWindow';
 import Find from './components/ChatSingle/Find';
 import ChatList from './components/ChatSingle/ChatList';
+
 import Welcome from './components/Welcome/Welcome';
+
+import ChangePass from './components/Profile/ChangePass';
+import ForgetPass from './components/Profile/ForgetPass';
+
 
 function App() {
   return (
@@ -45,6 +50,26 @@ function App() {
             <Route path='/friend' element={<Friend />} />
             <Route path='/profile' element={<Profile />} />
           </Routes>
+        <TabBar />
+        <Routes>
+          {/* <Route exact path="/" element={<Login />} /> */}
+          {/* <Route path="/" element={<Register />} />
+          <Route path="/registercontinute" element={<Register_Continute />} />
+          <Route path="/registerinf" element={<Register_Inf />} />
+          <Route path='/' element={<TabBar />} />
+          <Route path='/chat' element={<Chat />} /> */}
+         <Route path='/sideBar' element={<SideBar />} />
+           {/* <Route path='/find' element={<Find />} />
+          <Route path='/chatList' element={<ChatList />} />
+          <Route path='/chatWindow' element={<ChatWindow />} /> */}
+          <Route path='/chatGroup' element={<ChatGroup />} />
+          <Route path='/friend' element={<Friend />} />
+          <Route path='/profile' element={<Profile />} />
+          <Route path='/changepass' element={<ChangePass />} />
+          <Route path='/forgetpass' element={<ForgetPass />} />
+
+
+        </Routes>
       </div>
     </Provider>
   );
