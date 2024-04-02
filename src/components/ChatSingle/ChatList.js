@@ -29,7 +29,11 @@ const data = [{
 export default function ChatList() {
 
   return (
+<<<<<<< HEAD:src/components/ChatSingle/ChatList.js
     <div style={{ height: '100%' }}>
+=======
+    <div style={{ marginTop:'20px', marginLeft: '10px', height:'79.5vh' }}>
+>>>>>>> d2c13c61cb976d02e52bd73382c548ffc9e45601:src/components/ChatRoom/ChatList.js
       {data.map(item => (
         <Button key={item.id} style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}>
           <img src={item.avt} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
