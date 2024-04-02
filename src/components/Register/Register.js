@@ -40,36 +40,74 @@ export default function Register() {
               validateOnMount={true}
               onSubmit={(values) => {
                 console.log(values);
-                navigate('/login', {values});
-                // navigation.navigate('EnterInfoScreen', { values });
+                navigate('/registerinf', { state: { values: values } });
+                
+
               }}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isValid }) => (
                 <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
-                  <input name='phoneNumber' type='tel' placeholder='Số điện thoại' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}
-                    label={i18next.t('nhapSoDienThoai')}
-                    onChange={handleChange('phoneNumber')}
-                    onBlur={handleBlur('phoneNumber')}
-                    value={values.phoneNumber}
-                    error={errors.phoneNumber && touched.phoneNumber}
-                  >
 
-                    {/* {errors.phoneNumber && touched.phoneNumber } */}
-                    {/* // <Text>{errors.phoneNumber}</Text>} */}
+                  <div className='phone-number' style={{ width: '100%' }}>
+                    <input name='phoneNumber' type='tel' placeholder='Số điện thoại' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}
+                      // label={i18next.t('nhapSoDienThoai')}
+                      onChange={handleChange('phoneNumber')}
+                      onBlur={handleBlur('phoneNumber')}
+                      value={values.phoneNumber}
+                      error={errors.phoneNumber && touched.phoneNumber}
+                    />
 
-                  </input>
+                    {errors.phoneNumber && touched.phoneNumber && <Text style={{ color: '#FFF', fontSize: 12 }}>{errors.phoneNumber}</Text>}
+                  </div>
 
-                  <input name='email' type='email' placeholder='Email' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}></input>
+                  <div className='email' style={{ width: '100%' }}>
+                    <input name='email' type='email' placeholder='Email' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}
+                      // label={i18next.t('nhapSoDienThoai')}
+                      onChange={handleChange('email')}
+                      onBlur={handleBlur('email')}
+                      value={values.email}
+                      error={errors.email && touched.email}
+                    />
 
-                  <input name='password' type='password' placeholder='Mật khẩu' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}></input>
+                    {errors.email && touched.email && <Text style={{ color: '#FFF', fontSize: 12 }}>{errors.email}</Text>}
+                  </div>
 
-                  <input name='confirmPassword' type='password' placeholder='Nhập lại mật khẩu' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}></input>
+                  <div className='password' style={{ width: '100%' }}>
+                    <input name='password' type='password' placeholder='Mật khẩu' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}
+                      // label={i18next.t('nhapSoDienThoai')}
+                      onChange={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                      value={values.password}
+                      error={errors.password && touched.password}
+                    />
 
-                  <Link to='/registercontinute'>
-                    <Button style={{ width: '440px', height: '60px', fontSize: '24px', fontWeight: '800px', color: '#FFFFFF', backgroundColor: '#F24E1E', borderColor: '#F24E1E', marginTop: '80px', fontWeight: '600' }}>
-                      Tiếp tục
-                    </Button>
-                  </Link>
+                    {errors.password && touched.password && <Text style={{ color: '#FFF', fontSize: 12 }}>{errors.password}</Text>}
+                  </div>
+
+                  <div className='re-password' style={{ width: '100%' }}>
+                    <input name='re-password' type='password' placeholder='Nhập lại mật khẩu' style={{ backgroundColor: '#2E2E2E', width: '100%', height: '60px', borderRadius: '10px', marginTop: '30px', fontSize: '18px', padding: '15px', color: '#FFF' }}
+                      // label={i18next.t('nhapSoDienThoai')}
+                      onChange={handleChange('repassword')}
+                      onBlur={handleBlur('repassword')}
+                      value={values.repassword}
+                      error={errors.repassword && touched.repassword}
+                    />
+
+                    {errors.repassword && touched.repassword && <Text style={{ color: '#FFF', fontSize: 12 }}>{errors.repassword}</Text>}
+                  </div>
+
+                  <Button
+                    disabled={!isValid}
+                    onClick={handleSubmit}
+                    style={
+                      isValid ? {
+                        width: '60%', height: '60px', fontSize: '24px', fontWeight: '800px', color: '#FFFFFF', backgroundColor: '#F24E1E', borderColor: '#F24E1E', marginTop: '80px', fontWeight: '600'
+                      } : {
+                        width: '60%', height: '60px', fontSize: '24px', fontWeight: '800px', color: '#FFFFFF', backgroundColor: 'gray', borderColor: '#F24E1E', marginTop: '80px', fontWeight: '600'
+                      }
+                    }>
+                    Tiếp tục
+                  </Button>
                 </div>
               )}
             </Formik>

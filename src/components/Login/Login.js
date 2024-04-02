@@ -80,16 +80,8 @@ export default function Login() {
                                     <Text style={{ color: '#FFFFFF59', fontSize: '18px' }}>Ghi nhớ thông tin</Text>
                                 </div>
 
-
                                 <Text style={{ color: '#FFFFFF59', fontSize: '18px' }}>Quên mật khẩu ?</Text>
                             </div>
-
-                            {/* <Button style={{ width: '100%', height: 75, backgroundColor: '#2E2E2E78', borderColor: '#2E2E2E78', marginTop: '50px' }}>
-                                <div style={{ justifyContent: "center", alignItems: 'center', display: 'flex' }}>
-                                    <FaFacebookF style={{ fontSize: '30', color: '#FFF' }} />
-                                    <Text style={{ color: '#FFFFFF59', fontSize: '18px' }}>Đăng nhập bằng FaceBook</Text>
-                                </div>
-                            </Button> */}
                         </Col>
                     </Row>
                 </div>

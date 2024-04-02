@@ -24,6 +24,7 @@ const  login = async ({username,password}) => {
 }
 
 const register = async (data) => {
+    console.log("data", data);
     try {
         const response = await instance.post('/auth/register', {
             name: data.name,
@@ -34,6 +35,7 @@ const register = async (data) => {
             gender:data.gender,
             password: data.password,
         });
+        return response.data;
     } catch (error) {
         throw new Error(error);
     }

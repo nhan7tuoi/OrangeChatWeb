@@ -13,7 +13,6 @@ const { Text, Title } = Typography;
 
 export default function ChatWindow() {
     return (
-<<<<<<< HEAD:src/components/ChatSingle/ChatWindow.js
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
             <img src='./images/Hello.svg' style={{ height: '300px', width: '100%' }}></img>
             <Text style={{fontSize: '32px', fontWeight: '700px', color: '#F24E1E'}}>Chào mừng đến với OrangeC Web</Text>
@@ -23,12 +22,6 @@ export default function ChatWindow() {
             {/* <Row style={{}}>
                 <Col span={18} style={{height: '90vh'}}>
                     <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
-=======
-        <div style={{ height:'95vh'}}>
-            <Row>
-                <Col span={18}>
-                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height:'85vh' }}>
->>>>>>> d2c13c61cb976d02e52bd73382c548ffc9e45601:src/components/ChatRoom/ChatWindow.js
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
                                 <div style={{ width: "65px", height: "7vh", position: "relative" }}>
