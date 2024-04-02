@@ -1,5 +1,5 @@
 import React from 'react'
-import { Typography } from 'antd'
+import { Button, Typography } from 'antd'
 
 const { Text } = Typography;
 
@@ -29,19 +29,19 @@ const data = [{
 export default function ChatList() {
 
   return (
-    <div style={{ marginTop: '20px', marginLeft: '10px' }}>
+    <div style={{ height: '100%' }}>
       {data.map(item => (
-        <div key={item.id} style={{ marginBottom: '10px', display: 'flex' }}>
-          <img src={item.avt} style={{ width: '60px', height: '60px', borderRadius: '100%' }}></img>
+        <Button key={item.id} style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}>
+          <img src={item.avt} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
 
-          <div style={{display: 'flex', flexDirection: 'column', width: '100%', paddingRight: '5px', margin: '10px', justifyContent: 'center' }}>
+          <div style={{display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
             <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={{ fontSize: '20px', fontWeight: '700px', color: '#FFF' }}>{item.name}</Text>
               <Text style={{fontSize: '14px', fontWeight: '400px', color: '#666'}}>{item.time}</Text>
             </div>
-            <Text style={{fontSize: '14px', fontWeight: '400px', color: '#666'}}>Hello</Text>
+            <Text style={{fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left'}}>Hello</Text>
           </div>
-        </div>))}
+        </Button>))}
     </div>
   )
 }

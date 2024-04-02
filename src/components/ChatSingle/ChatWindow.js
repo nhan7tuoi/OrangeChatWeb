@@ -1,6 +1,6 @@
 import { Col, Row, Typography } from 'antd'
 import React from 'react'
-import { IoSearchSharp  } from "react-icons/io5";
+import { IoSearchSharp } from "react-icons/io5";
 import { LuPhone } from "react-icons/lu";
 import { BsCameraVideo, BsImage } from "react-icons/bs";
 import { FaRegSquarePlus, FaUserLarge } from "react-icons/fa6";
@@ -13,9 +13,14 @@ const { Text, Title } = Typography;
 
 export default function ChatWindow() {
     return (
-        <div style={{}}>
-            <Row>
-                <Col span={18}>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            <img src='./images/Hello.svg' style={{ height: '300px', width: '100%' }}></img>
+            <Text style={{fontSize: '32px', fontWeight: '700px', color: '#F24E1E'}}>Chào mừng đến với OrangeC Web</Text>
+            <Text style={{fontSize: '20px', fontWeight: '700px', color: '#FFF', textAlign: 'center'}}>Khám phát những tiện ích hỗ trợ làm việc và trò chuyện cùng người thân, bạn bè được tối ưu hóa cho máy tính của bạn.</Text>
+
+
+            {/* <Row style={{}}>
+                <Col span={18} style={{height: '90vh'}}>
                     <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
@@ -37,7 +42,7 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ background: '#1B1B1B', width: '100%', height: '700px' }}>
+                        <div style={{ background: '#1B1B1B', width: '100%', height: '80%' }}>
 
                         </div>
 
@@ -54,7 +59,7 @@ export default function ChatWindow() {
 
                 </Col>
 
-                <Col span={6} style={{display: 'flex', flexDirection: 'column'}}>
+                <Col span={6} style={{display: 'flex', flexDirection: 'column', height: '90vh'}}>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E'}}>
                         <img src='./images/avt.jpg' style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center'}}>
@@ -79,7 +84,7 @@ export default function ChatWindow() {
                         <Text style={{color: '#FFF', fontSize: '20px', fontWeight: '700'}}>File, phương tiện và liên kết</Text>
                     </div>
                 </Col>
-            </Row>
+            </Row> */}
         </div>
     )
 }

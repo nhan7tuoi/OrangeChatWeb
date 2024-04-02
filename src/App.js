@@ -1,18 +1,43 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Chat from './components/ChatRoom/Chat';
+import Chat from './components/ChatSingle/Chat';
+import ChatGroup from './components/ChatGroup/ChatGroup';
+import Friend from './components/Friend/Friend';
 import Login from './components/Login/Login';
 import Register from './components/Register/Register';
+import Register_Continute from './components/Register/Register_Continute';
+import Register_Inf from './components/Register/Register_Inf';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+import TabBar from './components/BottomTab/TabBar';
+import Profile from './components/Profile/Profile';
+import SideBar from './components/ChatSingle/SideBar';
+import ChatWindow from './components/ChatSingle/ChatWindow';
+import Find from './components/ChatSingle/Find';
+import ChatList from './components/ChatSingle/ChatList';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route exact path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path='/chat' element={<Chat />} />
-      </Routes>
-    </Router>
+    <Provider store={store}>
+      <div>
+        <TabBar />
+        <Routes>
+          {/* <Route exact path="/" element={<Login />} /> */}
+          {/* <Route path="/" element={<Register />} />
+        <Route path="/registercontinute" element={<Register_Continute />} />
+        <Route path="/registerinf" element={<Register_Inf />} /> */}
+          {/* <Route path='/' element={<TabBar />} /> */}
+          <Route path='/chat' element={<Chat />} />
+          {/* <Route path='/sideBar' element={<SideBar />} />
+          <Route path='/find' element={<Find />} />
+          <Route path='/chatList' element={<ChatList />} />
+          <Route path='/chatWindow' element={<ChatWindow />} /> */}
+          <Route path='/chatGroup' element={<ChatGroup />} />
+          <Route path='/friend' element={<Friend />} />
+          <Route path='/profile' element={<Profile />} />
+        </Routes>
+      </div>
+    </Provider>
   );
 }
 
