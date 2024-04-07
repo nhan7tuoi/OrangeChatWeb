@@ -13,15 +13,15 @@ const { Text, Title } = Typography;
 
 export default function ChatWindow() {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            <img src='./images/Hello.svg' style={{ height: '300px', width: '100%' }}></img>
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}>
+            {/* <img src='./images/Hello.svg' style={{ height: '300px', width: '100%' }}></img>
             <Text style={{fontSize: '32px', fontWeight: '700', color: '#F24E1E'}}>Chào mừng đến với OrangeC Web</Text>
-            <Text style={{fontSize: '20px', fontWeight: '700px', color: '#FFF', textAlign: 'center'}}>Khám phát những tiện ích hỗ trợ làm việc và trò chuyện cùng người thân, bạn bè được tối ưu hóa cho máy tính của bạn.</Text>
+            <Text style={{fontSize: '20px', fontWeight: '700px', color: '#FFF', textAlign: 'center'}}>Khám phát những tiện ích hỗ trợ làm việc và trò chuyện cùng người thân, bạn bè được tối ưu hóa cho máy tính của bạn.</Text> */}
 
 
-            {/* <Row style={{}}>
-                <Col span={18} style={{height: '90vh'}}>
-                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
+            <Row style={{height: '100%', width: '100%'}}>
+                <Col span={18}>
+                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E', width: '100%', height: '100%' }}>
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
                                 <div style={{ width: "65px", height: "7vh", position: "relative" }}>
@@ -84,7 +84,7 @@ export default function ChatWindow() {
                         <Text style={{color: '#FFF', fontSize: '20px', fontWeight: '700'}}>File, phương tiện và liên kết</Text>
                     </div>
                 </Col>
-            </Row> */}
+            </Row>
         </div>
     )
 }

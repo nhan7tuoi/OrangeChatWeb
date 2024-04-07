@@ -7,7 +7,7 @@ import Login from './components/Login/Login';
 import Register from './components/Register/Register';
 import Register_Verifi from './components/Register/Register_Verifi';
 import Register_Inf from './components/Register/Register_Inf';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import store from './redux/store';
 import TabBar from './components/BottomTab/TabBar';
 import Profile from './components/Profile/Profile';
@@ -20,58 +20,51 @@ import Welcome from './components/Welcome/Welcome';
 
 import ChangePass from './components/Profile/ChangePass';
 import ForgetPass from './components/Profile/ForgetPass';
+import Information from './components/Profile/Information';
+
+import PrivateRoute from './components/Layout/PrivateRoute';
+import MainLayout from './components/Layout/MainLayout';
+
+import React, { useEffect, useState } from 'react'
 
 
 function App() {
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // useEffect(() => {
+  //   // Giả sử bạn có thể kiểm tra trạng thái đăng nhập thông qua local storage hoặc Redux
+  //   const loggedInStatus = localStorage.getItem("isLoggedIn") === "true";
+  //   setIsLoggedIn(loggedInStatus);
+  // }, []);
+  const user = useSelector((state) => state.auth.user);
+  console.log(user);
   return (
-    <Provider store={store}>
+
+
       <div>
-          <Routes>
-          {/* <Route exact path="/" element={<Welcome />} /> */}
-            <Route exact path="/login" element={<Login />} />
-            <Route path="/" element={<Register />} />
-            <Route path="/registerverifi" element={<Register_Verifi />} />
-            <Route path="/registerinf" element={<Register_Inf />} />
-          </Routes>
-
-          {/* <TabBar /> */}
-          <Routes>
-            {/* <Route exact path="/login" element={<Login />} />
-          <Route path="/" element={<Register />} />
-          <Route path="/registerverifi" element={<Register_Verifi />} />
-          <Route path="/registerinf" element={<Register_Inf />} /> */}
-            {/* <Route path='/' element={<TabBar />} />
-          <Route path='/chat' element={<Chat />} />
-          {/* <Route path='/sideBar' element={<SideBar />} />
-          <Route path='/find' element={<Find />} />
-          <Route path='/chatList' element={<ChatList />} />
-          <Route path='/chatWindow' element={<ChatWindow />} /> */}
-            <Route path='/chatGroup' element={<ChatGroup />} />
-            <Route path='/friend' element={<Friend />} />
-            <Route path='/profile' element={<Profile />} />
-          </Routes>
-        <TabBar />
         <Routes>
-          {/* <Route exact path="/" element={<Login />} /> */}
-          {/* <Route path="/" element={<Register />} />
-          <Route path="/registercontinute" element={<Register_Continute />} />
+          <Route exact path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/registerverifi" element={<Register_Verifi />} />
           <Route path="/registerinf" element={<Register_Inf />} />
-          <Route path='/' element={<TabBar />} />
-          <Route path='/chat' element={<Chat />} /> */}
-         <Route path='/sideBar' element={<SideBar />} />
-           {/* <Route path='/find' element={<Find />} />
-          <Route path='/chatList' element={<ChatList />} />
-          <Route path='/chatWindow' element={<ChatWindow />} /> */}
-          <Route path='/chatGroup' element={<ChatGroup />} />
-          <Route path='/friend' element={<Friend />} />
-          <Route path='/profile' element={<Profile />} />
+          <Route path='/forgotpassword' element={<ForgetPass />} />
           <Route path='/changepass' element={<ChangePass />} />
-          <Route path='/forgetpass' element={<ForgetPass />} />
+          {/* <Route path='/welcome' element={<Welcome />} /> */}
+        </Routes>
 
+        {/* {isLoggedIn && <TabBar />} */}
+        <TabBar/>
+        <Routes>
 
+          
+
+            <Route path='/chatGroup' element={user.name ? <ChatGroup /> : <Login />}/>
+            <Route path='/friend' element={user.name ? <Friend /> : <Login />} />
+            <Route path='/chat' element={user.name ? <Chat /> : <Login />} />
+            <Route path='/profile' element={user.name ? <Profile /> : <Login />} />
+            <Route path='/information' element={user.name ? <Information  /> : <Login />} />
+         
         </Routes>
       </div>
-    </Provider>
   );
 }
 

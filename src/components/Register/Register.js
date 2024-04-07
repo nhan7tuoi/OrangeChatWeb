@@ -3,6 +3,7 @@ import { Button, Col, Flex, Row, Typography } from 'antd'
 import { Link, useNavigate } from 'react-router-dom';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import authApi from '../../apis/authApi';
 import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
@@ -10,6 +11,26 @@ const { Text, Title } = Typography;
 
 export default function Register() {
   let navigate = useNavigate();
+
+  const checkInfo = async (values) => {
+    console.log(values);
+    try {
+        const response = await authApi.checkInfo({
+            email: values.email,
+            phone: values.phoneNumber
+        });
+        console.log('response', response);
+        if (response.message === 'email') {
+            alert(i18next.t('emailDaTonTai'));
+        } else if (response.message === 'phone') {
+            alert(i18next.t('soDienThoaiDaTonTai'));
+        } else {
+          navigate('/registerinf', { state: { values: values } });
+        }
+    } catch (error) {
+        console.log('error', error);
+    }
+}
   return (
     <div style={{ background: '#1D1D1D', width: '100vw', height: '100vh' }}>
 
@@ -40,9 +61,7 @@ export default function Register() {
               validateOnMount={true}
               onSubmit={(values) => {
                 console.log(values);
-                navigate('/registerinf', { state: { values: values } });
-                
-
+                checkInfo(values);
               }}
             >
               {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isValid }) => (

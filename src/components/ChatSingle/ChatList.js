@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Typography } from 'antd'
+import { useSelector } from 'react-redux';
 
 const { Text } = Typography;
 
@@ -27,7 +28,7 @@ const data = [{
 
 
 export default function ChatList() {
-
+  const user = useSelector((state) => state.auth.user);
   return (
     <div style={{ height: '100%' }}>
       {data.map(item => (

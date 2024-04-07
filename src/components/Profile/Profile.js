@@ -5,16 +5,22 @@ import { IoIosLock } from "react-icons/io";
 import { FaLanguage } from "react-icons/fa6";
 import { LuPhone } from "react-icons/lu";
 import { Link, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 
 const { Text, Title } = Typography;
 
 export default function Profile() {
+    let navigate = useNavigate();
+    const user = useSelector((state) => state.auth.user);
     return (
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
             <Col span={10} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', border: '1px solid #2E2E2E' }}>
-                <img src='./images/avt.jpg' style={{ height: '350px', width: '350px', borderRadius: '100%' }} alt='avatar'></img>
+                <Button style={{width: '350px', height: '350px', borderRadius: '100%', backgroundColor: '#242424', border: 'hidden'}} onClick={() => navigate("/information")}>
+                    <img src={user.image} style={{ height: '350px', width: '350px', borderRadius: '100%' }} alt='avatar'></img>
+                </Button>
 
-                <Text style={{ fontSize: '40px', fontWeight: '700', color: '#FFF' }}>Nguyễn Nhật Sang</Text>
+
+                <Text style={{ fontSize: '40px', fontWeight: '700', color: '#FFF' }}>{user.name}</Text>
 
                 <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '70%', alignItems: 'center' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -56,7 +62,7 @@ export default function Profile() {
                         </div>
                         <div style={{ width: '100%' }}></div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Text style={{ marginLeft: '20px', color: 'white' }}>000000000000000</Text>
+                            <Text style={{ marginLeft: '20px', color: 'white' }}>{user.phone}</Text>
                             <Button style={{ display: 'flex', marginLeft: 10, border: 'hidden', width: '100%', height: '100%', background: '#242424', padding: '10px', alignItems: 'center', justifyContent: 'center' }}>
                                 <img src='./images/ArrowRight.svg' style={{ height: '10px', width: '' }} alt='avatar'></img>
                             </Button>

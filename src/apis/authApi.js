@@ -76,6 +76,35 @@ const refreshToken = async ({token}) => {
     }
 };
 
+const checkInfo = async ({email,phone}) => {
+    console.log('email', email);
+    console.log('phone', phone);
+    try {
+        const response = await instance.post('/checkInfo', {
+            email: email,
+            phone: phone
+        });
+        return response.data;
+    } catch (error) {
+        throw new Error(error);
+    }
+};
+
+const changePassword = async (data) => {
+    console.log('data', data);
+    try {
+        const response = await instance.post('/changePassword', {
+            userId: data.userId,
+            oldpassword: data.oldpassword,
+            password: data.password,
+        });
+        return response.data;
+    }
+    catch (error) {
+        throw new Error(error);
+    }
+};
+
 const searchUsers = async ({keyword,userId}) => {
   try {
     const data = {keyword:keyword,userId:userId}
@@ -94,6 +123,8 @@ export default {
     verifycation,
     forgotPassword,
     refreshToken,
-    searchUsers
+    searchUsers,
+    checkInfo,
+    changePassword
 }
 

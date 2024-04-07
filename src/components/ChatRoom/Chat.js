@@ -3,8 +3,7 @@ import { Button, Col, Flex, Row, Typography } from 'antd'
 import { BsChatFill } from "react-icons/bs";
 import { HiUsers } from "react-icons/hi2";
 import { FaPhoneSquareAlt, FaUser } from "react-icons/fa";
-import SideBar from './SideBar';
-import ChatWindow from './ChatWindow';
+import Chat from './ChatSingle';
 
 const { Text, Title } = Typography;
 
@@ -14,8 +13,7 @@ export default function Chat() {
     <div style={{ width: '100%', height: '100%', background: '#242424' }}>
       <div style={{height:'93.5vh'}}>
       <Row>
-        <Col span={6}><SideBar /></Col>
-        <Col span={18}><ChatWindow /></Col>
+        <Col span={24}><Chat/></Col>
       </Row>
       </div>
       

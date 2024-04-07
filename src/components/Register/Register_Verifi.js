@@ -6,8 +6,8 @@ import i18next from '../../i18n/i18n';
 
 const { Text, Title } = Typography;
 
-const URL_IMAGE_MALE = "https://nhannehihi1.s3.ap-southeast-1.amazonaws.com/man-user-circle-icon.png";
-const URL_IMAGE_FEMALE = "https://nhannehihi1.s3.ap-southeast-1.amazonaws.com/woman-user-circle-icon.png";
+const URL_IMAGE_MALE = "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/man-user-circle-icon.png";
+const URL_IMAGE_FEMALE = "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/woman-user-circle-icon.png";
 
 export default function Register() {
   let navigate = useNavigate();
@@ -47,7 +47,8 @@ export default function Register() {
     try {
       const response = await authApi.register({ ...userData });
       console.log(response);
-      navigate('LoginScreen');
+      alert('Đăng ký thành công!');
+      navigate('/');
     } catch (error) {
       alert('Đăng ký thất bại', error.message);
     }

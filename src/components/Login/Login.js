@@ -5,7 +5,7 @@ import { FaFacebookF } from "react-icons/fa";
 import authApi from '../../apis/authApi';
 import { useDispatch } from 'react-redux';
 import "./Login.css";
-// import { setAuth } from '../../redux/authSlice';
+import { setAuth } from '../../redux/authSlice';
 // import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
@@ -35,10 +35,10 @@ export default function Login() {
             //     isChecked ? response.accessToken : ''
             //   );
 
-            //   dispatch(setAuth({
-            //     user: response.user,
-            //     accessToken: response.accessToken
-            //   }));
+              dispatch(setAuth({
+                user: response.user,
+                accessToken: response.accessToken
+              }));
         } catch (error) {
             //   Alert.alert(i18next.t('dangNhapThatBai'), i18next.t('taiKhoanMatKhauKhongChinhSac'));
             // alert("i18next.t('dangNhapThatBai'), i18next.t('taiKhoanMatKhauKhongChinhSac')");
@@ -80,7 +80,7 @@ export default function Login() {
                                     <Text style={{ color: '#FFFFFF59', fontSize: '18px' }}>Ghi nhớ thông tin</Text>
                                 </div>
 
-                                <Text style={{ color: '#FFFFFF59', fontSize: '18px' }}>Quên mật khẩu ?</Text>
+                                <Link to={"/forgotpassword"} style={{ color: '#FFFFFF59', fontSize: '18px' }}>Quên mật khẩu ?</Link>
                             </div>
                         </Col>
                     </Row>
