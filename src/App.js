@@ -48,7 +48,14 @@ function App() {
           <Route path="/registerinf" element={<Register_Inf />} />
           <Route path='/forgotpassword' element={<ForgetPass />} />
           <Route path='/changepass' element={<ChangePass />} />
+          
           {/* <Route path='/welcome' element={<Welcome />} /> */}
+        </Routes>
+
+        <Routes>
+          
+        <Route path='/chatWindow' element={<ChatWindow />} />
+          
         </Routes>
 
         {/* {isLoggedIn && <TabBar />} */}

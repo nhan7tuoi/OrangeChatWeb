@@ -16,7 +16,7 @@ export default function Register() {
   const [countdown, setCountdown] = useState(60);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
   const [txtCode, setTxtCode] = useState('');
-  const  valuesRegister  = location.state?.valuesRegister;
+  const valuesRegister  = location.state?.valuesRegister;
   const valueInfo = location.state?.valueInfo;
   const code= location.state?.code;
   const dateOfBirth = location.state?.dateOfBirth;

@@ -1,48 +1,107 @@
-import React from 'react'
+import React, { useEffect, useId } from 'react'
 import { Button, Typography } from 'antd'
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import connectSocket from '../../server/ConnectSocket';
+import { setConversations } from '../../redux/conversationSlice';
+import conversationApi from '../../apis/conversationApi';
+import { useNavigate } from 'react-router-dom';
+import { setCurrentPage, setUserId } from '../../redux/currentSlice';
 
 const { Text } = Typography;
 
-const data = [{
-  id: 0,
-  avt: './images/avt.jpg',
-  name: 'Phạm Đức Nhân',
-  time: '1 phút'
-}, {
-  id: 1,
-  avt: './images/avt.jpg',
-  name: 'Nguyễn Nhật Sang',
-  time: '15 phút'
-}, {
-  id: 2,
-  avt: './images/avt.jpg',
-  name: 'Võ Trọng Tài',
-  time: '1 giờ'
-}, {
-  id: 3,
-  avt: './images/avt.jpg',
-  name: 'Bùi Nhựt Duy',
-  time: '2 ngày'
-}];
-
-
 export default function ChatList() {
+  let navigate = useNavigate();
   const user = useSelector((state) => state.auth.user);
-  return (
-    <div style={{ height: '100%' }}>
-      {data.map(item => (
-        <Button key={item.id} style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}>
-          <img src={item.avt} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
+  const accessToken = useSelector((state) => state.auth.accessToken);
+  const dispatch = useDispatch();
+  const conversations = useSelector((state) => state.conversation.conversations);
+  
 
-          <div style={{display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
-            <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ fontSize: '20px', fontWeight: '700px', color: '#FFF' }}>{item.name}</Text>
-              <Text style={{fontSize: '14px', fontWeight: '400px', color: '#666'}}>{item.time}</Text>
-            </div>
-            <Text style={{fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left'}}>Hello</Text>
-          </div>
-        </Button>))}
-    </div>
+  useEffect(() => {
+    getConversation();
+  }, []);
+
+  useEffect(() => {
+    connectSocket.on('conversation updated', () => {
+      getConversation();
+    })
+  })
+
+  const getConversation = async () => {
+    try {
+      const response = await conversationApi.getConversation({ userId: user._id });
+
+      if (response) {
+        dispatch(setConversations(response.data));
+        // console.log("response", response.data);
+      }
+
+    } catch (error) {
+      console.log('error getConversation', error);
+    }
+  };
+
+  const handleButtonClick = () => {
+    dispatch(setCurrentPage('ChatWindow'));
+  };
+
+  const handleUserId = (userId) => {
+    dispatch(setUserId(userId));
+    console.log("UserID", userId);
+  };
+
+  const currentPage = useSelector(state => state.current.currentPage);
+  // console.log("CurrentChat", currentPage);
+
+  return (
+    conversations.map((item, index) => {
+        // console.log("item:", item);
+        const otherMember = item?.conversation.members.find(member => member._id !== user._id);
+        // console.log("member",otherMember._id);
+        if (otherMember) {
+          return (
+            <div key={index}>
+              <Button style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
+                onClick={() => (handleButtonClick(), handleUserId(
+                  {
+                      receiverId: otherMember._id,
+                      conversationId: item.conversation._id,
+                      receiverImage: otherMember.image,
+                      receiverName: otherMember.name
+                  } 
+                  
+                ))}>
+                <img src={otherMember.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
+
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: '20px', fontWeight: '700px', color: '#FFF' }}>{
+                      otherMember.name
+                    }</Text>
+                    {/* <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666' }}>{item.time}</Text> */}
+                  </div>
+                  {
+                    item?.lastMessage?.senderId === user._id
+                      ? (
+                        <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
+                          Bạn: {
+                            item?.lastMessage?.contentMessage
+                          }</Text>
+                      )
+                      : (
+                        <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
+                          {
+                            item?.lastMessage?.contentMessage
+                          }
+                        </Text>
+                      )
+                  }
+
+                </div>
+              </Button>
+            </div>)
+        }
+      }
+    )
   )
 }

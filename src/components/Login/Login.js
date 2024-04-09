@@ -6,6 +6,7 @@ import authApi from '../../apis/authApi';
 import { useDispatch } from 'react-redux';
 import "./Login.css";
 import { setAuth } from '../../redux/authSlice';
+import connectSocket from '../../server/ConnectSocket';
 // import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
@@ -14,8 +15,8 @@ export default function Login() {
     const [error, setError] = useState("");
     const dispatch = useDispatch();
     const [data, setData] = useState({
-        username: '',
-        password: ''
+        username: 'admin@orange.com',
+        password: 'admin123'
     });
 
     let navigate = useNavigate();
@@ -35,13 +36,13 @@ export default function Login() {
             //     isChecked ? response.accessToken : ''
             //   );
 
-              dispatch(setAuth({
+            dispatch(setAuth({
                 user: response.user,
                 accessToken: response.accessToken
-              }));
+            }));
+            connectSocket.emit('user login', response.user._id);
+            console.log(response.user._id);
         } catch (error) {
-            //   Alert.alert(i18next.t('dangNhapThatBai'), i18next.t('taiKhoanMatKhauKhongChinhSac'));
-            // alert("i18next.t('dangNhapThatBai'), i18next.t('taiKhoanMatKhauKhongChinhSac')");
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")
         }
     }
