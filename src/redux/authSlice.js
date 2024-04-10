@@ -21,9 +21,16 @@ const authSlice = createSlice({
             state.email = '';
             state.accessToken = '';
             state.user = {};
+        },
+        setAvt: (state, action) => {
+            console.log('action.payload.image',action.payload);
+            state.user.image = action.payload;
+        },
+        setUser: (state, action) => {
+            state.user = action.payload;
         }
     },
 });
 
-export const { setAuth,removeAuth } = authSlice.actions;
+export const { setAuth,removeAuth,setAvt,setUser } = authSlice.actions;
 export default authSlice.reducer;

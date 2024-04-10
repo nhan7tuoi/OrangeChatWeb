@@ -1,4 +1,4 @@
-import React, { useEffect, useId } from 'react'
+import React, { useEffect, useId, useRef } from 'react'
 import { Button, Typography } from 'antd'
 import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
@@ -15,6 +15,7 @@ export default function ChatList() {
   const accessToken = useSelector((state) => state.auth.accessToken);
   const dispatch = useDispatch();
   const conversations = useSelector((state) => state.conversation.conversations);
+  const scrollRef = useRef(null);
   
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function ChatList() {
         // console.log("member",otherMember._id);
         if (otherMember) {
           return (
-            <div key={index}>
+            <div key={index} ref={scrollRef} style={{ overflowY: 'auto' }}>
               <Button style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
                 onClick={() => (handleButtonClick(), handleUserId(
                   {

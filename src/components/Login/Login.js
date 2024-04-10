@@ -40,7 +40,8 @@ export default function Login() {
                 user: response.user,
                 accessToken: response.accessToken
             }));
-            connectSocket.emit('user login', response.user._id);
+            connectSocket.initSocket(response.user._id);
+            // connectSocket.emit('user login',response.user._id);
             console.log(response.user._id);
         } catch (error) {
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")

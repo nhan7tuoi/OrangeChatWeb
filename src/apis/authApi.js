@@ -1,6 +1,9 @@
 import axios from 'axios';
+import IPV4 from './ipv4';
 
-const BASE_URL = 'http://localhost:3000/api/v1';
+
+const BASE_URL = `http://${IPV4}:3000/api/v1`;
+
 
 const instance = axios.create({
     baseURL: BASE_URL,
@@ -8,15 +11,12 @@ const instance = axios.create({
 })
 
 const  login = async ({username,password}) => {
-    console.log(username);
-    console.log(password);
     try {
         const response = await instance.post('/auth/login',
             {
                 username: username,
                 password: password,
             });
-            console.log(response.data);
         return response.data;
     } catch (error) {
         throw new Error(error);
@@ -24,7 +24,6 @@ const  login = async ({username,password}) => {
 }
 
 const register = async (data) => {
-    console.log("data", data);
     try {
         const response = await instance.post('/auth/register', {
             name: data.name,
@@ -35,7 +34,7 @@ const register = async (data) => {
             gender:data.gender,
             password: data.password,
         });
-        return response.data;
+        return response.data
     } catch (error) {
         throw new Error(error);
     }
@@ -57,6 +56,7 @@ const forgotPassword = async ({username}) => {
         const response = await instance.post('/forgotpassword', {
             username: username
         });
+        return response.data;
     } catch (error) {
         throw new Error(error);
     }
@@ -76,6 +76,18 @@ const refreshToken = async ({token}) => {
     }
 };
 
+const searchUsers = async ({keyword,userId}) => {
+  try {
+    const data = {keyword:keyword,userId:userId}
+    const queryParam = new URLSearchParams(data).toString();
+    const response = await instance.get(`/users?`+queryParam);
+    return response.data;
+  } catch (error) {
+    console.log('error', error);
+    throw error;
+  }
+};
+
 const checkInfo = async ({email,phone}) => {
     console.log('email', email);
     console.log('phone', phone);
@@ -88,8 +100,25 @@ const checkInfo = async ({email,phone}) => {
     } catch (error) {
         throw new Error(error);
     }
-};
+}
+//ham chinh sua thong tin ca nhan
+const editProfile = async (data) => {
+    console.log('data', data);
+    try {
+        const response = await instance.post('/editProfile', {
+            userId: data.userId,
+            name: data.name,
+            dateOfBirth: data.dateOfBirth,
+            gender:data.gender,
+        });
+        return response.data;
+    }
+    catch (error) {
+        throw new Error(error);
+    }
+}
 
+//ham change password
 const changePassword = async (data) => {
     console.log('data', data);
     try {
@@ -103,19 +132,8 @@ const changePassword = async (data) => {
     catch (error) {
         throw new Error(error);
     }
-};
+}
 
-const searchUsers = async ({keyword,userId}) => {
-  try {
-    const data = {keyword:keyword,userId:userId}
-    const queryParam = new URLSearchParams(data).toString();
-    const response = await instance.get(`/users?`+queryParam);
-    return response.data;
-  } catch (error) {
-    console.log('error', error);
-    throw error;
-  }
-};
 
 export default {
     login,
@@ -125,6 +143,6 @@ export default {
     refreshToken,
     searchUsers,
     checkInfo,
+    editProfile,
     changePassword
 }
-

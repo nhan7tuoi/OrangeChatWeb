@@ -6,11 +6,14 @@ import { FaLanguage } from "react-icons/fa6";
 import { LuPhone } from "react-icons/lu";
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import connectSocket from '../../server/ConnectSocket';
+import { removeAuth } from '../../redux/authSlice';
 
 const { Text, Title } = Typography;
 
 export default function Profile() {
     let navigate = useNavigate();
+    const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     return (
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
@@ -34,11 +37,17 @@ export default function Profile() {
 
 
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <Link to='/'>
-                            <Button style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
+                            <Button
+                            onClick={()=>{
+                                console.log('logout');
+                                dispatch(removeAuth());
+                                console.log('user',user)
+                                connectSocket.emit('logout',user._id);
+                                navigate("/")
+                              }}
+                            style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
                                 <FaUser style={{ fontSize: '25', color: '#FFF' }} />
                             </Button>
-                        </Link>
                         <Text style={{ color: 'white', marginTop: '20px' }}>Chuyển tài khoản</Text>
                     </div>
 

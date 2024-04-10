@@ -1,52 +1,122 @@
 import { Button, Col, Row, Typography } from 'antd';
-import React from 'react';
+
 import { MdDelete } from "react-icons/md";
 import { IoIosSearch } from "react-icons/io";
-import { useSelector, useDispatch } from 'react-redux';
+
+import { FaCheck } from "react-icons/fa";
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
+import friendApi from '../../apis/FriendApi';
+import { CiSearch } from "react-icons/ci";
+
+import { CiBoxList } from "react-icons/ci";
+import { IoPersonAddOutline } from "react-icons/io5";
+// import { Link, Navigate, useNavigate } from 'react-router-dom';
+// import { addFriend, deleteFriend, fetchFriends, setFriends } from '../../redux/friendSlice';
+import { Link } from 'react-router-dom';
+import FriendRequest from './FriendRequest';
+// import connectSocket from '../../server/connectSocket';
+import FriendApi from '../../apis/FriendApi';
+import connectSocket from '../../server/ConnectSocket';
+import { addFriend, deleteFriend, fetchFriends } from '../../redux/friendSilce';
+
+
 
 const { Text, Title } = Typography;
 
-export default function Friend() {
+export default function Friends() {
+
     const user = useSelector((state) => state.auth.user);
+    const dispatch = useDispatch();
+    const listFriends = useSelector(state => state.friend.listFriends);
+
+
+   
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                dispatch(fetchFriends(user._id));
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    },[])
+
+
+    useEffect(() => {
+        connectSocket.on('acceptFriendRequest', data => {
+          console.log(data);
+          if (data) dispatch(addFriend(data));
+        });
+      }, []);
+
     return (
+
+
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
-            <Col span={14} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid #2E2E2E' }}>
-                <header style={{ fontSize: '40px', fontWeight: '700', color: '#FFF' }}>Danh sách bạn bè</header>
+            <Col span={6} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid #2E2E2E' }}>
 
-                <Button style={{ display: 'flex', border: 'hidden', width: '100%', height: '10%', background: '#242424', padding: '20px', alignItems: 'center', justifyContent: 'space-evenly' }}>
+                <Button style={{ display: 'flex', border: '2px solid #2E2E2E', width: '90%', height: '10%', background: '#242424', padding: '20px', alignItems: 'center', justifyContent: 'space-evenly', marginTop: '20px' }}>
+                    <Link to={"/Friend"} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <CiBoxList style={{ fontSize: '20', color: '#FFF' }} />
+                            <Text style={{ marginLeft: '20px', color: 'white', fontSize: '20px' }}>Danh sách bạn bè</Text>
+                        </div>
+                        <div style={{ width: '100%' }}></div>
+                    </Link>
+                </Button>
+                <Button style={{ display: 'flex', border: '2px solid #2E2E2E', width: '90%', height: '10%', background: '#242424', padding: '20px', alignItems: 'center', justifyContent: 'space-evenly', marginTop: '10px' }}
 
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <img src='./images/avt.jpg' style={{ height: '70px', width: '70px', borderRadius: '100%' }} alt='avatar'></img>
-                        <Text style={{ marginLeft: '20px', color: 'white', fontSize: '30px' }}>Nguyễn Nhật Sang</Text>
-                    </div>
-                    <div style={{ width: '100%' }}></div>
-                    <Button style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
+                >
+                    <Link to={"/FriendRequest"} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
 
-                        <MdDelete style={{ fontSize: '30', color: '#FFF' }} />
-                    </Button>
+                            <IoPersonAddOutline style={{ fontSize: '20', color: '#FFF' }} />
+                            <Text style={{ marginLeft: '20px', color: 'white', fontSize: '20px' }}>Lời mời kết bạn</Text>
+                        </div>
+                        <div style={{ width: '100%' }}></div>
 
+
+                    </Link>
+                </Button>
+                <Button style={{ display: 'flex', border: '2px solid #2E2E2E', width: '90%', height: '10%', background: '#242424', padding: '20px', alignItems: 'center', justifyContent: 'space-evenly', marginTop: '20px' }}>
+                    <Link to={"/FriendSearch"} style={{ width: '100%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+
+                            <CiSearch style={{ fontSize: '20', color: '#FFF' }} />
+                            <Text style={{ marginLeft: '20px', color: 'white', fontSize: '20px' }}>Tìm kiếm bạn bè</Text>
+                        </div>
+                        <div style={{ width: '100%' }}></div>
+                    </Link>
                 </Button>
             </Col>
 
-            <Col span={10} style={{ border: '1px solid #2E2E2E', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                <header>
-                    <Title style={{ fontSize: '32px', fontWeight: '700', color: '#FFF', marginLeft: '40px' }}>Tìm kiếm bạn bè</Title>
-                </header>
-                <body style={{ marginTop: '50px', marginLeft: 20, width: '90%' }}>
+            <Col span={18} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', border: '1px solid #2E2E2E' }}>
+                <header style={{ fontSize: '32px', fontWeight: '700', color: '#FFF', arginLeft: '30px', marginTop: '30px', marginBottom: '20px' }}>Danh sách bạn bè</header>
 
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#36373A', paddingLeft: '10px', width: '100%', borderRadius: '8px' }}>
-                        <IoIosSearch style={{ fontSize: '18', color: '#FFF' }} />
-                        <input type='text' placeholder='Tìm kiếm' style={{ width: '90%', height: '40px', background: '#36373A', marginLeft: '5px', border: 'hidden', outline: 'none', color: '#FFF', borderRadius: '10px' }}></input>
-                    </div>
-
-                    {/* <Button style={{ display: 'flex', border: 'hidden', width: '100%', height: '100%', background: '#242424', padding: '10px' }}>
-                        <div style={{ display: 'flex', width: '50px', height: '50px', background: '#FE294D', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                            <FaLanguage style={{ fontSize: '30', color: '#FFF' }} />
+                {Array.isArray(listFriends) && listFriends.map((listFriends, index) => (
+                    <div key={index} style={{ display: 'flex', width: '90%', background: '#242424', padding: '20px', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', marginLeft: '30px', border: '2px solid #2E2E2E', borderRadius: '10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <img src={listFriends.image} style={{ height: '50px', width: '50px', borderRadius: '50%' }} alt='image'></img>
+                            <Text style={{ marginLeft: '20px', color: 'white', fontSize: '20px' }}>{listFriends.name}</Text>
                         </div>
-                        <Text>Ngôn ngữ</Text>
-                    </Button> */}
-                    <br style={{ backgroundcolor: "white" }} />
-                </body>
+                        <Button style={{ display: 'flex', width: '50px', height: '50px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}
+                            onClick={() => {
+                               connectSocket.emit('delete friend', {
+                                senderId: user._id,
+                                receiverId: listFriends._id,
+                                });
+                                console.log(listFriends);
+                                dispatch(deleteFriend(listFriends._id));
+                            }}
+                        >
+                            <MdDelete style={{ fontSize: '40', color: '#FFF' }} />
+                        </Button>
+                    </div>
+                ))}
             </Col>
         </Row>
     )

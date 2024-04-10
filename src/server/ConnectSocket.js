@@ -1,15 +1,19 @@
-
 import io from "socket.io-client";
 import IPV4 from "../apis/ipv4";
 
-const SOCKET_URL = `http://localhost:3000`;
+const SOCKET_URL = `http://${IPV4}:3000`;
 
 class ConnectSocket {
-    initSocket = async () => {
+    initSocket = async userId => {
         try {
-            this.socket = io(SOCKET_URL, {
-                transports: ['websocket'],
-            });
+            if (userId) {
+                this.socket = io(SOCKET_URL, {
+                  transports: ['websocket'],
+                  query: {
+                    userId: userId,
+                  },
+                });
+              }
             console.log("initsocket");
 
             this.socket.on("connect", () => {
@@ -52,6 +56,5 @@ class ConnectSocket {
 }
 
 const connectSocket = new ConnectSocket();
-connectSocket.initSocket();
 export default connectSocket;
 

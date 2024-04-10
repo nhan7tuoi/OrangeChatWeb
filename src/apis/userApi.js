@@ -1,6 +1,7 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
 
+
 const BASE_URL = `http://${IPV4}:3000/api/v1`;
 
 const instance = axios.create({
@@ -8,17 +9,19 @@ const instance = axios.create({
     timeout: 10000,
 })
 
-//get conversation by userId
-const getConversation = async ({userId}) => {
+//up avatar
+const uploadAvatar = async ({userId,image}) => {
     try {
-        const response = await instance.get(`/conversation/${userId}`);
+        const response = await instance.post('/uploadAvatar', {
+            userId: userId,
+            image: image,
+        });
         return response.data;
     } catch (error) {
-        console.log('error', error);
-        throw error;
+        throw new Error(error);
     }
-};
+}
 
 export default {
-    getConversation,
+    uploadAvatar
 }

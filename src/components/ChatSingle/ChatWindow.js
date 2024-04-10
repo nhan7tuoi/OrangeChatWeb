@@ -8,29 +8,39 @@ import { HiBell } from "react-icons/hi";
 import { MdSend } from "react-icons/md";
 import { FaSmile, FaFile } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
-import { useLocation } from 'react-router-dom';
 import conversationApi from '../../apis/conversationApi';
 import connectSocket from '../../server/ConnectSocket';
 import { useSelector, useDispatch } from 'react-redux';
 import { setConversations } from '../../redux/conversationSlice';
 import messageApi from '../../apis/messageApi';
+import '../../css/chatWindow.css';
+// import MessageWithIcons from '../Hover/MessageWithIcon';
+import { IoMdMore } from "react-icons/io";
+import { TbMessageCircleX } from "react-icons/tb";
+import { MdDelete } from "react-icons/md";
+import { RiShareForwardFill } from "react-icons/ri";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 export default function ChatWindow() {
-    const location = useLocation();
 
     const friend = useSelector((state) => state.current.userId);
     const user = useSelector((state) => state.auth.user);
     const userId = user._id;
     const scrollRef = useRef(null);
-    // console.log("user: ", userId);
-    // console.log("friend: ", friend);
     const dispatch = useDispatch();
     const [messages, setMessages] = useState([]);
     const [showReactionIndex, setShowReactionIndex] = useState(-1);
     const [hasPerformedAction, setHasPerformedAction] = useState(false);
     const [itemSelected, setItemSelected] = useState({});
+    const [inputMessage, setInputMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const fileImageRef = useRef(null);
+    const fileRef = useRef(null);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewSrc, setPreviewSrc] = useState('');
+    const [isOpenEmoji, setIsOpenEmoji] = useState(false);
 
     const formatTime = (time) => {
         const options = { hour: "numeric", minute: "numeric" };
@@ -47,8 +57,6 @@ export default function ChatWindow() {
         if (response) {
             setMessages(response.data);
         }
-        // console.log("conver:", friend.conversationId);
-        // console.log("response: ", response.data);
     }
 
     useEffect(() => {
@@ -60,84 +68,215 @@ export default function ChatWindow() {
         }
     }, [messages]);
 
+    // Xử lý tin nhắn gửi lên
+    //- set tin nhắn
+    const handleInputText = (text) => {
+        setInputMessage(text);
+    };
+    //- gửi tin nhắn lên Socket
+    const sendMessage = (message) => {
+        connectSocket.emit('chat message', message);
+        getConversation();
+    };
+    //- gửi tin nhắn TEXT
+    const onSend = () => {
 
+        if (!inputMessage.trim()) {
+            return;
+        }
+        const newMessage = {
+            conversationId: friend.conversationId,
+            senderId: userId,
+            receiverId: friend.receiverId,
+            type: "text",
+            contentMessage: inputMessage,
+            urlType: "",
+            createAt: new Date(),
+            isDeleted: false,
+            reaction: [],
+            isSeen: false,
+            isReceive: false,
+            isSend: false,
+            isRecall: false,
+        };
+        console.log("Chat text: ", newMessage);
+        setInputMessage('');
+        sendMessage(newMessage);
 
-    ///reaction
-    const toggleReaction = (index) => {
-        if (showReactionIndex === index) {
-            setShowReactionIndex(-1); // Nếu ô message đã hiển thị reaction thì ẩn reaction đi
-        } else {
-            setShowReactionIndex(index); // Nếu người dùng click vào ô message mới, cập nhật index của ô message và hiển thị reaction
+        // setMessages(preMessage => [...preMessage, newMessage]);
+
+    };
+
+    const handleImageChange = async (event) => {
+        const files = event.target.files;
+        console.log("files: ", files);
+        const selectedImages = [];
+
+        try {
+            const formDataArray = [];
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('image', file);
+                formDataArray.push(formData); // Thêm formData vào mảng
+
+                try {
+                    const uploadResponse = await messageApi.uploadImage(formData);
+                    const imageUrl = uploadResponse.data;
+                    selectedImages.push(imageUrl);
+                } catch (error) {
+                    console.error('Error uploading image:', error);
+                }
+            }
+
+            const newMessages = formDataArray.map(formData => ({
+                conversationId: friend.conversationId,
+                senderId: userId,
+                receiverId: friend.receiverId,
+                type: formData.get('image').type.startsWith('video/') ? 'video' : 'image',
+                urlType: selectedImages, // Có thể bạn muốn chỉ gửi imageUrl
+                createAt: new Date(),
+                isDeleted: false,
+                reaction: [],
+                isSeen: false,
+                isReceive: false,
+                isSend: false,
+            }));
+            console.log("Chat image: ", newMessages);
+
+            // setMessages(prevMessages => [...prevMessages, ...newMessages]);
+            sendMessage(newMessages);
+            console.log("con:", friend.conversationId);
+        } catch (error) {
+            console.error('Error processing images:', error);
         }
     };
 
-    // Tải xuống và mở file
-    // const downloadAndOpenFile = async (fileUrl) => {
-    //     try {
-    //         const fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
-    //         const localFilePath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
-    //         const options = {
-    //             fromUrl: fileUrl,
-    //             toFile: localFilePath,
-    //         };
+    const onSelectFile = async (event) => {
+        try {
+            const file = event.target.files[0]; // Lấy tệp từ sự kiện
+            console.log("file: ", file);
+            const formData = new FormData();
+            formData.append('image', file);
+            console.log(formData.getAll('image'));
 
-    //         const download = RNFS.downloadFile(options);
-    //         download.promise.then(response => {
-    //             if (response.statusCode === 200) {
-    //                 // Mở tệp sau khi tải xuống hoàn tất
-    //                 FileViewer.open(localFilePath, { showOpenWithDialog: true })
-    //                     .then(() => console.log('File opened successfully'))
-    //                     .catch(error => console.error('Error opening file:', error));
-    //             } else {
-    //                 alert('Download failed', `Failed to download ${fileName}`);
-    //             }
-    //         }).catch(error => console.error('Error downloading file:', error));
-    //     } catch (error) {
-    //         console.error('Error:', error);
-    //     }
-    // };
+            const fileUrl = await messageApi.uploadFile(formData);
+            const newMessage = {
+                conversationId: friend.conversationId,
+                senderId: userId,
+                receiverId: friend.receiverId,
+                type: "file",
+                urlType: fileUrl.data,
+                createAt: new Date(),
+                isDeleted: false,
+                reaction: [],
+                isSeen: false,
+                isReceive: false,
+                isSend: false,
+                typeFile: file.type,
+                fileName: file.name
+            };
+            // setMessages([...messages, newMessage]);
+            sendMessage(newMessage);
+            console.log("file message: ", newMessage);
+        } catch (err) {
+            console.log('Lỗi khi chọn tệp: ' + err);
+        }
+    };
 
-
-
-    //upadate message
-    // useEffect(() => {
-    //     connectSocket.on('chat message', (msg) => {
-    //         console.log('new message', msg);
-    //         setMessages(preMessage => [...preMessage, msg]);
-    //     });
-    //     connectSocket.on('reaction message', (reaction) => {
-    //         console.log('reaction message', reaction.messageId, reaction.reactType);
-    //         const newMessages = messages.map((message) => {
-    //             if (message._id === reaction.messageId) {
-    //                 message.reaction = [{ type: reactType }];
-    //             }
-    //             console.log('mes' + message);
-    //             return message;
-    //         });
-
-    //         // setMessages(newMessages);
-    //     });
-    // }, []);
+    // Thu hồi tin nhắn
+    const recallMessage = (messageId) => {
+        console.log('recall message', itemSelected);
+        // hidePressOther()
+        connectSocket.emit('recall message', { messageId: messageId, conversationId: friend.conversationId });
+        getConversation();
+    };
 
     //get conversation
-    // const getConversation = async () => {
-    //     try {
-    //         const response = await conversationApi.getConversation({ userId: user._id });
+    const getConversation = async () => {
+        try {
+            const response = await conversationApi.getConversation({ userId: user._id });
 
-    //         if (response) {
-    //             console.log('update');
-    //             dispatch(setConversations(response.data));
-    //         }
-    //     } catch (error) {
-    //         console.log('error', error);
-    //     }
-    // };
+            if (response) {
+                console.log('update');
+                dispatch(setConversations(response.data));
+            }
+        } catch (error) {
+            console.log('error', error);
+        }
+    };
 
-    // console.log("Message: ", messages);
+    // Update data từ Socket gửi về
+    useEffect(() => {
+        connectSocket.on('chat message', (msg) => {
+            if (msg.conversationId === friend.conversationId) {
+                console.log('new message', msg);
+                setMessages(preMessage => [...preMessage, msg]);
+            }
+        });
+        connectSocket.on('reaction message', async (reaction) => {
+            console.log('reaction message', reaction.messageId, reaction.reactType);
+            const newMessages = messages.map((message) => {
+                if (message._id === reaction.messageId) {
+                    message.reaction = [{ type: reaction.reactType }];
+                }
+                return message;
+            });
+            getLastMessage();
+        });
+        connectSocket.on('recall message', (msg) => {
+            console.log('recall message', msg);
+            if (msg.conversationId === friend.conversationId) {
+                const newMessages = messages.map((message) => {
+                    if (message._id === msg.messageId) {
+                        message.isRecall = true;
+                    }
+                    return message;
+                });
+                getLastMessage();
+            }
+        });
+    }, []);
 
+    const handleImageClick = () => {
+        fileImageRef.current.click(); // Kích hoạt input file khi button được nhấn
+        // console.log("fileInput: ", fileInputRef.current);
+    };
+
+    const handleFileClick = () => {
+        fileRef.current.click(); // Kích hoạt input file khi button được nhấn
+        // console.log("fileInput: ", fileInputRef.current);
+    };
+
+    const MessageWithIcons = () => {
+        const [showIcons, setShowIcons] = useState(false);
+
+        const handleMouseEnter = () => {
+            setShowIcons(true);
+        };
+
+        const handleMouseLeave = () => {
+            setShowIcons(false);
+        };
+
+        return (
+            <div className="message" id="message-1" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ display: 'flex' }}>
+                <IoMdMore style={{ fontSize: '20', color: '#F24E1E' }} />
+                <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
+                    <Button style={{background: ''}}>
+                        <TbMessageCircleX style={{ fontSize: '20', color: '#F24E1E' }} />
+                    </Button>
+
+                    <MdDelete style={{ fontSize: '20', color: '#F24E1E' }} />
+                    <RiShareForwardFill style={{ fontSize: '20', color: '#F24E1E' }} />
+                </div>
+            </div>
+        );
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '90vh', width: '100%' }}>
+
 
             <Row style={{ height: '100%', width: '100%' }}>
                 <Col span={18}>
@@ -162,7 +301,7 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ width: '100%', height: '680px' }}>
+                        <div style={{ width: '100%', height: '640px' }}>
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {/* Render message */}
                                 {messages.map((item, index) => {
@@ -250,10 +389,11 @@ export default function ChatWindow() {
 
                                                     </Button> */}
                                                 </Button>
+                                                <MessageWithIcons />
                                             </div>
                                         )
                                     }
-                                    if (item.type === "image" && item.isDeleted === false) {
+                                    if (item.type === "image") {
                                         return (
                                             <div key={index}
                                                 style={
@@ -281,10 +421,11 @@ export default function ChatWindow() {
                                                 )}
 
                                                 <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
+                                                <MessageWithIcons />
                                             </div>
                                         )
                                     }
-                                    if (item.type === "file" && item.isDeleted === false) {
+                                    if (item.type === "file") {
                                         return (
                                             <div
                                                 key={index}
@@ -312,35 +453,67 @@ export default function ChatWindow() {
                                                     />
                                                 )}
                                                 <div
-                                                    style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', padding: 5 }}
+                                                    style={{
+                                                        display: 'flex',
+                                                        flexDirection: 'row',
+                                                        // flexWrap: 'wrap',
+                                                        // justifyContent: 'flex-start',
+                                                        // alignItems: 'flex-start',
+                                                        padding: 5,
+                                                        width: '20%',
+                                                        height: '50px'
+                                                    }}
                                                 >
                                                     <Button
-                                                        style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}
+                                                        onClick={() => {
+                                                            window.open(item.urlType, '_blank')
+                                                        }}
+                                                        style={{
+                                                            flexDirection: 'row',
+                                                            // alignItems: 'center',
+                                                            width: '100%',
+                                                            height: '100%'
+                                                        }}
                                                     >
                                                         <div
-                                                            style={{ width: '20%', justifyContent: 'center', alignItems: 'center' }}
+                                                        // style={{
+                                                        //     justifyContent: 'center',
+                                                        //     alignItems: 'center'
+                                                        // }}
                                                         >
-                                                            <FaFile style={{ fontSize: '35', margin: '10', color: '#F24E1E' }} />
+                                                            <FaFile style={{
+                                                                fontSize: '35',
+                                                                color: '#F24E1E'
+                                                            }} />
+
+                                                            <Text style={{
+                                                                fontSize: 14,
+                                                                // textDecorationLine: 'underline',
+                                                                color: 'red',
+                                                                fontWeight: '700',
+                                                                whiteSpace: 'pre-wrap'
+                                                            }}>
+                                                                {item.fileName}</Text>
                                                         </div>
-                                                        <Button
+                                                        {/* <Button
                                                             // onClick={() => {
                                                             //     downloadAndOpenFile(item.urlType[0]);
                                                             // }}
                                                             style={{ width: '80%', justifyContent: 'center', alignItems: 'center' }}
                                                         >
                                                             <Text numberOfLines={3} style={{ fontSize: 14, textDecorationLine: 'underline', color: '#FFF', fontWeight: 'bold' }}>{item.fileName}</Text>
-                                                        </Button>
+                                                        </Button> */}
 
                                                     </Button>
 
                                                 </div>
-
+                                                <MessageWithIcons />
                                             </div>
                                         )
 
 
                                     }
-                                    if (item.type === "video" && item.isDeleted === false) {
+                                    if (item.type === "video") {
                                         return (
                                             <div
                                                 key={index}
@@ -383,15 +556,73 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
+                        <div style={{ display: 'flex', alignItems: 'center', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
+                            <div>
+                                <input
+                                    type="file"
+                                    onChange={onSelectFile}
+                                    ref={fileRef}
+                                    style={{ display: 'none' }} // Ẩn input file
+                                    accept="*/*"
+                                />
+                                <Button
+                                    onClick={handleFileClick}
+                                    style={{
+                                        display: 'flex',
+                                        margin: '5px',
+                                        background: '#242424',
+                                        border: 'hidden',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                    <FaFile style={{ fontSize: '30px', color: '#F24E1E' }} />
+                                </Button>
+                            </div>
+
+                            <div>
+                                <input
+                                    type="file"
+                                    multiple
+                                    ref={fileImageRef}
+                                    onChange={handleImageChange}
+                                    style={{ display: 'none' }} // Ẩn input file
+                                    accept="image/*,video/*" // Chấp nhận cả ảnh và video
+                                />
+                                <Button
+                                    onClick={handleImageClick}
+                                    style={{
+                                        display: 'flex',
+                                        marginLeft: '5px',
+                                        background: '#242424',
+                                        border: 'hidden',
+                                        justifyContent: 'center', // Thêm để căn giữa icon trong button
+                                        alignItems: 'center' // Thêm để căn giữa icon trong button
+                                    }}
+                                >
+                                    <BsImage style={{ fontSize: '30px', color: '#F24E1E' }} />
+                                </Button>
+                            </div>
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <FaFile style={{ fontSize: '35', margin: '10', color: '#F24E1E' }} />
-                            <BsImage style={{ fontSize: '40', margin: '10', color: '#F24E1E' }} />
+
+
                             <div style={{ display: 'flex', background: '#36373A', borderRadius: '25px', justifyContent: 'space-between', alignaItems: 'center', width: '100%', margin: '10px' }}>
-                                <input type='text' placeholder='Nhập tin nhắn' style={{ background: '#36373A', border: 'hidden', fontSize: '18px', outline: 'none', marginLeft: '20px', color: '#FFF' }}></input>
+                                <input
+                                    value={inputMessage}
+                                    onChange={(e) => handleInputText(e.target.value)}
+                                    type='text' placeholder='Nhập tin nhắn' style={{ background: '#36373A', border: 'hidden', fontSize: '18px', outline: 'none', marginLeft: '20px', color: '#FFF' }}></input>
                                 <FaSmile style={{ fontSize: '30', margin: '10', color: '#F24E1E' }} />
                             </div>
                             <BiSolidLike style={{ fontSize: '50', margin: '10', color: '#F24E1E' }} />
-                            <MdSend style={{ fontSize: '50', margin: '10', color: '#F24E1E' }} />
+
+                            <Button style={{ display: 'flex', marginLeft: '10px', background: '#242424', border: 'hidden', justifyContent: 'center', alignItems: 'center' }}
+                                onClick={() => {
+                                    onSend()
+                                }}
+                            >
+                                <MdSend style={{ fontSize: '40', color: '#F24E1E' }} />
+                            </Button>
                         </div>
                     </div>
 

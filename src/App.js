@@ -26,6 +26,8 @@ import PrivateRoute from './components/Layout/PrivateRoute';
 import MainLayout from './components/Layout/MainLayout';
 
 import React, { useEffect, useState } from 'react'
+import FriendsRequest from './components/Friend/FriendRequest';
+import FriendsSearch from './components/Friend/FriendSearch';
 
 
 function App() {
@@ -66,6 +68,8 @@ function App() {
 
             <Route path='/chatGroup' element={user.name ? <ChatGroup /> : <Login />}/>
             <Route path='/friend' element={user.name ? <Friend /> : <Login />} />
+            <Route path='/friendrequest' element={user.name ? <FriendsRequest /> : <Login />} />
+            <Route path='/friendSearch' element={user.name ? <FriendsSearch /> : <Login />} />
             <Route path='/chat' element={user.name ? <Chat /> : <Login />} />
             <Route path='/profile' element={user.name ? <Profile /> : <Login />} />
             <Route path='/information' element={user.name ? <Information  /> : <Login />} />
