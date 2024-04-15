@@ -12,6 +12,8 @@ import conversationApi from '../../apis/conversationApi';
 import connectSocket from '../../server/ConnectSocket';
 import { useSelector, useDispatch } from 'react-redux';
 import { setConversations } from '../../redux/conversationSlice';
+import { AiOutlineUsergroupAdd } from "react-icons/ai";
+import { CiLogout } from "react-icons/ci";
 import messageApi from '../../apis/messageApi';
 import '../../css/chatWindow.css';
 // import MessageWithIcons from '../Hover/MessageWithIcon';
@@ -19,11 +21,16 @@ import { IoMdMore } from "react-icons/io";
 import { TbMessageCircleX } from "react-icons/tb";
 import { MdDelete } from "react-icons/md";
 import { RiShareForwardFill } from "react-icons/ri";
+import Modal from './Modal';
 
 const { Text } = Typography;
 
 export default function ChatWindow() {
+    const [isOpen, setIsOpen] = useState(false);
 
+    const toggleModal = () => {
+        setIsOpen(!isOpen);
+    };
     const friend = useSelector((state) => state.current.userId);
     const user = useSelector((state) => state.auth.user);
     const userId = user._id;
@@ -263,7 +270,7 @@ export default function ChatWindow() {
             <div className="message" id="message-1" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ display: 'flex' }}>
                 <IoMdMore style={{ fontSize: '20', color: '#F24E1E' }} />
                 <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
-                    <Button style={{background: ''}}>
+                    <Button style={{ background: '' }}>
                         <TbMessageCircleX style={{ fontSize: '20', color: '#F24E1E' }} />
                     </Button>
 
@@ -629,29 +636,43 @@ export default function ChatWindow() {
                 </Col>
 
                 <Col span={6} style={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
-                        <img src={friend.receiverImage} style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'flex-start', alignItems: 'center', height: '75%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
+                        <img src={friend.receiverImage} style={{ width: "150px", height: "150px", borderRadius: '100%', marginTop: '30px' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
-                            <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>
+                            <Text style={{ fontSize: '24px', fontWeight: '800px', color: '#FFF', width: '100%', marginTop:'20px', fontWeight:'600' }}>
                                 {friend.receiverName}
                             </Text>
-                            <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#F24E1E', width: '100%' }}>Đang hoạt động</Text>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%' }}>
-                            <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                                <HiBell style={{ fontSize: '30', color: '#FFF' }} />
-                            </div>
+                            {/* <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', marginTop: '30px' }}>
+                                <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                                    <HiBell style={{ fontSize: '30', color: '#FFF' }} />
+                                </div>
 
-                            <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                                <FaUserLarge style={{ fontSize: '25', color: '#FFF' }} />
-                            </div>
+                                <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                                    <FaUserLarge style={{ fontSize: '25', color: '#FFF' }} />
+                                </div>
 
 
+                            </div> */}
+                        <div style={{display: 'flex', justifyContent: 'flex-start', width:'100%', marginTop:'50px'}}>
+                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', marginTop: '30px', background: 'none', border: 'none', height: '50px' }}
+                                onClick={toggleModal}
+                            >
+
+                                <AiOutlineUsergroupAdd style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
+                                <Text style={{ color: '#FFF', fontSize: '18px', }}>Thêm thành viên</Text>
+                            </Button>
+                            <Modal isOpen={isOpen} toggleModal={toggleModal} />
                         </div>
+
+                        <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', background: 'none', border: 'none', height: '50px', marginTop: '10px' }}>
+                            <CiLogout style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
+                            <Text style={{ color: '#FFF', fontSize: '18px', }}>Rời nhóm</Text>
+                        </Button>
                     </div>
 
-                    <div style={{ paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '55vh', padding: '20px' }}>
+                    <div style={{ paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '25vh', padding: '20px' }}>
                         <Text style={{ color: '#FFF', fontSize: '20px', fontWeight: '700' }}>File, phương tiện và liên kết</Text>
                     </div>
                 </Col>
