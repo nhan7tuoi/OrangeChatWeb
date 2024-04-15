@@ -1,3 +1,3 @@
 
-const IPV4 = '18.141.141.233';
+const IPV4 = 'localhost';
 export default IPV4;

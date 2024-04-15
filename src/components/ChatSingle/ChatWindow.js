@@ -5,7 +5,7 @@ import { LuPhone } from "react-icons/lu";
 import { BsCameraVideo, BsImage } from "react-icons/bs";
 import { FaRegSquarePlus, FaUserLarge } from "react-icons/fa6";
 import { HiBell } from "react-icons/hi";
-import { MdSend } from "react-icons/md";
+import { MdSend, MdDelete } from "react-icons/md";
 import { FaSmile, FaFile } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
 import conversationApi from '../../apis/conversationApi';
@@ -14,11 +14,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setConversations } from '../../redux/conversationSlice';
 import messageApi from '../../apis/messageApi';
 import '../../css/chatWindow.css';
-// import MessageWithIcons from '../Hover/MessageWithIcon';
 import { IoMdMore } from "react-icons/io";
 import { TbMessageCircleX } from "react-icons/tb";
-import { MdDelete } from "react-icons/md";
 import { RiShareForwardFill } from "react-icons/ri";
+import 'emoji-mart/../emoji-mart';
+import { Picker } from 'emoji-mart';
+import ForwardModal from './ForwardModal';
+
 
 const { Text } = Typography;
 
@@ -30,8 +32,6 @@ export default function ChatWindow() {
     const scrollRef = useRef(null);
     const dispatch = useDispatch();
     const [messages, setMessages] = useState([]);
-    const [showReactionIndex, setShowReactionIndex] = useState(-1);
-    const [hasPerformedAction, setHasPerformedAction] = useState(false);
     const [itemSelected, setItemSelected] = useState({});
     const [inputMessage, setInputMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +41,10 @@ export default function ChatWindow() {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewSrc, setPreviewSrc] = useState('');
     const [isOpenEmoji, setIsOpenEmoji] = useState(false);
+    const [showPicker, setShowPicker] = useState(false);
+    const [selectedEmoji, setSelectedEmoji] = useState(null);
+    const [isShowReCall, setIsShowReCall] = useState(false);
+    const [showForwardModal, setShowForwardModal] = useState(false);
 
     const formatTime = (time) => {
         const options = { hour: "numeric", minute: "numeric" };
@@ -113,12 +117,12 @@ export default function ChatWindow() {
         const selectedImages = [];
 
         try {
-            const formDataArray = [];
+            const formData = [];
 
             for (const file of files) {
                 const formData = new FormData();
                 formData.append('image', file);
-                formDataArray.push(formData); // Thêm formData vào mảng
+                // formDataArray.push(formData); // Thêm formData vào mảng
 
                 try {
                     const uploadResponse = await messageApi.uploadImage(formData);
@@ -129,11 +133,11 @@ export default function ChatWindow() {
                 }
             }
 
-            const newMessages = formDataArray.map(formData => ({
+            const newMessages = {
                 conversationId: friend.conversationId,
                 senderId: userId,
                 receiverId: friend.receiverId,
-                type: formData.get('image').type.startsWith('video/') ? 'video' : 'image',
+                type: 'image',
                 urlType: selectedImages, // Có thể bạn muốn chỉ gửi imageUrl
                 createAt: new Date(),
                 isDeleted: false,
@@ -141,12 +145,12 @@ export default function ChatWindow() {
                 isSeen: false,
                 isReceive: false,
                 isSend: false,
-            }));
+            };
             console.log("Chat image: ", newMessages);
 
             // setMessages(prevMessages => [...prevMessages, ...newMessages]);
             sendMessage(newMessages);
-            console.log("con:", friend.conversationId);
+            // console.log("con:", friend.conversationId);
         } catch (error) {
             console.error('Error processing images:', error);
         }
@@ -184,11 +188,27 @@ export default function ChatWindow() {
         }
     };
 
+    //- show recall
+    const showReCall = isShowReCall => {
+        setIsShowReCall(isShowReCall);
+    };
+
     // Thu hồi tin nhắn
     const recallMessage = (messageId) => {
         console.log('recall message', itemSelected);
         // hidePressOther()
         connectSocket.emit('recall message', { messageId: messageId, conversationId: friend.conversationId });
+        getConversation();
+    };
+
+    const deleteMessage = messageId => {
+        console.log('delete message', itemSelected);
+        // hidePressOther();
+        connectSocket.emit('delete message', {
+            messageId: messageId,
+            conversationId: friend.conversationId,
+            userDelete: user._id,
+        });
         getConversation();
     };
 
@@ -236,6 +256,18 @@ export default function ChatWindow() {
                 getLastMessage();
             }
         });
+        connectSocket.on('delete message', msg => {
+            console.log('delete message', msg);
+            if (msg.conversationId === friend.conversationId) {
+              const newMessages = messages.map(message => {
+                if (message._id === msg.messageId) {
+                  message.deleteBy = [{userDelete: msg.userDelete}];
+                }
+                return message;
+              });
+              getLastMessage();
+            }
+          });
     }, []);
 
     const handleImageClick = () => {
@@ -248,28 +280,74 @@ export default function ChatWindow() {
         // console.log("fileInput: ", fileInputRef.current);
     };
 
-    const MessageWithIcons = () => {
+    const handleEmojiSelect = emoji => {
+        setSelectedEmoji(emoji.native);
+        togglePicker();
+    };
+
+    const togglePicker = () => {
+        setShowPicker(!showPicker);
+    };
+
+    const MessageWithIcons = ({ itemSelected }) => {
         const [showIcons, setShowIcons] = useState(false);
 
-        const handleMouseEnter = () => {
-            setShowIcons(true);
+        const toggleIcons = () => {
+            setShowIcons(prevShowIcons => !prevShowIcons);
+        };
+        
+        const toggleForwardModal = () => {
+            setShowForwardModal(prevState => !prevState);
         };
 
-        const handleMouseLeave = () => {
+        const handleActionClick = (action) => {
+            action(itemSelected.messageId);
             setShowIcons(false);
         };
 
-        return (
-            <div className="message" id="message-1" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} style={{ display: 'flex' }}>
-                <IoMdMore style={{ fontSize: '20', color: '#F24E1E' }} />
-                <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
-                    <Button style={{background: ''}}>
-                        <TbMessageCircleX style={{ fontSize: '20', color: '#F24E1E' }} />
-                    </Button>
+        const handleForward = (friendId) => {
+            // Xử lý việc chuyển tiếp tin nhắn tới bạn bè có id là friendId
+            console.log("Forward message to friend:", friendId);
+            toggleForwardModal(); // Đóng modal sau khi chuyển tiếp
+        };
 
-                    <MdDelete style={{ fontSize: '20', color: '#F24E1E' }} />
-                    <RiShareForwardFill style={{ fontSize: '20', color: '#F24E1E' }} />
+        return (
+            <div className="message" id="message-1" style={{ display: 'flex', alignItems: 'center' }}>
+                <IoMdMore style={{ fontSize: '20px', color: '#F24E1E', cursor: 'pointer' }} onClick={() => {
+                    toggleIcons();
+                    setItemSelected(itemSelected);
+                }} />
+                <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
+                    {itemSelected?.senderId === userId && ( // Chỉ hiển thị khi là tin nhắn của người dùng hiện tại
+                        <Button style={{ background: 'transparent' }} onClick={() => {
+                        //     if (itemSelected?.senderId === userId) {
+                        //     showReCall(!isShowReCall);
+                        //     console.log("Check1: ", itemSelected?.senderId);
+                        //     console.log("Check2: ", userId);
+                        // }
+                        handleActionClick(() => recallMessage(itemSelected._id))
+                        }}>
+                            <TbMessageCircleX style={{ fontSize: '20px', color: '#F24E1E' }} />
+                        </Button>
+                    )}
+                    <Button style={{ background: 'transparent' }} onClick={() => handleActionClick(() => deleteMessage(itemSelected._id))}>
+                        <MdDelete style={{ fontSize: '20px', color: '#F24E1E' }} />
+                    </Button>
+                    <Button style={{ background: 'transparent' }} onClick={() => {
+                        toggleForwardModal();
+                        // handleActionClick(() => recallMessage(itemSelected._id))
+                    }}>
+                        <RiShareForwardFill style={{ fontSize: '20px', color: '#F24E1E' }} />
+                    </Button>
                 </div>
+                {showForwardModal && (
+                // Modal danh sách bạn bè
+                <ForwardModal
+                    onClose={toggleForwardModal}
+                    onForward={handleForward}
+                    userId={userId}
+                />
+            )}
             </div>
         );
     };
@@ -301,38 +379,42 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ width: '100%', height: '640px' }}>
+                        <div style={{ width: '100%', height: '640px' }}
+                        >
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {/* Render message */}
                                 {messages.map((item, index) => {
                                     // console.log("item: ", item);
                                     if (item.type === "first") {
                                         return (
-                                            <div style={{ textAlign: 'center', justifyContent: 'center', alignItems: 'center' }}>
+                                            <div key={index} style={{ textAlign: 'center', justifyContent: 'center', alignItems: 'center' }}>
                                                 <Text style={{ color: "#FFF", fontSize: "16px", fontWeight: '700', textAlign: 'center', width: '100%' }}>Chào mừng bạn đến với OrangeC - Nơi gắn kết bạn bè online</Text>
                                             </div>
                                         )
                                     }
-                                    if (item.type === "text") {
+                                    if (item.type === 'text' &&
+                                        (item.deleteBy?.length == 0 ||
+                                            item.deleteBy?.find(f => f !== user._id))) {
                                         return (
-                                            <div key={index} style={
-                                                item?.senderId === userId ?
-                                                    {
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        paddingLeft: '10px',
-                                                        alignItems: 'flex-end',
-                                                        justifyContent: 'flex-end'
-                                                    } :
-                                                    {
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        paddingLeft: '10px',
-                                                        alignItems: 'flex-start',
-                                                        justifyContent: 'flex-start'
-                                                    }
+                                            <div key={index}
+                                                style={
+                                                    item?.senderId === userId ?
+                                                        {
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                            paddingLeft: '10px',
+                                                            alignItems: 'flex-end',
+                                                            justifyContent: 'flex-end'
+                                                        } :
+                                                        {
+                                                            display: 'flex',
+                                                            flexDirection: 'row',
+                                                            paddingLeft: '10px',
+                                                            alignItems: 'flex-start',
+                                                            justifyContent: 'flex-start'
+                                                        }
 
-                                            }>
+                                                }>
                                                 {item?.senderId !== userId && (
                                                     <img src={friend.receiverImage}
                                                         style={{ width: '32px', height: '32px', borderRadius: '16px' }}
@@ -356,46 +438,35 @@ export default function ChatWindow() {
                                                         color: "#FFF",
                                                         fontWeight: '600'
                                                     }}>
-                                                        {item.contentMessage}
+                                                        {item.isReCall === true ? 'Đã thu hồi' : item.contentMessage}
                                                     </Text>
-                                                    <Text style={
-                                                        item?.senderId === userId ? {
-                                                            textAlign: 'right',
-                                                            fontSize: '12px',
-                                                            padding: '2px'
-                                                        } : {
-                                                            textAlign: "left",
-                                                            fontSize: '12px',
-                                                            padding: '2px'
-                                                        }
-                                                    }>
-                                                        {formatTime(item.createAt)}
-                                                    </Text>
-                                                    {/* <Button
-                                                        onClick={() => {
-                                                            toggleReaction(item._id)
-                                                        }}
-                                                        style={
-                                                            item?.senderId === userId
-                                                                ? {
-                                                                    position: 'absolute', width: 18, height: 18, borderRadius: 9, backgroundColor: "gray", justifyContent: 'center', alignItems: 'center',
-                                                                    left: 5, bottom: -5
-                                                                } : {
-                                                                    position: 'absolute', width: 18, height: 18, borderRadius: 9, backgroundColor: 'gray', justifyContent: 'center', alignItems: 'center',
-                                                                    right: 5, bottom: -5
-                                                                }
-                                                        }
-                                                    >
-
-                                                    </Button> */}
+                                                    {item.isReCall === false && (
+                                                        <Text style={
+                                                            item?.senderId === userId ? {
+                                                                textAlign: 'right',
+                                                                fontSize: '12px',
+                                                                padding: '2px'
+                                                            } : {
+                                                                textAlign: "left",
+                                                                fontSize: '12px',
+                                                                padding: '2px'
+                                                            }
+                                                        }>
+                                                            {formatTime(item.createAt)}
+                                                        </Text>
+                                                    )}
                                                 </Button>
-                                                <MessageWithIcons />
+                                                <MessageWithIcons itemSelected={item} />
+
                                             </div>
                                         )
                                     }
                                     if (item.type === "image") {
                                         return (
                                             <div key={index}
+                                                setItemSelected={setItemSelected}
+                                                showReCall={showReCall}
+                                                isShowReCall={isShowReCall}
                                                 style={
                                                     item?.senderId === userId ?
                                                         {
@@ -421,7 +492,7 @@ export default function ChatWindow() {
                                                 )}
 
                                                 <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
-                                                <MessageWithIcons />
+                                                <MessageWithIcons key={messages._id} messageId={messages._id} conversationId={messages.conversationId} />
                                             </div>
                                         )
                                     }
@@ -429,6 +500,9 @@ export default function ChatWindow() {
                                         return (
                                             <div
                                                 key={index}
+                                                setItemSelected={setItemSelected}
+                                                showReCall={showReCall}
+                                                isShowReCall={isShowReCall}
                                                 style={
                                                     item?.senderId === userId ?
                                                         {
@@ -495,19 +569,12 @@ export default function ChatWindow() {
                                                             }}>
                                                                 {item.fileName}</Text>
                                                         </div>
-                                                        {/* <Button
-                                                            // onClick={() => {
-                                                            //     downloadAndOpenFile(item.urlType[0]);
-                                                            // }}
-                                                            style={{ width: '80%', justifyContent: 'center', alignItems: 'center' }}
-                                                        >
-                                                            <Text numberOfLines={3} style={{ fontSize: 14, textDecorationLine: 'underline', color: '#FFF', fontWeight: 'bold' }}>{item.fileName}</Text>
-                                                        </Button> */}
+
 
                                                     </Button>
 
                                                 </div>
-                                                <MessageWithIcons />
+                                                <MessageWithIcons key={messages._id} messageId={messages._id} conversationId={messages.conversationId} />
                                             </div>
                                         )
 
@@ -517,6 +584,9 @@ export default function ChatWindow() {
                                         return (
                                             <div
                                                 key={index}
+                                                setItemSelected={setItemSelected}
+                                                showReCall={showReCall}
+                                                isShowReCall={isShowReCall}
                                                 style={
                                                     item?.senderId === userId ?
                                                         {
@@ -604,15 +674,60 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style=
+                            {{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                width: '100%',
+                                // height: '5%'
+                            }}
+                        >
 
 
-                            <div style={{ display: 'flex', background: '#36373A', borderRadius: '25px', justifyContent: 'space-between', alignaItems: 'center', width: '100%', margin: '10px' }}>
+                            <div style=
+                                {{
+                                    display: 'flex',
+                                    background: '#36373A',
+                                    borderRadius: '25px',
+                                    justifyContent: 'space-between',
+                                    alignaItems: 'center',
+                                    width: '100%',
+                                    margin: '10px',
+                                    height: '100%'
+                                }}
+                            >
                                 <input
                                     value={inputMessage}
                                     onChange={(e) => handleInputText(e.target.value)}
-                                    type='text' placeholder='Nhập tin nhắn' style={{ background: '#36373A', border: 'hidden', fontSize: '18px', outline: 'none', marginLeft: '20px', color: '#FFF' }}></input>
-                                <FaSmile style={{ fontSize: '30', margin: '10', color: '#F24E1E' }} />
+                                    type='text' placeholder='Nhập tin nhắn' style={{
+                                        background: '#36373A',
+                                        border: 'hidden',
+                                        fontSize: '18px',
+                                        outline: 'none',
+                                        marginLeft: '20px',
+                                        color: '#FFF',
+                                        width: '90%'
+                                    }}
+                                />
+
+                                <Button
+                                    style={{
+                                        display: 'flex',
+                                        // marginLeft: '5px',
+                                        background: '#36373A',
+                                        border: 'hidden',
+                                        justifyContent: 'flex-end', // Thêm để căn giữa icon trong button
+                                        alignItems: 'center', // Thêm để căn giữa icon trong button
+                                        width: '5%',
+                                        borderRadius: '25px'
+                                    }}
+                                // onClick={()=> {togglePicker()}}
+                                >
+                                    <FaSmile style={{ fontSize: '30px', color: '#F24E1E' }} />
+                                    {/* {showPicker && <Picker onSelect={handleEmojiSelect} />} */}
+                                </Button>
+
                             </div>
                             <BiSolidLike style={{ fontSize: '50', margin: '10', color: '#F24E1E' }} />
 
