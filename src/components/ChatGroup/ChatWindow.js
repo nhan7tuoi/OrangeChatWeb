@@ -21,19 +21,41 @@ import { IoMdMore } from "react-icons/io";
 import { TbMessageCircleX } from "react-icons/tb";
 import { MdDelete } from "react-icons/md";
 import { RiShareForwardFill } from "react-icons/ri";
-import Modal from './Modal';
+import { MdOutlineGroups3 } from "react-icons/md";
+import { MdOutlineCloseFullscreen } from "react-icons/md";
+
+
+
+import ModalManageGroup from './ModalManageGroup';
+import ModalAddMemberGroup from './ModalAddMemberGroup';
+import i18next from '../../i18n/i18n';
+
+
+
+
 
 const { Text } = Typography;
 
 export default function ChatWindow() {
-    const [isOpen, setIsOpen] = useState(false);
-
-    const toggleModal = () => {
-        setIsOpen(!isOpen);
+    const [isOpenAddMember, setIsOpenAddMember] = useState(false);
+    const [isOpenManageGroup, setIsOpenManageGroup] = useState(false);
+    const conversation = useSelector(state => state.conversation.conversation);
+    const toggleAddMemberModal = () => {
+        setIsOpenAddMember(!isOpenAddMember);
     };
-    const friend = useSelector((state) => state.current.userId);
+
+    const toggleManageGroupModal = () => {
+        setIsOpenManageGroup(!isOpenManageGroup);
+    };
+    const group = useSelector((state) => state.current.userId);
+    const friend = group.groupChat;
+
+    console.log("Friend: ", friend);
+
     const user = useSelector((state) => state.auth.user);
     const userId = user._id;
+
+    console.log("User: ", userId);
     const scrollRef = useRef(null);
     const dispatch = useDispatch();
     const [messages, setMessages] = useState([]);
@@ -60,20 +82,21 @@ export default function ChatWindow() {
     }, [friend])
 
     const getLastMessage = async () => {
-        const response = await messageApi.getMessage({ conversationId: friend.conversationId });
+        const response = await messageApi.getMessage({ conversationId: friend.lastMessage.conversationId });
+        console.log("Response: ", response);
         if (response) {
             setMessages(response.data);
         }
     }
 
-    useEffect(() => {
-        // Lấy phần tử div bên trong
-        const scrollElement = scrollRef.current;
-        // Nếu có phần tử và đã có tin nhắn mới, cuộn xuống dưới cùng của phần tử
-        if (scrollElement && messages.length > 0) {
-            scrollElement.scrollTop = scrollElement.scrollHeight;
-        }
-    }, [messages]);
+    // useEffect(() => {
+    //     // Lấy phần tử div bên trong
+    //     const scrollElement = scrollRef.current;
+    //     // Nếu có phần tử và đã có tin nhắn mới, cuộn xuống dưới cùng của phần tử
+    //     if (scrollElement && messages.length > 0) {
+    //         scrollElement.scrollTop = scrollElement.scrollHeight;
+    //     }
+    // }, [messages]);
 
     // Xử lý tin nhắn gửi lên
     //- set tin nhắn
@@ -158,6 +181,20 @@ export default function ChatWindow() {
             console.error('Error processing images:', error);
         }
     };
+    const handleDisband = () => {
+        alert(i18next.t('thongBao'), i18next.t('xacNhanGiaiTan'), [
+            {
+                text: i18next.t('huy'),
+                style: 'cancel',
+            },
+            {
+                text: i18next.t('dongY'),
+                onPress: () => {
+                    connectSocket.emit('disband the group', conversation);
+                },
+            },
+        ]);
+    };
 
     const onSelectFile = async (event) => {
         try {
@@ -216,7 +253,7 @@ export default function ChatWindow() {
     // Update data từ Socket gửi về
     useEffect(() => {
         connectSocket.on('chat message', (msg) => {
-            if (msg.conversationId === friend.conversationId) {
+            if (msg.conversationId === friend.lastMessage.conversationId) {
                 console.log('new message', msg);
                 setMessages(preMessage => [...preMessage, msg]);
             }
@@ -291,13 +328,12 @@ export default function ChatWindow() {
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
                                 <div style={{ width: "65px", height: "7vh", position: "relative" }}>
-                                    <img src={friend.receiverImage} style={{ width: "100%", height: "100%", borderRadius: '100%' }} />
+                                    <img src={friend.image} style={{ width: "100%", height: "100%", borderRadius: '100%' }} />
                                     <div style={{ position: "absolute", width: "10px", height: "10px", backgroundColor: "#F24E1E", borderRadius: "100%", bottom: 0, right: 10, borderColor: '#FFF', border: '1px solid #FFF' }}></div>
                                 </div>
 
                                 <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column' }}>
-                                    <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>{friend.receiverName}</Text>
-                                    <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', width: '100%' }}>Đang hoạt động</Text>
+                                    <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>{friend.nameGroup}</Text>
                                 </div>
                             </div>
                             <div>
@@ -310,9 +346,8 @@ export default function ChatWindow() {
 
                         <div style={{ width: '100%', height: '610px' }}>
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
-                                {/* Render message */}
-                                {messages.map((item, index) => {
-                                    // console.log("item: ", item);
+                                {friend.messages.map((item, index) => {
+                                    console.log("data: ", item);
                                     if (item.type === "first") {
                                         return (
                                             <div style={{ textAlign: 'center', justifyContent: 'center', alignItems: 'center' }}>
@@ -341,7 +376,7 @@ export default function ChatWindow() {
 
                                             }>
                                                 {item?.senderId !== userId && (
-                                                    <img src={friend.receiverImage}
+                                                    <img src={friend.members.image}
                                                         style={{ width: '32px', height: '32px', borderRadius: '16px' }}
                                                     />
                                                 )}
@@ -378,186 +413,162 @@ export default function ChatWindow() {
                                                     }>
                                                         {formatTime(item.createAt)}
                                                     </Text>
-                                                    {/* <Button
-                                                        onClick={() => {
-                                                            toggleReaction(item._id)
-                                                        }}
-                                                        style={
-                                                            item?.senderId === userId
-                                                                ? {
-                                                                    position: 'absolute', width: 18, height: 18, borderRadius: 9, backgroundColor: "gray", justifyContent: 'center', alignItems: 'center',
-                                                                    left: 5, bottom: -5
-                                                                } : {
-                                                                    position: 'absolute', width: 18, height: 18, borderRadius: 9, backgroundColor: 'gray', justifyContent: 'center', alignItems: 'center',
-                                                                    right: 5, bottom: -5
-                                                                }
-                                                        }
-                                                    >
-
-                                                    </Button> */}
                                                 </Button>
                                                 <MessageWithIcons />
                                             </div>
                                         )
                                     }
-                                    if (item.type === "image") {
-                                        return (
-                                            <div key={index}
-                                                style={
-                                                    item?.senderId === userId ?
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-end',
-                                                            justifyContent: 'flex-end'
-                                                        } :
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-start',
-                                                            justifyContent: 'flex-start'
-                                                        }
-                                                }
-                                            >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
-                                                        style={{ width: 32, height: 32, borderRadius: 16 }}
-                                                    />
-                                                )}
+                                    // if (item.type === "image") {
+                                    //     return (
+                                    //         <div key={index}
+                                    //             style={
+                                    //                 item?.senderId === userId ?
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-end',
+                                    //                         justifyContent: 'flex-end'
+                                    //                     } :
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-start',
+                                    //                         justifyContent: 'flex-start'
+                                    //                     }
+                                    //             }
+                                    //         >
+                                    //             {item?.senderId !== userId && (
+                                    //                 <src source={friend.receiverImage}
+                                    //                     style={{ width: 32, height: 32, borderRadius: 16 }}
+                                    //                 />
+                                    //             )}
 
-                                                <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
-                                                <MessageWithIcons />
-                                            </div>
-                                        )
-                                    }
-                                    if (item.type === "file") {
-                                        return (
-                                            <div
-                                                key={index}
-                                                style={
-                                                    item?.senderId === userId ?
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-end',
-                                                            justifyContent: 'flex-end'
-                                                        } :
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-start',
-                                                            justifyContent: 'flex-start'
-                                                        }
-                                                }
-                                            >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
-                                                        style={{ width: 32, height: 32, borderRadius: 16 }}
-                                                    />
-                                                )}
-                                                <div
-                                                    style={{
-                                                        display: 'flex',
-                                                        flexDirection: 'row',
-                                                        // flexWrap: 'wrap',
-                                                        // justifyContent: 'flex-start',
-                                                        // alignItems: 'flex-start',
-                                                        padding: 5,
-                                                        width: '20%',
-                                                        height: '50px'
-                                                    }}
-                                                >
-                                                    <Button
-                                                        onClick={() => {
-                                                            window.open(item.urlType, '_blank')
-                                                        }}
-                                                        style={{
-                                                            flexDirection: 'row',
-                                                            // alignItems: 'center',
-                                                            width: '100%',
-                                                            height: '100%'
-                                                        }}
-                                                    >
-                                                        <div
-                                                        // style={{
-                                                        //     justifyContent: 'center',
-                                                        //     alignItems: 'center'
-                                                        // }}
-                                                        >
-                                                            <FaFile style={{
-                                                                fontSize: '35',
-                                                                color: '#F24E1E'
-                                                            }} />
+                                    //             <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
+                                    //             <MessageWithIcons />
+                                    //         </div>
+                                    //     )
+                                    // }
+                                    // if (item.type === "file") {
+                                    //     return (
+                                    //         <div
+                                    //             key={index}
+                                    //             style={
+                                    //                 item?.senderId === userId ?
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-end',
+                                    //                         justifyContent: 'flex-end'
+                                    //                     } :
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-start',
+                                    //                         justifyContent: 'flex-start'
+                                    //                     }
+                                    //             }
+                                    //         >
+                                    //             {item?.senderId !== userId && (
+                                    //                 <src source={friend.receiverImage}
+                                    //                     style={{ width: 32, height: 32, borderRadius: 16 }}
+                                    //                 />
+                                    //             )}
+                                    //             <div
+                                    //                 style={{
+                                    //                     display: 'flex',
+                                    //                     flexDirection: 'row',
+                                    //                     // flexWrap: 'wrap',
+                                    //                     // justifyContent: 'flex-start',
+                                    //                     // alignItems: 'flex-start',
+                                    //                     padding: 5,
+                                    //                     width: '20%',
+                                    //                     height: '50px'
+                                    //                 }}
+                                    //             >
+                                    //                 <Button
+                                    //                     onClick={() => {
+                                    //                         window.open(item.urlType, '_blank')
+                                    //                     }}
+                                    //                     style={{
+                                    //                         flexDirection: 'row',
+                                    //                         // alignItems: 'center',
+                                    //                         width: '100%',
+                                    //                         height: '100%'
+                                    //                     }}
+                                    //                 >
+                                    //                     <div
+                                    //                     // style={{
+                                    //                     //     justifyContent: 'center',
+                                    //                     //     alignItems: 'center'
+                                    //                     // }}
+                                    //                     >
+                                    //                         <FaFile style={{
+                                    //                             fontSize: '35',
+                                    //                             color: '#F24E1E'
+                                    //                         }} />
 
-                                                            <Text style={{
-                                                                fontSize: 14,
-                                                                // textDecorationLine: 'underline',
-                                                                color: 'red',
-                                                                fontWeight: '700',
-                                                                whiteSpace: 'pre-wrap'
-                                                            }}>
-                                                                {item.fileName}</Text>
-                                                        </div>
-                                                        {/* <Button
-                                                            // onClick={() => {
-                                                            //     downloadAndOpenFile(item.urlType[0]);
-                                                            // }}
-                                                            style={{ width: '80%', justifyContent: 'center', alignItems: 'center' }}
-                                                        >
-                                                            <Text numberOfLines={3} style={{ fontSize: 14, textDecorationLine: 'underline', color: '#FFF', fontWeight: 'bold' }}>{item.fileName}</Text>
-                                                        </Button> */}
-
-                                                    </Button>
-
-                                                </div>
-                                                <MessageWithIcons />
-                                            </div>
-                                        )
+                                    //                         <Text style={{
+                                    //                             fontSize: 14,
+                                    //                             // textDecorationLine: 'underline',
+                                    //                             color: 'red',
+                                    //                             fontWeight: '700',
+                                    //                             whiteSpace: 'pre-wrap'
+                                    //                         }}>
+                                    //                             {item.fileName}</Text>
+                                    //                     </div>
 
 
-                                    }
-                                    if (item.type === "video") {
-                                        return (
-                                            <div
-                                                key={index}
-                                                style={
-                                                    item?.senderId === userId ?
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-end',
-                                                            justifyContent: 'flex-end'
-                                                        } :
-                                                        {
-                                                            display: 'flex',
-                                                            flexDirection: 'row',
-                                                            paddingLeft: '10px',
-                                                            alignItems: 'flex-start',
-                                                            justifyContent: 'flex-start'
-                                                        }
-                                                }
-                                            >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
-                                                        style={{ width: 32, height: 32, borderRadius: 16 }}
-                                                    />
-                                                )}
-                                                <video src={item.urlType[0]}
-                                                    controls
-                                                    muted
-                                                    style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }}
-                                                />
+                                    //                 </Button>
 
-                                            </div>
-                                        )
+                                    //             </div>
+                                    //             <MessageWithIcons />
+                                    //         </div>
+                                    //     )
 
 
-                                    }
+                                    // }
+                                    // if (item.type === "video") {
+                                    //     return (
+                                    //         <div
+                                    //             key={index}
+                                    //             style={
+                                    //                 item?.senderId === userId ?
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-end',
+                                    //                         justifyContent: 'flex-end'
+                                    //                     } :
+                                    //                     {
+                                    //                         display: 'flex',
+                                    //                         flexDirection: 'row',
+                                    //                         paddingLeft: '10px',
+                                    //                         alignItems: 'flex-start',
+                                    //                         justifyContent: 'flex-start'
+                                    //                     }
+                                    //             }
+                                    //         >
+                                    //             {item?.senderId !== userId && (
+                                    //                 <src source={friend.receiverImage}
+                                    //                     style={{ width: 32, height: 32, borderRadius: 16 }}
+                                    //                 />
+                                    //             )}
+                                    //             <video src={item.urlType[0]}
+                                    //                 controls
+                                    //                 muted
+                                    //                 style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }}
+                                    //             />
+
+                                    //         </div>
+                                    //     )
+
+
+                                    // }
                                 })}
 
                             </div>
@@ -636,43 +647,54 @@ export default function ChatWindow() {
                 </Col>
 
                 <Col span={6} style={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'flex-start', alignItems: 'center', height: '75%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
-                        <img src={friend.receiverImage} style={{ width: "150px", height: "150px", borderRadius: '100%', marginTop: '30px' }} />
-                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
-                            <Text style={{ fontSize: '24px', fontWeight: '800px', color: '#FFF', width: '100%', marginTop:'20px', fontWeight:'600' }}>
-                                {friend.receiverName}
+                    <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'flex-start', alignItems: 'center', height: '80%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
+                        <img src={friend.image} style={{ width: "150px", height: "150px", borderRadius: '100%', marginTop: '30px' }} />
+                        <div style={{ display: 'flex', flexDirection: '', textAlign: 'center' }}>
+                            <Text style={{ fontSize: '24px', fontWeight: '800px', color: '#FFF', width: '100%', marginTop: '20px', fontWeight: '600' }}>
+                                {friend.nameGroup}
                             </Text>
                         </div>
 
-                            {/* <div style={{ display: 'flex', justifyContent: 'space-evenly', width: '100%', marginTop: '30px' }}>
-                                <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                                    <HiBell style={{ fontSize: '30', color: '#FFF' }} />
-                                </div>
-
-                                <div style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                                    <FaUserLarge style={{ fontSize: '25', color: '#FFF' }} />
-                                </div>
-
-
-                            </div> */}
-                        <div style={{display: 'flex', justifyContent: 'flex-start', width:'100%', marginTop:'50px'}}>
+                        <div style={{ display: 'flex', justifyContent: '', width: '100%', marginTop: '30px' }}>
                             <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', marginTop: '30px', background: 'none', border: 'none', height: '50px' }}
-                                onClick={toggleModal}
+                                onClick={toggleAddMemberModal}
                             >
 
                                 <AiOutlineUsergroupAdd style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
                                 <Text style={{ color: '#FFF', fontSize: '18px', }}>Thêm thành viên</Text>
                             </Button>
-                            <Modal isOpen={isOpen} toggleModal={toggleModal} />
+                            <ModalAddMemberGroup isOpen={isOpenAddMember} toggleModal={toggleAddMemberModal} />
                         </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginTop: '10px' }}>
+                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', marginTop: '0px', background: 'none', border: 'none', height: '50px' }}
+                                onClick={toggleManageGroupModal}
+                            >
 
-                        <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', background: 'none', border: 'none', height: '50px', marginTop: '10px' }}>
-                            <CiLogout style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
-                            <Text style={{ color: '#FFF', fontSize: '18px', }}>Rời nhóm</Text>
-                        </Button>
+                                <MdOutlineGroups3 style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
+                                <Text style={{ color: '#FFF', fontSize: '18px', }}>Thành viên</Text>
+                            </Button>
+                            <ModalManageGroup isOpen={isOpenManageGroup} toggleModal={toggleManageGroupModal} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginTop: '10px' }}>
+                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', marginTop: '10px', background: 'none', border: 'none', height: '50px' }}
+
+                            >
+
+
+                                <MdOutlineCloseFullscreen style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
+                                <Text style={{ color: '#FFF', fontSize: '18px', }}>Giải tán nhóm</Text>
+                            </Button>
+
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginTop: '10px' }}>
+                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', background: 'none', border: 'none', height: '50px', marginTop: '10px' }}>
+                                <CiLogout style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
+                                <Text style={{ color: '#FFF', fontSize: '18px', }}>Rời nhóm</Text>
+                            </Button>
+                        </div>
                     </div>
 
-                    <div style={{ paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '25vh', padding: '20px' }}>
+                    <div style={{ paddingLeft: '5px', borderColor: '#2E2E2E', border: '1px solid #2E2E2E', height: '20%', padding: '20%' }}>
                         <Text style={{ color: '#FFF', fontSize: '20px', fontWeight: '700' }}>File, phương tiện và liên kết</Text>
                     </div>
                 </Col>

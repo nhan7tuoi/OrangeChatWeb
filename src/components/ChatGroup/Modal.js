@@ -10,8 +10,9 @@ import connectSocket from '../../server/ConnectSocket';
 import { MdDelete } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import i18next from '../../i18n/i18n';
-import { addMember, removeMember, setMembers } from '../../redux/conversationSlice';
+import { addMember, removeMember, setCoversation, setMembers } from '../../redux/conversationSlice';
 import messageApi from '../../apis/messageApi';
+import { formatOneConversation } from '../../utils/formatOneConverstation';
 // import {launchImageLibrary} from 'react-native-image-picker';
 
 const { Text, Title } = Typography;
@@ -25,6 +26,7 @@ function Modal({ isOpen, toggleModal }) {
     const avatarGroup = useRef(
         'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/group-user-circle.png',
     ).current;
+    const [groupName, setGroupName] = useState('');
 
     const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
@@ -36,7 +38,6 @@ function Modal({ isOpen, toggleModal }) {
     const listFriends = useSelector(state => state.friend.listFriends);
 
 
-    const [listFriendRequests, setListFq] = useState([]);
     useEffect(() => {
         if (keyword === '') {
             fetchData();
@@ -62,12 +63,34 @@ function Modal({ isOpen, toggleModal }) {
     console.log(keyword);
 
 
+    useEffect(() => {
+        connectSocket.on('newConversationGroup', data => {
+            try {
+                if (data.administrators.includes(user._id)) {
+                    const fConversation = formatOneConversation({
+                        conversation: data,
+                        userId: user._id,
+                    });
+
+                    dispatch(setCoversation(fConversation));
+                    // navigation.navigate('ChatScreen');
+
+                }
+            } catch (error) {
+                console.error(
+                    'Đã xảy ra lỗi khi chuyển đến màn hình trò chuyện:',
+                    error,
+                );
+            }
+        });
+    }, []);
+
 
 
 
 
     // const onSelectAvatar = async () => {
-    //     launchImageLibrary(
+    //     launchImageLibrary (
     //       {mediaType: 'photo', selectionLimit: 1},
     //       async response => {
     //         if (!response.didCancel) {
@@ -97,9 +120,10 @@ function Modal({ isOpen, toggleModal }) {
     //       },
     //     );
     //   };
+
+
     const handleAddMember = member => {
         dispatch(addMember(member));
-        setSelectedMembers([...selectedMembers, member]); // Thêm thành viên vào danh sách đã chọn
         const updatedList = listFriends.map(f => {
             if (f._id === member._id) {
                 return { ...f, addStatus: true };
@@ -111,7 +135,6 @@ function Modal({ isOpen, toggleModal }) {
 
     const handleRemoveMember = member => {
         dispatch(removeMember(member._id));
-        setSelectedMembers(selectedMembers.filter(m => m._id !== member._id)); // Loại bỏ thành viên khỏi danh sách đã chọn
         const updatedList = listFriends.map(f => {
             if (f._id === member._id) {
                 return { ...f, addStatus: false };
@@ -123,19 +146,19 @@ function Modal({ isOpen, toggleModal }) {
 
 
     const handleCreateGroup = () => {
-
         let tempMembers = members.map(m => m._id);
         tempMembers = [...tempMembers, user._id];
-        console.log('members', tempMembers);
-        console.log("avt", avatarGroup);
-        console.log("name: ", nameGroup);
         connectSocket.emit('create new conversation', {
-            nameGroup: nameGroup,
+            nameGroup: groupName,
             isGroup: true,
             administrators: [user._id],
             members: tempMembers,
             image: avatarGroup,
         });
+        console.log('members', tempMembers);
+        console.log("avt", avatarGroup);
+        console.log("name: ", groupName);
+        console.log(tempMembers);
     };
 
     return (
@@ -146,10 +169,17 @@ function Modal({ isOpen, toggleModal }) {
                         <div className="modal-content" style={{ width: '500px', height: '600px', display: 'flex', justifyContent: 'flex-start', alignItems: 'center', flexDirection: 'column' }}>
                             <Text style={{ fontSize: '24px', fontWeight: 600, color: 'white', marginBottom: '20px' }}>Tạo nhóm</Text>
                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '450px', alignItems: 'center' }}>
-                                <img src="../../public/images/avt.jpg" style={{ height: '30px', width: '30px', borderRadius: '50%', marginLeft: '5px' }} alt='image'></img>
+                                <Button style={{ border: 'none', background: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                                    onClick={() => {
+
+                                    }}
+                                >
+                                    <img src={{ uri: avatarGroup, }} style={{ height: '30px', width: '30px', borderRadius: '50%', marginLeft: '5px' }} alt='image'></img>
+                                </Button>
+
                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#36373A', paddingLeft: '10px', width: '400px', borderRadius: '8px' }}>
 
-                                    <input type='text' placeholder='Nhập tên nhóm' style={{ width: '100%', height: '40px', background: '#36373A', marginLeft: '5px', border: 'hidden', outline: 'none', color: '#FFF', borderRadius: '10px' }}></input>
+                                    <input type='text'  placeholder={i18next.t('datTenNhom')} onChange={(evt) => setGroupName(evt.target.value)} style={{ width: '100%', height: '40px', background: '#36373A', marginLeft: '5px', border: 'hidden', outline: 'none', color: '#FFF', borderRadius: '10px' }}></input>
                                 </div>
                             </div>
 
@@ -205,13 +235,13 @@ function Modal({ isOpen, toggleModal }) {
                                         <Text>Hủy</Text>
                                     </Button>
 
-                                   
-                                        <Button style={{ width: '100px', height: '40px', marginLeft: '10px', backgroundColor: '#36373A' }}
-                                            onClick={() => handleCreateGroup(user)}
-                                        >
-                                            <Text style={{ color: 'white' }}>Tạo nhóm</Text>
-                                        </Button>
-                                    
+
+                                    <Button style={{ width: '100px', height: '40px', marginLeft: '10px', backgroundColor: '#36373A' }}
+                                        onClick={() => handleCreateGroup() }
+                                    >
+                                        <Text style={{ color: 'white' }}>Tạo nhóm</Text>
+                                    </Button>
+
 
                                 </div>
 

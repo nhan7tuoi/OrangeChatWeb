@@ -57,7 +57,7 @@ export default function ChatList() {
   return (
     conversations.map((item, index) => {
         // console.log("item:", item);
-        const otherMember = item?.conversation.members.find(member => member._id !== user._id);
+        const otherMember = item?.conversation?.members.find(member => member._id !== user._id);
         // console.log("member",otherMember._id);
         if (otherMember) {
           return (

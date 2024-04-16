@@ -6,8 +6,16 @@ const conversationSlice = createSlice({
     conversations: [],
     members: [],
     conversationGroups: [],
+    nameGroup: '',
+    conversation: {},
   },
   reducers: {
+    setCoversation: (state, action) => {
+      state.conversation = action.payload;
+    },
+    setNameGroup: (state, action) => {
+      state.nameGroup = action.payload;
+    },
     setConversations: (state, action) => {
       state.conversations = action.payload;
     },
@@ -31,5 +39,7 @@ export const {
   removeMember,
   setMembers,
   setConversationGroups,
+  setNameGroup,
+  setCoversation
 } = conversationSlice.actions;
 export default conversationSlice.reducer;
