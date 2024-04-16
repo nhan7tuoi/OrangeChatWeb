@@ -2,10 +2,11 @@ import React, { useEffect, useId, useRef } from 'react'
 import { Button, Typography } from 'antd'
 import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
-import { setConversations } from '../../redux/conversationSlice';
+import { setConversations, setCoversation } from '../../redux/conversationSlice';
 import conversationApi from '../../apis/conversationApi';
 import { useNavigate } from 'react-router-dom';
 import { setCurrentPage, setUserId } from '../../redux/currentSlice';
+import { formatConversation } from '../../utils/formatConverstation';
 
 const { Text } = Typography;
 
@@ -17,6 +18,7 @@ export default function ChatList() {
   const conversations = useSelector((state) => state.conversation.conversations);
   const scrollRef = useRef(null);
   
+  // console.log("Con:", conversations);
 
   useEffect(() => {
     getConversation();
@@ -30,15 +32,19 @@ export default function ChatList() {
 
   const getConversation = async () => {
     try {
-      const response = await conversationApi.getConversation({ userId: user._id });
+      const response = await conversationApi.getConversation({
+        userId: user._id,
+      });
 
       if (response) {
-        dispatch(setConversations(response.data));
-        // console.log("response", response.data);
+        const fmConversations = formatConversation({
+          data: response.data,
+          userId: user._id,
+        });
+        dispatch(setConversations(fmConversations));
       }
-
     } catch (error) {
-      console.log('error getConversation', error);
+      console.log('error', error);
     }
   };
 
@@ -46,32 +52,23 @@ export default function ChatList() {
     dispatch(setCurrentPage('ChatWindow'));
   };
 
-  const handleUserId = (userId) => {
-    dispatch(setUserId(userId));
-    console.log("UserID", userId);
-  };
-
   const currentPage = useSelector(state => state.current.currentPage);
   // console.log("CurrentChat", currentPage);
 
   return (
     conversations.map((item, index) => {
-        // console.log("item:", item);
-        const otherMember = item?.conversation?.members.find(member => member._id !== user._id);
-        // console.log("member",otherMember._id);
+        console.log("item:", item);
+        const otherMember = item?.members.find(member => member._id !== user._id);
+        // console.log("member",otherMember);
         if (otherMember) {
           return (
             <div key={index} ref={scrollRef} style={{ overflowY: 'auto' }}>
               <Button style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
-                onClick={() => (handleButtonClick(), handleUserId(
-                  {
-                      receiverId: otherMember._id,
-                      conversationId: item.conversation._id,
-                      receiverImage: otherMember.image,
-                      receiverName: otherMember.name
-                  } 
-                  
-                ))}>
+                onClick={() => {
+                  dispatch(setCoversation(item))
+                  handleButtonClick()
+                }
+                }>
                 <img src={otherMember.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
 
                 <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
@@ -82,7 +79,7 @@ export default function ChatList() {
                     {/* <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666' }}>{item.time}</Text> */}
                   </div>
                   {
-                    item?.lastMessage?.senderId === user._id
+                    item?.lastMessage?.senderId_id === user._id
                       ? (
                         <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
                           Bạn: {

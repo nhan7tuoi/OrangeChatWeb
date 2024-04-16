@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button, Typography } from 'antd'
 import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
-import { setConversationGroups, setConversations } from '../../redux/conversationSlice';
+import { setConversationGroups, setConversations, setCoversation } from '../../redux/conversationSlice';
 import conversationApi from '../../apis/conversationApi';
 import { useNavigate } from 'react-router-dom';
 import { setCurrentPage, setUserId } from '../../redux/currentSlice';
@@ -18,7 +18,7 @@ export default function ChatList() {
   const dispatch = useDispatch();
   const conversations = useSelector((state) => state.conversation.conversationGroups);
 
-  console.log("Group: ", conversations);
+  // console.log("Group: ", conversations);
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -26,21 +26,25 @@ export default function ChatList() {
       fetchData();
     });
   }, []);
+
   useEffect(() => {
     fetchData();
+    // console.log("data");
   }, [])
+
   const fetchData = async () => {
     try {
       const res = await conversationApi.getConversationGroups({
         userId: user._id,
-      });
+      });   
+      // console.log("fecth");
       if (res) {
         const fConversation = formatConversation({
           data: res.data,
           userId: user._id,
         });
         dispatch(setConversationGroups(fConversation));
-        console.log(fConversation);
+        // console.log(fConversation);
       }
     } catch (error) {
       console.error('Error fetching data a:', error);
@@ -53,17 +57,12 @@ export default function ChatList() {
     dispatch(setCurrentPage('ChatWindow'));
   };
 
-  const handleUserId = (userId) => {
-    dispatch(setUserId(userId));
-    console.log("UserID", userId);
-  };
-
   const currentPage = useSelector(state => state.current.currentPage);
   // console.log("CurrentChat", currentPage);
 
   return (
 
-    <div style={{ height: '620px', width: '100%' }}>
+    // <div style={{ height: '620px', width: '100%' }}>
 
       <div ref={scrollRef} style={{ overflowY: 'auto', height: '100%', width: '100%' }}>
         {conversations.map((item, index) => {
@@ -75,14 +74,8 @@ export default function ChatList() {
               <Button
                 style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
                 onClick={() => {
+                  dispatch(setCoversation(item))
                   handleButtonClick();
-                  handleUserId({
-                    // receiverId: item._id,
-                    // conversationId: item.conversations,
-                    // receiverImage: item.image,
-                    // receiverName: item.nameGroup
-                    groupChat : item
-                  });
                 }}
               >
                 <img src={item.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} alt="Avatar" />
@@ -106,7 +99,7 @@ export default function ChatList() {
           // }
         })}
       </div>
-    </div>
+    // </div>
   )
 
 

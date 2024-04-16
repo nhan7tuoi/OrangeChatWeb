@@ -27,6 +27,10 @@ export default function ChatWindow() {
 
     const friend = useSelector((state) => state.current.userId);
     const user = useSelector((state) => state.auth.user);
+    const conversation= useSelector(
+        state => state.conversation.conversation
+    );
+    console.log("conversation: ", conversation);
     const userId = user._id;
     const scrollRef = useRef(null);
     const dispatch = useDispatch();
@@ -36,6 +40,7 @@ export default function ChatWindow() {
     const fileImageRef = useRef(null);
     const fileRef = useRef(null);
     const [isShowReCall, setIsShowReCall] = useState(false);
+    // console.log("Friend: ", friend);
 
 
     const formatTime = (time) => {
@@ -46,10 +51,10 @@ export default function ChatWindow() {
     useEffect(() => {
         getLastMessage();
         console.log("fetch message");
-    }, [friend])
+    }, [conversation])
 
     const getLastMessage = async () => {
-        const response = await messageApi.getMessage({ conversationId: friend.conversationId });
+        const response = await messageApi.getMessage({ conversationId: conversation._id });
         if (response) {
             setMessages(response.data);
         }
@@ -59,7 +64,7 @@ export default function ChatWindow() {
         // Lấy phần tử div bên trong
         const scrollElement = scrollRef.current;
         // Nếu có phần tử và đã có tin nhắn mới, cuộn xuống dưới cùng của phần tử
-        if (scrollElement && messages.length > 0) {
+        if (scrollElement && messages?.length > 0) {
             scrollElement.scrollTop = scrollElement.scrollHeight;
         }
     }, [messages]);
@@ -81,9 +86,9 @@ export default function ChatWindow() {
             return;
         }
         const newMessage = {
-            conversationId: friend.conversationId,
+            conversationId: conversation._id,
             senderId: userId,
-            receiverId: friend.receiverId,
+            receiverId: conversation.receiverId,
             type: "text",
             contentMessage: inputMessage,
             urlType: "",
@@ -119,9 +124,9 @@ export default function ChatWindow() {
 
             if (mediaUrl) {
                 const newMessage = {
-                    conversationId: friend.conversationId,
+                    conversationId: conversation._id,
                     senderId: userId,
-                    receiverId: friend.receiverId,
+                    receiverId: conversation.receiverId,
                     type: file.type.startsWith('image/') ? 'image' : 'video',
                     urlType: mediaUrl,
                     createAt: new Date(),
@@ -154,9 +159,9 @@ export default function ChatWindow() {
             const fileUrl = await messageApi.uploadFile(formData);
             console.log("File URL: ", fileUrl);
             const newMessage = {
-                conversationId: friend.conversationId,
+                conversationId: conversation._id,
                 senderId: userId,
-                receiverId: friend.receiverId,
+                receiverId: conversation.receiverId,
                 type: "file",
                 urlType: fileUrl.data,
                 createAt: new Date(),
@@ -183,7 +188,7 @@ export default function ChatWindow() {
     // Thu hồi tin nhắn
     const recallMessage = (messageId) => {
         console.log('recall message', itemSelected);
-        connectSocket.emit('recall message', { messageId: messageId, conversationId: friend.conversationId });
+        connectSocket.emit('recall message', { messageId: messageId, conversationId: conversation._id });
         getConversation();
     };
 
@@ -191,7 +196,7 @@ export default function ChatWindow() {
         console.log('deleting', itemSelected);
         connectSocket.emit('delete message', {
             messageId: messageId,
-            conversationId: friend.conversationId,
+            conversationId: conversation._id,
             userDelete: user._id,
         });
         getConversation();
@@ -214,7 +219,7 @@ export default function ChatWindow() {
     // Update data từ Socket gửi về
     useEffect(() => {
         connectSocket.on('chat message', (msg) => {
-            if (msg.conversationId === friend.conversationId) {
+            if (msg.conversationId === conversation._id) {
                 console.log('new message', msg);
                 setMessages(preMessage => [...preMessage, msg]);
             }
@@ -231,7 +236,8 @@ export default function ChatWindow() {
         });
         connectSocket.on('recall message', (msg) => {
             console.log('recall message', msg);
-            if (msg.conversationId === friend.conversationId) {
+            if (msg.conversationId === conversation.
+            _id) {
                 const newMessages = messages.map((message) => {
                     if (message._id === msg.messageId) {
                         message.isRecall = true;
@@ -243,7 +249,7 @@ export default function ChatWindow() {
         });
         connectSocket.on('delete message', msg => {
             console.log('delete message', msg);
-            if (msg.conversationId === friend.conversationId) {
+            if (msg.conversationId === conversation._id) {
                 const newMessages = messages.map(message => {
                     if (message._id === msg.messageId) {
                         message.deleteBy = [{ userDelete: msg.userDelete }];
@@ -290,7 +296,7 @@ export default function ChatWindow() {
                     setItemSelected(itemSelected);
                 }} />
                 <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
-                    {itemSelected?.senderId === userId && (
+                    {itemSelected?.senderId._id === userId && (
                         <Button style={{ background: 'transparent' }} onClick={() => {
                             handleActionClick(() => recallMessage(itemSelected._id))
                         }}>
@@ -337,12 +343,12 @@ export default function ChatWindow() {
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
                                 <div style={{ width: "65px", height: "7vh", position: "relative" }}>
-                                    <img src={friend.receiverImage} style={{ width: "100%", height: "100%", borderRadius: '100%' }} />
+                                    <img src={conversation.image} style={{ width: "100%", height: "100%", borderRadius: '100%' }} />
                                     <div style={{ position: "absolute", width: "10px", height: "10px", backgroundColor: "#F24E1E", borderRadius: "100%", bottom: 0, right: 10, borderColor: '#FFF', border: '1px solid #FFF' }}></div>
                                 </div>
 
                                 <div style={{ marginLeft: '10px', display: 'flex', flexDirection: 'column' }}>
-                                    <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>{friend.receiverName}</Text>
+                                    <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>{conversation.name}</Text>
                                     <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', width: '100%' }}>Đang hoạt động</Text>
                                 </div>
                             </div>
@@ -358,7 +364,7 @@ export default function ChatWindow() {
                         >
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {/* Render message */}
-                                {messages.map((item, index) => {
+                                {messages?.map((item, index) => {
                                     // console.log("item: ", messages);
                                     if (item.type === "first") {
                                         return (
@@ -373,7 +379,7 @@ export default function ChatWindow() {
                                         return (
                                             <div key={index}
                                                 style={
-                                                    item?.senderId === userId ?
+                                                    item?.senderId._id === userId ?
                                                         {
                                                             display: 'flex',
                                                             flexDirection: 'row',
@@ -390,8 +396,8 @@ export default function ChatWindow() {
                                                         }
 
                                                 }>
-                                                {item?.senderId !== userId && (
-                                                    <img src={friend.receiverImage}
+                                                {item?.senderId._id !== userId && (
+                                                    <img src={conversation.receiverImage}
                                                         style={{ width: '32px', height: '32px', borderRadius: '16px' }}
                                                     />
                                                 )}
@@ -417,7 +423,7 @@ export default function ChatWindow() {
                                                     </Text>
                                                     {item.isReCall === false && (
                                                         <Text style={
-                                                            item?.senderId === userId ? {
+                                                            item?.senderId._id === userId ? {
                                                                 textAlign: 'right',
                                                                 fontSize: '12px',
                                                                 padding: '2px'
@@ -445,7 +451,7 @@ export default function ChatWindow() {
                                                 showReCall={showReCall}
                                                 isShowReCall={isShowReCall}
                                                 style={
-                                                    item?.senderId === userId ?
+                                                    item?.senderId._id === userId ?
                                                         {
                                                             display: 'flex',
                                                             flexDirection: 'row',
@@ -462,8 +468,8 @@ export default function ChatWindow() {
                                                         }
                                                 }
                                             >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
+                                                {item?.senderId._id !== userId && (
+                                                    <src source={conversation.receiverImage}
                                                         style={{ width: 32, height: 32, borderRadius: 16 }}
                                                     />
                                                 )}
@@ -527,7 +533,7 @@ export default function ChatWindow() {
                                                 showReCall={showReCall}
                                                 isShowReCall={isShowReCall}
                                                 style={
-                                                    item?.senderId === userId ?
+                                                    item?.senderId._id === userId ?
                                                         {
                                                             display: 'flex',
                                                             flexDirection: 'row',
@@ -544,8 +550,8 @@ export default function ChatWindow() {
                                                         }
                                                 }
                                             >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
+                                                {item?.senderId._id !== userId && (
+                                                    <src source={conversation.receiverImage}
                                                         style={{ width: 32, height: 32, borderRadius: 16 }}
                                                     />
                                                 )}
@@ -657,7 +663,7 @@ export default function ChatWindow() {
                                                 showReCall={showReCall}
                                                 isShowReCall={isShowReCall}
                                                 style={
-                                                    item?.senderId === userId ?
+                                                    item?.senderId._id === userId ?
                                                         {
                                                             display: 'flex',
                                                             flexDirection: 'row',
@@ -674,8 +680,8 @@ export default function ChatWindow() {
                                                         }
                                                 }
                                             >
-                                                {item?.senderId !== userId && (
-                                                    <src source={friend.receiverImage}
+                                                {item?.senderId._id !== userId && (
+                                                    <src source={conversation.receiverImage}
                                                         style={{ width: 32, height: 32, borderRadius: 16 }}
                                                     />
                                                 )}
@@ -842,10 +848,10 @@ export default function ChatWindow() {
 
                 <Col span={6} style={{ display: 'flex', flexDirection: 'column', height: '90vh' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', justifyContent: 'space-evenly', alignItems: 'center', height: '45%', borderColor: '#2E2E2E', border: '1px solid #2E2E2E' }}>
-                        <img src={friend.receiverImage} style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
+                        <img src={conversation.receiverImage} style={{ width: "150px", height: "150px", borderRadius: '100%' }} />
                         <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center' }}>
                             <Text style={{ fontSize: '20px', fontWeight: '800px', color: '#FFF', width: '100%' }}>
-                                {friend.receiverName}
+                                {conversation.receiverName}
                             </Text>
                             <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#F24E1E', width: '100%' }}>Đang hoạt động</Text>
                         </div>

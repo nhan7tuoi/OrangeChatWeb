@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './Modal.css'; // File CSS cho modal
+import '../../css/Modal.css'; // File CSS cho modal
 // import { Button } from 'antd';
 import { IoIosSearch } from "react-icons/io";
 import { Button, Col, Row, Typography } from 'antd';
