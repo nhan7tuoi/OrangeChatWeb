@@ -14,7 +14,7 @@
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.15.0",
     "axios": "^1.6.8",
-    "emoji-mart": "^5.5.2",
+    "emoji-picker-react": "^4.9.2",
     "expo-linear-gradient": "^12.7.2",
     "formik": "^2.4.5",
     "react": "^18.2.0",

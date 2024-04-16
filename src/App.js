@@ -1,7 +1,7 @@
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Chat from './components/ChatSingle/Chat';
-import ChatGroup from './components/ChatGroup/ChatGroup';
+// import ChatGroup from './components/ChatGroup';
 import Friend from './components/Friend/Friend';
 import Login from './components/Login/Login';
 import Register from './components/Register/Register';
@@ -28,6 +28,7 @@ import MainLayout from './components/Layout/MainLayout';
 import React, { useEffect, useState } from 'react'
 import FriendsRequest from './components/Friend/FriendRequest';
 import FriendsSearch from './components/Friend/FriendSearch';
+import ChatGroup from './components/ChatGroup/Chat';
 
 
 function App() {

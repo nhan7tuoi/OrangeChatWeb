@@ -17,9 +17,8 @@ import '../../css/chatWindow.css';
 import { IoMdMore } from "react-icons/io";
 import { TbMessageCircleX } from "react-icons/tb";
 import { RiShareForwardFill } from "react-icons/ri";
-import 'emoji-mart/../emoji-mart';
-import { Picker } from 'emoji-mart';
 import ForwardModal from './ForwardModal';
+import EmojiPicker from 'emoji-picker-react';
 
 
 const { Text } = Typography;
@@ -34,17 +33,10 @@ export default function ChatWindow() {
     const [messages, setMessages] = useState([]);
     const [itemSelected, setItemSelected] = useState({});
     const [inputMessage, setInputMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
     const fileImageRef = useRef(null);
     const fileRef = useRef(null);
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [previewSrc, setPreviewSrc] = useState('');
-    const [isOpenEmoji, setIsOpenEmoji] = useState(false);
-    const [showPicker, setShowPicker] = useState(false);
-    const [selectedEmoji, setSelectedEmoji] = useState(null);
     const [isShowReCall, setIsShowReCall] = useState(false);
-    const [showForwardModal, setShowForwardModal] = useState(false);
+
 
     const formatTime = (time) => {
         const options = { hour: "numeric", minute: "numeric" };
@@ -106,55 +98,50 @@ export default function ChatWindow() {
         console.log("Chat text: ", newMessage);
         setInputMessage('');
         sendMessage(newMessage);
-
-        // setMessages(preMessage => [...preMessage, newMessage]);
-
     };
+
+    // 
 
     const handleImageChange = async (event) => {
-        const files = event.target.files;
-        console.log("files: ", files);
-        const selectedImages = [];
+        const file = event.target.files[0];
+        console.log("Selected file: ", file);
 
         try {
-            const formData = [];
+            const formData = new FormData();
+            formData.append('file', file);
 
-            for (const file of files) {
-                const formData = new FormData();
-                formData.append('image', file);
-                // formDataArray.push(formData); // Thêm formData vào mảng
+            let uploadResponse = await messageApi.uploadImage(formData);
 
-                try {
-                    const uploadResponse = await messageApi.uploadImage(formData);
-                    const imageUrl = uploadResponse.data;
-                    selectedImages.push(imageUrl);
-                } catch (error) {
-                    console.error('Error uploading image:', error);
-                }
+            console.log("File Type: ", file.type);
+
+            const mediaUrl = uploadResponse;
+            console.log("Uploaded media URL: ", mediaUrl);
+
+            if (mediaUrl) {
+                const newMessage = {
+                    conversationId: friend.conversationId,
+                    senderId: userId,
+                    receiverId: friend.receiverId,
+                    type: file.type.startsWith('image/') ? 'image' : 'video',
+                    urlType: mediaUrl,
+                    createAt: new Date(),
+                    isDeleted: false,
+                    reaction: [],
+                    isSeen: false,
+                    isReceive: false,
+                    isSend: false,
+                };
+                console.log("Chat media message: ", newMessage);
+
+                sendMessage(newMessage);
+            } else {
+                console.log("No media URL returned, message not sent.");
             }
-
-            const newMessages = {
-                conversationId: friend.conversationId,
-                senderId: userId,
-                receiverId: friend.receiverId,
-                type: 'image',
-                urlType: selectedImages, // Có thể bạn muốn chỉ gửi imageUrl
-                createAt: new Date(),
-                isDeleted: false,
-                reaction: [],
-                isSeen: false,
-                isReceive: false,
-                isSend: false,
-            };
-            console.log("Chat image: ", newMessages);
-
-            // setMessages(prevMessages => [...prevMessages, ...newMessages]);
-            sendMessage(newMessages);
-            // console.log("con:", friend.conversationId);
         } catch (error) {
-            console.error('Error processing images:', error);
+            console.error('Error processing media:', error);
         }
     };
+
 
     const onSelectFile = async (event) => {
         try {
@@ -162,9 +149,10 @@ export default function ChatWindow() {
             console.log("file: ", file);
             const formData = new FormData();
             formData.append('image', file);
-            console.log(formData.getAll('image'));
+            console.log("Get all: ",formData.getAll('image'));
 
             const fileUrl = await messageApi.uploadFile(formData);
+            console.log("File URL: ", fileUrl);
             const newMessage = {
                 conversationId: friend.conversationId,
                 senderId: userId,
@@ -180,7 +168,6 @@ export default function ChatWindow() {
                 typeFile: file.type,
                 fileName: file.name
             };
-            // setMessages([...messages, newMessage]);
             sendMessage(newMessage);
             console.log("file message: ", newMessage);
         } catch (err) {
@@ -196,14 +183,12 @@ export default function ChatWindow() {
     // Thu hồi tin nhắn
     const recallMessage = (messageId) => {
         console.log('recall message', itemSelected);
-        // hidePressOther()
         connectSocket.emit('recall message', { messageId: messageId, conversationId: friend.conversationId });
         getConversation();
     };
 
     const deleteMessage = messageId => {
-        console.log('delete message', itemSelected);
-        // hidePressOther();
+        console.log('deleting', itemSelected);
         connectSocket.emit('delete message', {
             messageId: messageId,
             conversationId: friend.conversationId,
@@ -259,34 +244,25 @@ export default function ChatWindow() {
         connectSocket.on('delete message', msg => {
             console.log('delete message', msg);
             if (msg.conversationId === friend.conversationId) {
-              const newMessages = messages.map(message => {
-                if (message._id === msg.messageId) {
-                  message.deleteBy = [{userDelete: msg.userDelete}];
-                }
-                return message;
-              });
-              getLastMessage();
+                const newMessages = messages.map(message => {
+                    if (message._id === msg.messageId) {
+                        message.deleteBy = [{ userDelete: msg.userDelete }];
+                    }
+                    return message;
+                });
+                getLastMessage();
             }
-          });
+        });
     }, []);
 
     const handleImageClick = () => {
         fileImageRef.current.click(); // Kích hoạt input file khi button được nhấn
-        // console.log("fileInput: ", fileInputRef.current);
+        // console.log("fileInput: ", fileImageRef.current);
     };
 
     const handleFileClick = () => {
         fileRef.current.click(); // Kích hoạt input file khi button được nhấn
         // console.log("fileInput: ", fileInputRef.current);
-    };
-
-    const handleEmojiSelect = emoji => {
-        setSelectedEmoji(emoji.native);
-        togglePicker();
-    };
-
-    const togglePicker = () => {
-        setShowPicker(!showPicker);
     };
 
     const MessageWithIcons = ({ itemSelected }) => {
@@ -295,20 +271,16 @@ export default function ChatWindow() {
         const toggleIcons = () => {
             setShowIcons(prevShowIcons => !prevShowIcons);
         };
-        
-        const toggleForwardModal = () => {
-            setShowForwardModal(prevState => !prevState);
-        };
 
         const handleActionClick = (action) => {
             action(itemSelected.messageId);
             setShowIcons(false);
         };
 
-        const handleForward = (friendId) => {
-            // Xử lý việc chuyển tiếp tin nhắn tới bạn bè có id là friendId
-            console.log("Forward message to friend:", friendId);
-            toggleForwardModal(); // Đóng modal sau khi chuyển tiếp
+        const [isOpen, setIsOpen] = useState(false);
+
+        const toggleForwardModal = () => {
+            setIsOpen(!isOpen);
         };
 
         return (
@@ -318,14 +290,9 @@ export default function ChatWindow() {
                     setItemSelected(itemSelected);
                 }} />
                 <div className="icons" style={{ display: showIcons ? 'block' : 'none' }}>
-                    {itemSelected?.senderId === userId && ( // Chỉ hiển thị khi là tin nhắn của người dùng hiện tại
+                    {itemSelected?.senderId === userId && (
                         <Button style={{ background: 'transparent' }} onClick={() => {
-                        //     if (itemSelected?.senderId === userId) {
-                        //     showReCall(!isShowReCall);
-                        //     console.log("Check1: ", itemSelected?.senderId);
-                        //     console.log("Check2: ", userId);
-                        // }
-                        handleActionClick(() => recallMessage(itemSelected._id))
+                            handleActionClick(() => recallMessage(itemSelected._id))
                         }}>
                             <TbMessageCircleX style={{ fontSize: '20px', color: '#F24E1E' }} />
                         </Button>
@@ -334,23 +301,31 @@ export default function ChatWindow() {
                         <MdDelete style={{ fontSize: '20px', color: '#F24E1E' }} />
                     </Button>
                     <Button style={{ background: 'transparent' }} onClick={() => {
-                        toggleForwardModal();
-                        // handleActionClick(() => recallMessage(itemSelected._id))
+                        toggleForwardModal()
                     }}>
                         <RiShareForwardFill style={{ fontSize: '20px', color: '#F24E1E' }} />
                     </Button>
                 </div>
-                {showForwardModal && (
-                // Modal danh sách bạn bè
                 <ForwardModal
-                    onClose={toggleForwardModal}
-                    onForward={handleForward}
-                    userId={userId}
+                    isOpen={isOpen}
+                    toggleForwardModal={toggleForwardModal}
                 />
-            )}
             </div>
         );
     };
+
+    const [inputEmoji, setInputEmoji] = useState('');
+    const [showPicker, setShowPicker] = useState(false);
+
+    const handleEmojiClick = (emojiObject) => {
+        setInputEmoji(e => e + emojiObject.emoji);
+        // setShowPicker(false);
+        console.log("emoji: ", emojiObject.emoji);
+    };
+
+    const handleShowPicker = () => {
+        setShowPicker(show => !show)
+    }
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '90vh', width: '100%' }}>
@@ -358,7 +333,7 @@ export default function ChatWindow() {
 
             <Row style={{ height: '100%', width: '100%' }}>
                 <Col span={18}>
-                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E', width: '100%', height: '100%' }}>
+                    <div style={{ borderColor: '#2E2E2E', border: '1px solid #2E2E2E', width: '100%', height: '90vh' }}>
                         <div style={{ display: 'flex', margin: '20px', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex' }}>
                                 <div style={{ width: "65px", height: "7vh", position: "relative" }}>
@@ -384,7 +359,7 @@ export default function ChatWindow() {
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {/* Render message */}
                                 {messages.map((item, index) => {
-                                    // console.log("item: ", item);
+                                    // console.log("item: ", messages);
                                     if (item.type === "first") {
                                         return (
                                             <div key={index} style={{ textAlign: 'center', justifyContent: 'center', alignItems: 'center' }}>
@@ -461,7 +436,9 @@ export default function ChatWindow() {
                                             </div>
                                         )
                                     }
-                                    if (item.type === "image") {
+                                    if (item.type === "image" &&
+                                        (item.deleteBy?.length == 0 ||
+                                            item.deleteBy?.find(f => f !== user._id))) {
                                         return (
                                             <div key={index}
                                                 setItemSelected={setItemSelected}
@@ -491,12 +468,58 @@ export default function ChatWindow() {
                                                     />
                                                 )}
 
-                                                <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
-                                                <MessageWithIcons key={messages._id} messageId={messages._id} conversationId={messages.conversationId} />
+                                                {item.isReCall === false ? (
+                                                    <Button
+                                                        style={
+                                                            {
+                                                                backgroundColor: "#F24E1E",
+                                                                maxWidth: '60%',
+                                                                padding: '2px',
+                                                                borderRadius: '10px',
+                                                                margin: '10px',
+                                                                minWidth: '10%',
+                                                                border: 'hidden'
+                                                            }
+                                                        }
+                                                    >
+                                                        <img src={item.urlType} alt="Hình ảnh" style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }} />
+                                                    </Button>
+
+                                                ) : (
+                                                    <Button
+                                                        style={
+                                                            {
+                                                                backgroundColor: "#F24E1E",
+                                                                maxWidth: '60%',
+                                                                padding: '2px',
+                                                                borderRadius: '10px',
+                                                                margin: '10px',
+                                                                minWidth: '10%',
+                                                                border: 'hidden'
+                                                            }
+                                                        }
+                                                    >
+                                                        <Text style={{
+                                                            fontSize: '14px',
+                                                            padding: '3px',
+                                                            color: "#FFF",
+                                                            fontWeight: '600'
+                                                        }}>
+                                                            Đã thu hồi
+                                                        </Text>
+                                                    </Button>
+
+                                                )
+                                                }
+
+
+                                                <MessageWithIcons itemSelected={item} />
                                             </div>
                                         )
                                     }
-                                    if (item.type === "file") {
+                                    if (item.type === "file" &&
+                                        (item.deleteBy?.length == 0 ||
+                                            item.deleteBy?.find(f => f !== user._id))) {
                                         return (
                                             <div
                                                 key={index}
@@ -530,57 +553,103 @@ export default function ChatWindow() {
                                                     style={{
                                                         display: 'flex',
                                                         flexDirection: 'row',
-                                                        // flexWrap: 'wrap',
-                                                        // justifyContent: 'flex-start',
-                                                        // alignItems: 'flex-start',
                                                         padding: 5,
                                                         width: '20%',
                                                         height: '50px'
                                                     }}
                                                 >
-                                                    <Button
-                                                        onClick={() => {
-                                                            window.open(item.urlType, '_blank')
-                                                        }}
-                                                        style={{
-                                                            flexDirection: 'row',
-                                                            // alignItems: 'center',
-                                                            width: '100%',
-                                                            height: '100%'
-                                                        }}
-                                                    >
-                                                        <div
-                                                        // style={{
-                                                        //     justifyContent: 'center',
-                                                        //     alignItems: 'center'
-                                                        // }}
+                                                    {item.isReCall === false ? (
+                                                        <Button
+                                                            onClick={() => {
+                                                                window.open(item.urlType, '_blank')
+                                                            }}
+                                                            style={{
+                                                                flexDirection: 'row',
+                                                                maxWidth: '40%',
+                                                                minWidth: '10%',
+                                                                height: '100%'
+                                                            }}
                                                         >
-                                                            <FaFile style={{
-                                                                fontSize: '35',
-                                                                color: '#F24E1E'
-                                                            }} />
+                                                            {(item.isReCall === false) ? (
+                                                                <div
+                                                                    style=
+                                                                    {{
+                                                                        width: '100%',
+                                                                        height: '100%'
+                                                                    }}>
+                                                                    <FaFile style={{
+                                                                        fontSize: '35',
+                                                                        color: '#F24E1E'
+                                                                    }} />
 
+                                                                    <Text style={{
+                                                                        fontSize: 14,
+                                                                        color: 'red',
+                                                                        fontWeight: '700',
+                                                                        // whiteSpace: 'pre-wrap'
+                                                                    }}>
+                                                                        {item.fileName}
+                                                                    </Text>
+                                                                </div>
+                                                            ) : (
+                                                                <Button
+                                                                    style={
+                                                                        {
+                                                                            backgroundColor: "#F24E1E",
+                                                                            maxWidth: '60%',
+                                                                            padding: '2px',
+                                                                            borderRadius: '10px',
+                                                                            margin: '10px',
+                                                                            minWidth: '10%',
+                                                                            border: 'hidden'
+                                                                        }
+                                                                    }
+                                                                >
+                                                                    <Text style={{
+                                                                        fontSize: '14px',
+                                                                        padding: '3px',
+                                                                        color: "#FFF",
+                                                                        fontWeight: '600'
+                                                                    }}>
+                                                                        Đã thu hồi
+                                                                    </Text>
+                                                                </Button>
+                                                            )}
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            style={
+                                                                {
+                                                                    backgroundColor: "#F24E1E",
+                                                                    maxWidth: '60%',
+                                                                    padding: '2px',
+                                                                    borderRadius: '10px',
+                                                                    margin: '10px',
+                                                                    minWidth: '10%',
+                                                                    border: 'hidden'
+                                                                }
+                                                            }
+                                                        >
                                                             <Text style={{
-                                                                fontSize: 14,
-                                                                // textDecorationLine: 'underline',
-                                                                color: 'red',
-                                                                fontWeight: '700',
-                                                                whiteSpace: 'pre-wrap'
+                                                                fontSize: '14px',
+                                                                padding: '3px',
+                                                                color: "#FFF",
+                                                                fontWeight: '600'
                                                             }}>
-                                                                {item.fileName}</Text>
-                                                        </div>
-
-
-                                                    </Button>
-
+                                                                Đã thu hồi
+                                                            </Text>
+                                                        </Button>
+                                                    )}
                                                 </div>
-                                                <MessageWithIcons key={messages._id} messageId={messages._id} conversationId={messages.conversationId} />
+                                                <MessageWithIcons itemSelected={item} />
                                             </div>
                                         )
 
 
                                     }
-                                    if (item.type === "video") {
+                                    if (item.type === "video" &&
+                                        (item.deleteBy?.length == 0 ||
+                                            item.deleteBy?.find(f => f !== user._id))) {
                                         return (
                                             <div
                                                 key={index}
@@ -610,12 +679,37 @@ export default function ChatWindow() {
                                                         style={{ width: 32, height: 32, borderRadius: 16 }}
                                                     />
                                                 )}
-                                                <video src={item.urlType[0]}
-                                                    controls
-                                                    muted
-                                                    style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }}
-                                                />
-
+                                                {item.isReCall === false ? (
+                                                    <video src={item.urlType[0]}
+                                                        controls
+                                                        muted
+                                                        style={{ maxWidth: '50%', height: '100%', borderRadius: '10px', margin: '10px' }}
+                                                    />
+                                                ) : (
+                                                    <Button
+                                                        style={
+                                                            {
+                                                                backgroundColor: "#F24E1E",
+                                                                maxWidth: '60%',
+                                                                padding: '2px',
+                                                                borderRadius: '10px',
+                                                                margin: '10px',
+                                                                minWidth: '10%',
+                                                                border: 'hidden'
+                                                            }
+                                                        }
+                                                    >
+                                                        <Text style={{
+                                                            fontSize: '14px',
+                                                            padding: '3px',
+                                                            color: "#FFF",
+                                                            fontWeight: '600'
+                                                        }}>
+                                                            Đã thu hồi
+                                                        </Text>
+                                                    </Button>
+                                                )}
+                                                <MessageWithIcons itemSelected={item} />
                                             </div>
                                         )
 
@@ -671,7 +765,23 @@ export default function ChatWindow() {
                                 >
                                     <BsImage style={{ fontSize: '30px', color: '#F24E1E' }} />
                                 </Button>
+
+
                             </div>
+
+                            <Button
+                                style={{
+                                    display: 'flex',
+                                    background: '#242424',
+                                    border: 'hidden',
+                                    justifyContent: 'flex-end',
+                                    alignItems: 'center'
+                                }}
+                                onClick={() => { handleShowPicker() }}
+                            >
+                                <FaSmile style={{ fontSize: '30px', color: '#F24E1E' }} />
+                                {showPicker && <EmojiPicker style={{ position: 'absolute', bottom: '40px', left: '20px' }} onEmojiClick={handleEmojiClick} />}
+                            </Button>
                         </div>
 
                         <div style=
@@ -680,7 +790,6 @@ export default function ChatWindow() {
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
                                 width: '100%',
-                                // height: '5%'
                             }}
                         >
 
@@ -694,12 +803,16 @@ export default function ChatWindow() {
                                     alignaItems: 'center',
                                     width: '100%',
                                     margin: '10px',
-                                    height: '100%'
+                                    height: '50px'
                                 }}
                             >
                                 <input
                                     value={inputMessage}
-                                    onChange={(e) => handleInputText(e.target.value)}
+                                    // value={inputEmoji}
+                                    onChange={e => {
+                                        handleInputText(e.target.value)
+                                        // setInputEmoji(e.target.value)
+                                    }}
                                     type='text' placeholder='Nhập tin nhắn' style={{
                                         background: '#36373A',
                                         border: 'hidden',
@@ -707,26 +820,10 @@ export default function ChatWindow() {
                                         outline: 'none',
                                         marginLeft: '20px',
                                         color: '#FFF',
-                                        width: '90%'
-                                    }}
-                                />
-
-                                <Button
-                                    style={{
-                                        display: 'flex',
-                                        // marginLeft: '5px',
-                                        background: '#36373A',
-                                        border: 'hidden',
-                                        justifyContent: 'flex-end', // Thêm để căn giữa icon trong button
-                                        alignItems: 'center', // Thêm để căn giữa icon trong button
-                                        width: '5%',
+                                        width: '100%',
                                         borderRadius: '25px'
                                     }}
-                                // onClick={()=> {togglePicker()}}
-                                >
-                                    <FaSmile style={{ fontSize: '30px', color: '#F24E1E' }} />
-                                    {/* {showPicker && <Picker onSelect={handleEmojiSelect} />} */}
-                                </Button>
+                                />
 
                             </div>
                             <BiSolidLike style={{ fontSize: '50', margin: '10', color: '#F24E1E' }} />
@@ -771,6 +868,73 @@ export default function ChatWindow() {
                     </div>
                 </Col>
             </Row>
-        </div>
+        </div >
     )
 }
+
+const arrgif = [
+    {
+        id: 1,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/icongif+(1).gif',
+    },
+    {
+        id: 2,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/icongif+(2).gif',
+    },
+    {
+        id: 3,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/icongif+(3).gif',
+    },
+    {
+        id: 4,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/icongif+(4).gif',
+    },
+    {
+        id: 5,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(1).jpg',
+    },
+    {
+        id: 6,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(2).png',
+    },
+    {
+        id: 7,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(3).png',
+    },
+    {
+        id: 8,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(4).png',
+    },
+    {
+        id: 9,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(5).png',
+    },
+    {
+        id: 10,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(6).png',
+    },
+    {
+        id: 11,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(7).png',
+    },
+    {
+        id: 12,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(8).png',
+    },
+    {
+        id: 13,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(9).png',
+    },
+    {
+        id: 14,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(10).png',
+    },
+    {
+        id: 15,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(11).png',
+    },
+    {
+        id: 16,
+        url: 'https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png',
+    },
+];

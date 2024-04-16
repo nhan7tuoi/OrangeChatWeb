@@ -5,7 +5,7 @@ const BASE_URL = `http://${IPV4}:3000/api/v1`;
 
 const instance = axios.create({
     baseURL: BASE_URL,
-    timeout: 10000,
+    timeout: 20000,
 
 })
 
@@ -13,6 +13,7 @@ const instance = axios.create({
 const getMessage = async ({ conversationId }) => {
     try {
         const response = await instance.get(`/messages/${conversationId}`);
+        console.log("messs",response.data);
         return response.data;
     } catch (error) {
         throw error;
