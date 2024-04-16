@@ -4,6 +4,7 @@ import authSlice from './authSlice';
 import conversationSlice from './conversationSlice';
 import currentSlice from './currentSlice';
 import friendSilce from './friendSilce';
+import {thunk} from 'redux-thunk';
 
 
 const store = configureStore({
@@ -14,5 +15,6 @@ const store = configureStore({
     current: currentSlice,
     friend: friendSilce,
   },
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(thunk),
 });
 export default store;

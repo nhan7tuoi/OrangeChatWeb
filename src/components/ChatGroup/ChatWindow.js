@@ -1,4 +1,4 @@
-import { Col, Row, Typography, Button } from 'antd'
+import { Col, Row, Typography, Button, Alert } from 'antd'
 import React, { useEffect, useRef, useState } from 'react'
 import { IoSearchSharp } from "react-icons/io5";
 import { LuPhone } from "react-icons/lu";
@@ -11,7 +11,7 @@ import { BiSolidLike } from "react-icons/bi";
 import conversationApi from '../../apis/conversationApi';
 import connectSocket from '../../server/ConnectSocket';
 import { useSelector, useDispatch } from 'react-redux';
-import { setConversations } from '../../redux/conversationSlice';
+import { setConversations, setCoversation } from '../../redux/conversationSlice';
 import { AiOutlineUsergroupAdd } from "react-icons/ai";
 import { CiLogout } from "react-icons/ci";
 import messageApi from '../../apis/messageApi';
@@ -29,6 +29,7 @@ import { MdOutlineCloseFullscreen } from "react-icons/md";
 import ModalManageGroup from './ModalManageGroup';
 import ModalAddMemberGroup from './ModalAddMemberGroup';
 import i18next from '../../i18n/i18n';
+import { formatOneConversation } from '../../utils/formatOneConverstation';
 
 
 
@@ -50,7 +51,7 @@ export default function ChatWindow() {
     const group = useSelector((state) => state.current.userId);
     const friend = group.groupChat;
 
-    console.log("Friend: ", friend);
+    console.log("Group: ", friend);
 
     const user = useSelector((state) => state.auth.user);
     const userId = user._id;
@@ -82,7 +83,7 @@ export default function ChatWindow() {
     }, [friend])
 
     const getLastMessage = async () => {
-        const response = await messageApi.getMessage({ conversationId: friend.lastMessage.conversationId });
+        const response = await messageApi.getMessage({ conversationId: friend?.lastMessage?.conversationId });
         console.log("Response: ", response);
         if (response) {
             setMessages(response.data);
@@ -181,20 +182,7 @@ export default function ChatWindow() {
             console.error('Error processing images:', error);
         }
     };
-    const handleDisband = () => {
-        alert(i18next.t('thongBao'), i18next.t('xacNhanGiaiTan'), [
-            {
-                text: i18next.t('huy'),
-                style: 'cancel',
-            },
-            {
-                text: i18next.t('dongY'),
-                onPress: () => {
-                    connectSocket.emit('disband the group', conversation);
-                },
-            },
-        ]);
-    };
+
 
     const onSelectFile = async (event) => {
         try {
@@ -317,7 +305,51 @@ export default function ChatWindow() {
             </div>
         );
     };
+    useEffect(() => {
+        connectSocket.on('updateConversation', data => {
+          const temp = formatOneConversation({
+            conversation: data,
+            userId: user._id,
+          });
+          dispatch(setCoversation(temp));
+        });
+    
+        connectSocket.on('removeMember', data => {
+          if (data.members.some(m => m._id === user._id)) {
+            const temp = formatOneConversation({
+              conversation: data,
+              userId: user._id,
+            });
+            dispatch(setCoversation(temp));
+            console.log("vvvvv", conversation);
+          }
+        });
+      }, []);
+    const handleLeave = () => {
+        if (
+            conversation.administrators?.length > 1 ||
+            !conversation.administrators?.includes(user._id)
+        ) {
+            if (window.confirm(i18next.t('thongBao') + '\n' + i18next.t('xacNhanRoi'))) {
+                connectSocket.emit('remove member', {
+                    conversation: conversation,
+                    member: user,
+                });
+            }
+        } else {
+            if (window.confirm(i18next.t('thongBao') + '\n' + i18next.t('dieuKienRoi'))) {
 
+            }
+        }
+    };
+    const handleDisband = () => {
+        // Hiển thị cửa sổ xác nhận giải tán nhóm
+        if (window.confirm(i18next.t('xacNhanGiaiTan'))) {
+          // Gửi yêu cầu giải tán nhóm đến server
+          connectSocket.emit('disband the group', conversation);
+        }
+      };
+      
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '90vh', width: '100%' }}>
 
@@ -344,7 +376,7 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ width: '100%', height: '610px' }}>
+                        <div style={{ width: '100%', height: '530px' }}>
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {friend.messages.map((item, index) => {
                                     console.log("data: ", item);
@@ -676,18 +708,32 @@ export default function ChatWindow() {
                             <ModalManageGroup isOpen={isOpenManageGroup} toggleModal={toggleManageGroupModal} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginTop: '10px' }}>
-                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', marginTop: '10px', background: 'none', border: 'none', height: '50px' }}
-
+                            <Button
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'flex-start',
+                                    width: '100%',
+                                    alignItems: 'center',
+                                    marginTop: '10px',
+                                    background: 'none',
+                                    border: 'none',
+                                    height: '50px',
+                                }}
+                                onClick={() => {
+                                    if (conversation.administrators.find(m => m === user._id)) {
+                                        handleDisband();
+                                    }
+                                }}
                             >
-
-
                                 <MdOutlineCloseFullscreen style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
-                                <Text style={{ color: '#FFF', fontSize: '18px', }}>Giải tán nhóm</Text>
+                                <Text style={{ color: '#FFF', fontSize: '18px' }}>Giải tán nhóm</Text>
                             </Button>
 
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', marginTop: '10px' }}>
-                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', background: 'none', border: 'none', height: '50px', marginTop: '10px' }}>
+                            <Button style={{ display: 'flex', justifyContent: 'flex-start', width: '100%', alignItems: 'center', background: 'none', border: 'none', height: '50px', marginTop: '10px' }}
+                                onClick={() => { handleLeave() }}
+                            >
                                 <CiLogout style={{ fontSize: 24, color: '#FFF', margin: '10px' }} />
                                 <Text style={{ color: '#FFF', fontSize: '18px', }}>Rời nhóm</Text>
                             </Button>

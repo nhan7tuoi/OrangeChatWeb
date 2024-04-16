@@ -41,11 +41,13 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
     useEffect(() => {
         fetchData();
-
         setNewList(listFriends.filter(
-            f => !conversation.members.some(m => m._id === f._id),
+            f => !conversation.members?.some(m => m._id === f._id),
         ));
     }, []);
+    
+   
+
 
     const fetchData = async () => {
         try {
@@ -65,30 +67,19 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
     useEffect(() => {
         connectSocket.on('respondAdd', data => {
-          // let temp = [];
-          // temp.push(data);
-          // temp = formatConversation({
-          //   data: temp,
-          //   userId: user._id,
-          // });
-    
-          const fConversation = formatOneConversation({
-            conversation: data,
-            userId: user._id,
-          });
-    
-          dispatch(setCoversation(fConversation));
-        //   navigation.navigate('ChatScreen');
-          // dispatch(setNameGroup(temp[0].nameGroup));
-    
-          // navigation.navigate('ChatScreen', {
-          //   receiverId: data?.members.filter(member => member._id !== user._id),
-          //   conversationId: data?._id,
-          //   receiverImage: data?.image,
-          //   conversation: data,
-          // });
+            const fConversation = formatOneConversation({
+                conversation: data,
+                userId: user._id,
+            });
+            dispatch(setCoversation(fConversation));
+            console.log("add", fConversation);
+
         });
-      }, []);
+    }, []);
+    console.log("newList", newList);
+    
+
+
     return (
         <>
             {isOpen && (
@@ -103,7 +94,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                             </div>
                             <div style={{ width: '100%', height: '380px' }}>
                                 <div ref={scrollRef} style={{ overflowY: 'auto', background: '#242424', width: '100%', height: '100%' }}>
-                                    {Array.isArray(listFriends) && listFriends.map((user, index) => (
+                                    {Array.isArray(newList) && newList.map((user, index) => (
                                         <div key={index} style={{ display: 'flex', width: '90%', background: '#242424', padding: '5px', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', marginLeft: '25px', border: '2px solid #2E2E2E', borderRadius: '10px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <img src={user.image} style={{ height: '30px', width: '30px', borderRadius: '50%', marginLeft: '5px' }} alt='image'></img>

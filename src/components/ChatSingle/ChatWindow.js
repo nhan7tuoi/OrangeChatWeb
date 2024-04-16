@@ -301,7 +301,7 @@ export default function ChatWindow() {
                             </div>
                         </div>
 
-                        <div style={{ width: '100%', height: '610px' }}>
+                        <div style={{ width: '100%', height: '550px' }}>
                             <div ref={scrollRef} style={{ overflowY: 'auto', background: '#1B1B1B', width: '100%', height: '100%' }}>
                                 {/* Render message */}
                                 {messages.map((item, index) => {

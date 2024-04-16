@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Button, Typography } from 'antd'
 import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
-import { setConversationGroups, setConversations } from '../../redux/conversationSlice';
+import { setConversationGroups, setConversations, setCoversation } from '../../redux/conversationSlice';
 import conversationApi from '../../apis/conversationApi';
 import { useNavigate } from 'react-router-dom';
 import { setCurrentPage, setUserId } from '../../redux/currentSlice';
@@ -75,10 +75,12 @@ export default function ChatList() {
               <Button
                 style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
                 onClick={() => {
+                  dispatch(setCoversation(item));
                   handleButtonClick();
                   handleUserId({
                     // receiverId: item._id,
-                    // conversationId: item.conversations,
+                    // conversationId: item?.conversations._id,
+                    conversationId: item?._id,
                     // receiverImage: item.image,
                     // receiverName: item.nameGroup
                     groupChat : item
