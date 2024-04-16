@@ -1,5 +1,6 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
+// import Conversation from '../components/conversation';
 
 const BASE_URL = `http://${IPV4}:3000/api/v1`;
 
@@ -40,8 +41,21 @@ const getConversationGroups = async ({userId}) => {
   }
 };
 
+const uploadAvatar = async ({conversationId, image}) => {
+  try {
+    const response = await instance.post('/uploadAvatarGroup', {
+      conversationId: conversationId,
+      image: image,
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 export default {
   getConversation,
   getAllConversation,
-  getConversationGroups
+  getConversationGroups,
+  uploadAvatar,
 };
