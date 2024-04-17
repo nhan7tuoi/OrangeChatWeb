@@ -60,7 +60,7 @@ function Modal({ isOpen, toggleModal }) {
             console.error('Error fetching data:', error);
         }
     };
-    console.log(keyword);
+    // console.log(keyword);
 
 
     useEffect(() => {
