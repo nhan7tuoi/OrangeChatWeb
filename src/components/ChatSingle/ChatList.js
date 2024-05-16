@@ -3,7 +3,7 @@ import { Button, Typography } from 'antd'
 import { useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
 import conversationApi from '../../apis/conversationApi';
-import { setCurrentPage } from '../../redux/currentSlice';
+import { setConversationReload, setCurrentPage } from '../../redux/currentSlice';
 import { formatConversation } from '../../utils/formatConverstation';
 
 const { Text } = Typography;
@@ -66,6 +66,7 @@ export default function ChatList() {
               onClick={() => {
                 localStorage.setItem('conversation', JSON.stringify(item));
                 handleButtonClick()
+                dispatch(setConversationReload(item._id))
               }
               }>
               <img src={otherMember.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>

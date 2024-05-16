@@ -10,7 +10,7 @@ import { FaSmile, FaFile } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
 import conversationApi from "../../apis/conversationApi";
 import connectSocket from "../../server/ConnectSocket";
-import {useDispatch } from "react-redux";
+import {useDispatch,useSelector } from "react-redux";
 import { setConversations } from "../../redux/conversationSlice";
 import messageApi from "../../apis/messageApi";
 import "../../css/chatWindow.css";
@@ -28,7 +28,7 @@ export default function ChatWindow() {
   const receiverId = conversation.members?.filter(
     member => member._id !== user._id,
   );
-  console.log("conversation: ", conversation);
+  const conversationId = useSelector((state) => state.current.conversationReload);
   const userId = user._id;
   const scrollRef = useRef(null);
   const dispatch = useDispatch();
@@ -47,7 +47,7 @@ export default function ChatWindow() {
   useEffect(() => {
     getLastMessage();
     console.log("fetch message");
-  }, [conversation]);
+  }, [conversationId]);
 
   const getLastMessage = async () => {
     const response = await messageApi.getMessage({
