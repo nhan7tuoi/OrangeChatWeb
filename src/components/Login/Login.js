@@ -1,12 +1,10 @@
-import { Alert, Button, Col, Row, Typography } from 'antd'
+import { Button, Col, Row, Typography } from 'antd'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { FaFacebookF } from "react-icons/fa";
 import authApi from '../../apis/authApi';
 import { useDispatch } from 'react-redux';
 import "./Login.css";
 import { setAuth } from '../../redux/authSlice';
-import connectSocket from '../../server/ConnectSocket';
 // import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
@@ -19,6 +17,7 @@ export default function Login() {
         password: 'admin123'
     });
 
+
     let navigate = useNavigate();
 
     const handleLogin = async () => {
@@ -28,21 +27,16 @@ export default function Login() {
                 password: data.password,
             });
             if (response) {
-                navigate('/chat');
-                console.log('OK');
-            }
-            //   await AsyncStorage.setItem(
-            //     'accessToken',
-            //     isChecked ? response.accessToken : ''
-            //   );
+                //luu token vao local storage
+                localStorage.setItem('accessToken', response.accessToken);
+                localStorage.setItem('user', JSON.stringify(response.user));
 
+                navigate('/chat');
+            }
             dispatch(setAuth({
                 user: response.user,
                 accessToken: response.accessToken
             }));
-            connectSocket.initSocket(response.user._id);
-            // connectSocket.emit('user login',response.user._id);
-            console.log(response.user._id);
         } catch (error) {
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")
         }

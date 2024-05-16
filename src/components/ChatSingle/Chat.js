@@ -1,21 +1,26 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import SideBar from './SideBar';
 import ChatWindow from './ChatWindow';
 import { Col, Row } from 'antd';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import ChatWelcome from './ChatWelcome';
-import { setCurrentPage } from '../../redux/currentSlice';
 
 export default function Chat() {
-  const user = useSelector((state) => state.auth.user);
+  const conversation = JSON.parse(localStorage.getItem('conversation'));
+  const hi = JSON.parse(localStorage.getItem('hi'));
   const currentPage = useSelector(state => state.current.currentPage);
-  // console.log("Current", currentPage);
-  console.log("ChatUser", user);
+  console.log("ChatConversation", hi);
   return (
     <Row style={{ width: '100%', height: '100%', background: '#242424' }}>
       <Col span={6}><SideBar /></Col>
-      {currentPage === 'ChatWelcome' &&<Col span={18}>  <ChatWelcome /></Col>}
-      {currentPage === 'ChatWindow' &&<Col span={18}>  <ChatWindow /></Col>}
+      {/* {currentPage === 'ChatWelcome' &&<Col span={18}>  <ChatWelcome /></Col>}
+      {currentPage === 'ChatWindow' &&<Col span={18}>  <ChatWindow /></Col>} */}
+
+      {conversation == null ?
+        currentPage === 'ChatWelcome' && <Col span={18}>  <ChatWelcome /></Col>
+        :
+        currentPage === 'ChatWindow' && <Col span={18}>  <ChatWindow /></Col>
+      }
     </Row>
   )
 }

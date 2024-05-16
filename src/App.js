@@ -21,16 +21,19 @@ import { authenticateUser } from './redux/authLogin';
 
 function App() {
   const user = useSelector((state) => state.auth.user);
-  const isLoggedIn = Boolean(user && user.name); // Kiểm tra nếu user và user.name tồn tại
   const dispatch = useDispatch();
+  const token = localStorage.getItem('accessToken');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    console.log("token: ",token);
+    const token = localStorage.getItem('accessToken');
+    console.log("token: ", token);
     if (token) {
       dispatch(authenticateUser(token));
     }
   }, [dispatch]);
+
+
+
 
   return (
     <div>
@@ -48,7 +51,7 @@ function App() {
         <Route path='/chatWindow' element={<ChatWindow />} />
       </Routes>
 
-      {isLoggedIn && <TabBar />} {/* Chỉ hiển thị TabBar khi đã đăng nhập */}
+      {token && <TabBar />} {/* Chỉ hiển thị TabBar khi đã đăng nhập */}
       {/* <Routes>
         <Route path='/chatGroup' element={<ChatGroup />} />
         <Route path='/friend' element={ <Friend /> } />
@@ -60,14 +63,15 @@ function App() {
       </Routes> */}
 
       <Routes>
-        <Route path='/chatGroup' element={isLoggedIn ? <ChatGroup /> : <Login />} />
-        <Route path='/friend' element={isLoggedIn ? <Friend /> : <Login />} />
-        <Route path='/friendrequest' element={isLoggedIn ? <FriendsRequest /> : <Login />} />
-        <Route path='/friendSearch' element={isLoggedIn ? <FriendsSearch /> : <Login />} />
-        <Route path='/chat' element={isLoggedIn ? <Chat /> : <Login />} />
-        <Route path='/profile' element={isLoggedIn ? <Profile /> : <Login />} />
-        <Route path='/information' element={isLoggedIn ? <Information /> : <Login />} />
+        <Route path='/chatGroup' element={token ? <ChatGroup /> : <Login />} />
+        <Route path='/friend' element={token ? <Friend /> : <Login />} />
+        <Route path='/friendrequest' element={token ? <FriendsRequest /> : <Login />} />
+        <Route path='/friendSearch' element={token ? <FriendsSearch /> : <Login />} />
+        <Route path='/chat' element={token ? <Chat /> : <Login />} />
+        <Route path='/profile' element={token ? <Profile /> : <Login />} />
+        <Route path='/information' element={token ? <Information /> : <Login />} />
       </Routes>
+
     </div>
   );
 }

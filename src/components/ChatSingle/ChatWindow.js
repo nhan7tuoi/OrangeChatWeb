@@ -10,7 +10,7 @@ import { FaSmile, FaFile } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
 import conversationApi from "../../apis/conversationApi";
 import connectSocket from "../../server/ConnectSocket";
-import { useSelector, useDispatch } from "react-redux";
+import {useDispatch } from "react-redux";
 import { setConversations } from "../../redux/conversationSlice";
 import messageApi from "../../apis/messageApi";
 import "../../css/chatWindow.css";
@@ -23,8 +23,11 @@ import EmojiPicker from "emoji-picker-react";
 const { Text } = Typography;
 
 export default function ChatWindow() {
-  const user = useSelector((state) => state.auth.user);
-  const conversation = useSelector((state) => state.conversation.conversation);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const conversation = JSON.parse(localStorage.getItem("conversation"));
+  const receiverId = conversation.members?.filter(
+    member => member._id !== user._id,
+  );
   console.log("conversation: ", conversation);
   const userId = user._id;
   const scrollRef = useRef(null);
@@ -82,7 +85,7 @@ export default function ChatWindow() {
     const newMessage = {
       conversationId: conversation._id,
       senderId: userId,
-      receiverId: conversation.receiverId,
+      receiverId: receiverId,
       type: "text",
       contentMessage: inputMessage,
       urlType: "",
@@ -500,19 +503,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-end",
-                                justifyContent: "flex-end",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-end",
+                              justifyContent: "flex-end",
+                            }
                             : {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-start",
-                                justifyContent: "flex-start",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-start",
+                              justifyContent: "flex-start",
+                            }
                         }
                       >
                         {item?.senderId._id !== userId && (
@@ -553,15 +556,15 @@ export default function ChatWindow() {
                               style={
                                 item?.senderId === userId
                                   ? {
-                                      textAlign: "right",
-                                      fontSize: "12px",
-                                      padding: "2px",
-                                    }
+                                    textAlign: "right",
+                                    fontSize: "12px",
+                                    padding: "2px",
+                                  }
                                   : {
-                                      textAlign: "left",
-                                      fontSize: "12px",
-                                      padding: "2px",
-                                    }
+                                    textAlign: "left",
+                                    fontSize: "12px",
+                                    padding: "2px",
+                                  }
                               }
                             >
                               {formatTime(item.createAt)}
@@ -586,19 +589,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-end",
-                                justifyContent: "flex-end",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-end",
+                              justifyContent: "flex-end",
+                            }
                             : {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-start",
-                                justifyContent: "flex-start",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-start",
+                              justifyContent: "flex-start",
+                            }
                         }
                       >
                         {item?.senderId !== userId && (
@@ -675,19 +678,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-end",
-                                justifyContent: "flex-end",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-end",
+                              justifyContent: "flex-end",
+                            }
                             : {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-start",
-                                justifyContent: "flex-start",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-start",
+                              justifyContent: "flex-start",
+                            }
                         }
                       >
                         {item?.senderId._id !== userId && (
@@ -812,19 +815,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-end",
-                                justifyContent: "flex-end",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-end",
+                              justifyContent: "flex-end",
+                            }
                             : {
-                                display: "flex",
-                                flexDirection: "row",
-                                paddingLeft: "10px",
-                                alignItems: "flex-start",
-                                justifyContent: "flex-start",
-                              }
+                              display: "flex",
+                              flexDirection: "row",
+                              paddingLeft: "10px",
+                              alignItems: "flex-start",
+                              justifyContent: "flex-start",
+                            }
                         }
                       >
                         {item?.senderId._id !== userId && (

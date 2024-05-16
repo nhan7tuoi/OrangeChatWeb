@@ -3,14 +3,25 @@ import IPV4 from '../apis/ipv4';
 
 const SOCKET_URL = `http://${IPV4}:3000`;
 
+
+
 class ConnectSocket {
   initSocket = async userId => {
+    const user = JSON.parse(localStorage.getItem('user'));
     try {
-      if (userId) {
+      // if (userId) {
+      //   this.socket = io(SOCKET_URL, {
+      //     transports: ['websocket'],
+      //     query: {
+      //       userId: userId,
+      //     },
+      //   });
+      // }
+      if (user._id) {
         this.socket = io(SOCKET_URL, {
           transports: ['websocket'],
           query: {
-            userId: userId,
+            userId: user._id,
           },
         });
       }

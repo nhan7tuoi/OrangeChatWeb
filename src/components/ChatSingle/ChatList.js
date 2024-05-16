@@ -1,27 +1,30 @@
-import React, { useEffect, useId, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button, Typography } from 'antd'
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
-import { setConversations, setCoversation } from '../../redux/conversationSlice';
 import conversationApi from '../../apis/conversationApi';
-import { useNavigate } from 'react-router-dom';
-import { setCurrentPage, setUserId } from '../../redux/currentSlice';
+import { setCurrentPage } from '../../redux/currentSlice';
 import { formatConversation } from '../../utils/formatConverstation';
 
 const { Text } = Typography;
 
 export default function ChatList() {
-  let navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
-  const accessToken = useSelector((state) => state.auth.accessToken);
+  const user = JSON.parse(localStorage.getItem('user'));
   const dispatch = useDispatch();
-  const conversations = useSelector((state) => state.conversation.conversations);
+  // const listConversations = JSON.parse(localStorage.getItem('conversations'));
+  const conversation = JSON.parse(localStorage.getItem('conversation'));
+  const [conversations, setConversations] = useState([]);
   const scrollRef = useRef(null);
-  
-  // console.log("Con:", conversations);
+
 
   useEffect(() => {
+
+    if (conversation !== null) {
+      handleButtonClick();
+    }
+
     getConversation();
+    connectSocket.initSocket(user._id);
   }, []);
 
   useEffect(() => {
@@ -41,7 +44,8 @@ export default function ChatList() {
           data: response.data,
           userId: user._id,
         });
-        dispatch(setConversations(fmConversations));
+        localStorage.setItem('conversations', JSON.stringify(fmConversations));
+        setConversations(fmConversations);
       }
     } catch (error) {
       console.log('error', error);
@@ -52,54 +56,48 @@ export default function ChatList() {
     dispatch(setCurrentPage('ChatWindow'));
   };
 
-  const currentPage = useSelector(state => state.current.currentPage);
-  // console.log("CurrentChat", currentPage);
-
   return (
     conversations.map((item, index) => {
-        console.log("item:", item);
-        const otherMember = item?.members.find(member => member._id !== user._id);
-        // console.log("member",otherMember);
-        if (otherMember) {
-          return (
-            <div key={index} ref={scrollRef} style={{ overflowY: 'auto' }}>
-              <Button style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
-                onClick={() => {
-                  dispatch(setCoversation(item))
-                  handleButtonClick()
-                }
-                }>
-                <img src={otherMember.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
+      const otherMember = item?.members.find(member => member._id !== user._id);
+      if (otherMember) {
+        return (
+          <div key={index} ref={scrollRef} style={{ overflowY: 'auto' }}>
+            <Button style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
+              onClick={() => {
+                localStorage.setItem('conversation', JSON.stringify(item));
+                handleButtonClick()
+              }
+              }>
+              <img src={otherMember.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} ></img>
 
-                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: '20px', fontWeight: '700px', color: '#FFF' }}>{
-                      otherMember.name
-                    }</Text>
-                    {/* <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666' }}>{item.time}</Text> */}
-                  </div>
-                  {
-                    item?.lastMessage?.senderId_id === user._id
-                      ? (
-                        <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
-                          Bạn: {
-                            item?.lastMessage?.contentMessage
-                          }</Text>
-                      )
-                      : (
-                        <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
-                          {
-                            item?.lastMessage?.contentMessage
-                          }
-                        </Text>
-                      )
-                  }
-
+              <div style={{ display: 'flex', flexDirection: 'column', width: '100%', marginLeft: '5px' }}>
+                <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Text style={{ fontSize: '20px', fontWeight: '700px', color: '#FFF' }}>{
+                    otherMember.name
+                  }</Text>
+                  {/* <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666' }}>{item.time}</Text> */}
                 </div>
-              </Button>
-            </div>)
-        }
+                {
+                  item?.lastMessage?.senderId_id === user._id
+                    ? (
+                      <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
+                        Bạn: {
+                          item?.lastMessage?.contentMessage
+                        }</Text>
+                    )
+                    : (
+                      <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666', textAlign: 'left' }}>
+                        {
+                          item?.lastMessage?.contentMessage
+                        }
+                      </Text>
+                    )
+                }
+              </div>
+            </Button>
+          </div>)
       }
+    }
     )
   )
 }
