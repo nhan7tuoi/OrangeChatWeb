@@ -1,39 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../../css/Modal.css'; // File CSS cho modal
-// import { Button } from 'antd';
 import { IoIosSearch } from "react-icons/io";
-import { Button, Col, Row, Typography } from 'antd';
+import { Button, Typography } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { addFriend, deleteFriend, fetchFriends, searchUsers, setFriends } from '../../redux/friendSilce';
-import FriendApi from '../../apis/FriendApi';
+import {  fetchFriends } from '../../redux/friendSilce';
 import connectSocket from '../../server/ConnectSocket';
-import { MdDelete } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import i18next from '../../i18n/i18n';
-import { addMember, removeMember, setCoversation, setMembers } from '../../redux/conversationSlice';
-import messageApi from '../../apis/messageApi';
+import { setCoversation } from '../../redux/conversationSlice';
 import { formatOneConversation } from '../../utils/formatOneConverstation';
-// import {launchImageLibrary} from 'react-native-image-picker';
-// import {setCoversation, setNameGroup} from '../redux/conversationSlice';
-// import {formatConversation} from '../utils/formatConversation';
-// import {formatOneConversation} from '../utils/formatOneConversation';
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 
 function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
 
-    const members = useSelector(state => state.conversation.members);
     const conversation = useSelector(state => state.conversation.conversation)
-    const [groupName, setGroupName] = useState('');
-
-    const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
     const [keyword, setKeyword] = useState("");
     const user = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
-    const resultSearch = useSelector(state => state.friend.resultSearch);
 
     const listFriends = useSelector(state => state.friend.listFriends);
 

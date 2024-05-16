@@ -1,5 +1,5 @@
 import { Button, Col, Row, Typography } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { IoIosLock } from "react-icons/io";
 import { FaLanguage } from "react-icons/fa6";
@@ -8,6 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
 import { removeAuth } from '../../redux/authSlice';
+import ModalInformation from "./ModalInformation";
 
 const { Text, Title } = Typography;
 
@@ -15,11 +16,22 @@ export default function Profile() {
     let navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
+    const [isOpenInformation, setIsOpenInformation] = useState(false);
+
+
+    const toggleInformationModal = () => {
+        setIsOpenInformation(!isOpenInformation);
+      };
+
     return (
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
             <Col span={10} style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center', border: '1px solid #2E2E2E' }}>
-                <Button style={{width: '350px', height: '350px', borderRadius: '100%', backgroundColor: '#242424', border: 'hidden'}} onClick={() => navigate("/information")}>
+                <Button style={{width: '350px', height: '350px', borderRadius: '100%', backgroundColor: '#242424', border: 'hidden'}} onClick={toggleInformationModal}>
                     <img src={user.image} style={{ height: '350px', width: '350px', borderRadius: '100%' }} alt='avatar'></img>
+                    <ModalInformation
+                        isOpen={isOpenInformation}
+                        toggleModal={toggleInformationModal}
+                    ></ModalInformation>
                 </Button>
 
 

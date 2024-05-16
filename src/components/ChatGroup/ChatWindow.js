@@ -32,6 +32,7 @@ import ModalAddMemberGroup from "./ModalAddMemberGroup";
 import i18next from "../../i18n/i18n";
 import { formatOneConversation } from "../../utils/formatOneConverstation";
 import ForwardModal from "../ChatSingle/ForwardModal";
+import currentSlice, { setCurrentPage } from "../../redux/currentSlice";
 
 const { Text } = Typography;
 
@@ -251,7 +252,7 @@ export default function ChatWindow() {
     connectSocket.on("recall message", (msg) => {
       console.log("recall message", msg);
       if (msg.conversationId === conversation._id) {
-        const newMessages = messages.map((message) => {
+        const newMessages = messages?.map((message) => {
           if (message._id === msg.messageId) {
             message.isRecall = true;
           }
@@ -270,6 +271,28 @@ export default function ChatWindow() {
           return message;
         });
         getLastMessage();
+      }
+    });
+    connectSocket.on("removeMember", (data) => {
+      console.log("conId", conversation._id);
+      console.log("dataid", data._id);
+      console.log(conversation._id === data._id);
+      if (
+        !data.members.some((m) => m._id === user._id) &&
+        conversation._id === data._id
+      ) {
+        dispatch(setCurrentPage("ChatWelcome"));
+      }
+    });
+
+    connectSocket.on("leaveGroup", (data) => {
+      console.log("conId", conversation._id);
+      console.log("dataid", data._id);
+      console.log(conversation._id === data._id);
+      if (
+        !data.members.some((m) => m._id === user._id) &&
+        conversation._id === data._id
+      ) {
       }
     });
   }, []);
@@ -319,7 +342,7 @@ export default function ChatWindow() {
           className="icons"
           style={{ display: showIcons ? "block" : "none" }}
         >
-          {itemSelected?.senderId === userId && (
+          {itemSelected?.senderId._id === userId && (
             <Button
               style={{ background: "transparent" }}
               onClick={() => {
@@ -354,14 +377,15 @@ export default function ChatWindow() {
       </div>
     );
   };
+
   useEffect(() => {
-    connectSocket.on("updateConversation", (data) => {
-      const temp = formatOneConversation({
-        conversation: data,
-        userId: user._id,
-      });
-      dispatch(setCoversation(temp));
-    });
+    // connectSocket.on("updateConversation", (data) => {
+    //   const temp = formatOneConversation({
+    //     conversation: data,
+    //     userId: user._id,
+    //   });
+    //   dispatch(setCoversation(temp));
+    // });
 
     connectSocket.on("removeMember", (data) => {
       if (data.members.some((m) => m._id === user._id)) {
@@ -374,13 +398,15 @@ export default function ChatWindow() {
       }
     });
   }, []);
+
   const handleLeave = () => {
     if (
       conversation.administrators?.length > 1 ||
       !conversation.administrators?.includes(user._id)
     ) {
       if (
-        window.confirm(i18next.t("thongBao") + "\n" + i18next.t("xacNhanRoi"))
+        (window.confirm(i18next.t("thongBao") + "\n" + i18next.t("xacNhanRoi")),
+        dispatch(setCurrentPage("ChatWelcome")))
       ) {
         connectSocket.emit("remove member", {
           conversation: conversation,
@@ -665,32 +691,36 @@ export default function ChatWindow() {
                         )}
 
                         {item.isReCall === false ? (
-                          // <Button
-                          //     style={
-                          //         {
-                          //             backgroundColor: "#F24E1E",
-                          //             maxWidth: '300px',
-                          //             padding: '2px',
-                          //             borderRadius: '10px',
-                          //             margin: '10px',
-                          //             minWidth: '10%',
-                          //             border: 'hidden'
-                          //         }
-                          //     }
-                          // >
+                          <Button
+                              style={
+                                  {
+                                      backgroundColor: "#F24E1E",
+                                      maxWidth: '30%',
+                                      height: '40%',
+                                      padding: '2px',
+                                      borderRadius: '10px',
+                                      margin: '10px',
+                                      minWidth: '10%',
+                                      border: 'hidden',
+                                      alignItems: 'center',
+                                      justifyContent: 'center'
+                                  }
+                              }
+                          >
                           <img
                             src={item.urlType[0]}
                             alt="Hình ảnh"
                             style={{
-                              maxWidth: "60%",
-                              height: "100%",
+                              maxWidth: "95%",
+                              height: "95%",
                               borderRadius: "10px",
-                              margin: "10px",
-                              minWidth: "20%",
+                              // margin: "10px",
+                              minWidth: "10%",
                             }}
                           />
+                          </Button>
                         ) : (
-                          // </Button>
+                          
 
                           <Button
                             style={{
@@ -750,7 +780,7 @@ export default function ChatWindow() {
                       >
                         {item?.senderId._id !== userId && (
                           <src
-                            source={item.senderId.image}
+                            source={conversation.receiverImage}
                             style={{ width: 32, height: 32, borderRadius: 16 }}
                           />
                         )}
@@ -759,8 +789,10 @@ export default function ChatWindow() {
                             display: "flex",
                             flexDirection: "row",
                             padding: 5,
-                            width: "20%",
-                            height: "50px",
+                            maxWidth: "30%",
+                            maxHeight: "20%",
+                            alignItems: 'center',
+                            justifyContent: 'center',
                           }}
                         >
                           {item.isReCall === false ? (
@@ -770,32 +802,32 @@ export default function ChatWindow() {
                               }}
                               style={{
                                 flexDirection: "row",
-                                maxWidth: "40%",
-                                minWidth: "10%",
-                                height: "100%",
+                                width: '100%',
+                                height: '100%',
+                                backgroundColor: "#F24E1E",
+                                border: 'hidden'
                               }}
                             >
                               {item.isReCall === false ? (
                                 <div
                                   style={{
-                                    maxWidth: "",
-                                    display: "flex",
+                                    width: "100%",
+                                    height: "100%",
                                   }}
                                 >
                                   <FaFile
                                     style={{
                                       fontSize: "35",
-                                      color: "#F24E1E",
+                                      color: "#FFF",
                                     }}
                                   />
 
                                   <Text
                                     style={{
-                                      width: "200px",
                                       fontSize: 14,
-                                      color: "red",
+                                      color: "#36373A",
                                       fontWeight: "700",
-                                    //   whiteSpace: "pre-wrap",
+                                      whiteSpace: 'pre-wrap'
                                     }}
                                   >
                                     {item.fileName}
@@ -830,11 +862,10 @@ export default function ChatWindow() {
                             <Button
                               style={{
                                 backgroundColor: "#F24E1E",
-                                maxWidth: "60%",
+                                width: "100%",
                                 padding: "2px",
                                 borderRadius: "10px",
                                 margin: "10px",
-                                minWidth: "10%",
                                 border: "hidden",
                               }}
                             >
@@ -886,31 +917,45 @@ export default function ChatWindow() {
                       >
                         {item?.senderId._id !== userId && (
                           <src
-                            source={item.senderId.image}
+                            source={conversation.receiverImage}
                             style={{ width: 32, height: 32, borderRadius: 16 }}
                           />
                         )}
                         {item.isReCall === false ? (
-                          <video
-                            src={item.urlType[0]}
-                            controls
-                            muted
-                            style={{
-                              maxWidth: "50%",
-                              height: "100%",
-                              borderRadius: "10px",
-                              margin: "10px",
-                            }}
-                          />
-                        ) : (
                           <Button
                             style={{
                               backgroundColor: "#F24E1E",
-                              maxWidth: "60%",
+                              maxWidth: "30%",
+                              height: "40%",
                               padding: "2px",
                               borderRadius: "10px",
                               margin: "10px",
                               minWidth: "10%",
+                              border: "hidden",
+                            }}
+                          >
+                            <video
+                              src={item.urlType[0]}
+                              controls
+                              muted
+                              style={{
+                                maxWidth: "95%",
+                                maxHeight: "95%",
+                                borderRadius: "10px",
+                                // margin: "10px",
+                                backgroundColor: "#F24E1E",
+                              }}
+                            />
+                          </Button>
+                        ) : (
+                          <Button
+                            style={{
+                              //   backgroundColor: "#F24E1E",
+                              //   maxWidth: "60%",
+                              padding: "2px",
+                              borderRadius: "10px",
+                              margin: "10px",
+                              //   minWidth: "10%",
                               border: "hidden",
                             }}
                           >
@@ -1091,7 +1136,7 @@ export default function ChatWindow() {
               width: "100%",
               justifyContent: "flex-start",
               alignItems: "center",
-              height: "80%",
+              height: "100%",
               borderColor: "#2E2E2E",
               border: "1px solid #2E2E2E",
             }}
@@ -1258,7 +1303,7 @@ export default function ChatWindow() {
             </div>
           </div>
 
-          <div
+          {/* <div
             style={{
               paddingLeft: "5px",
               borderColor: "#2E2E2E",
@@ -1272,7 +1317,7 @@ export default function ChatWindow() {
             >
               File, phương tiện và liên kết
             </Text>
-          </div>
+          </div> */}
         </Col>
       </Row>
     </div>

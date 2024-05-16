@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setMembers } from '../../redux/conversationSlice';
 import { fetchFriends, setFriends } from '../../redux/friendSilce';
 import FriendApi from '../../apis/FriendApi';
+import connectSocket from '../../server/ConnectSocket';
 
 
 const { Text } = Typography;
@@ -61,20 +62,20 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     const [listConversations, setConversations] = useState([]);
 
     const forwardMessage = messageId => {
-        // connectSocket.emit('forward message', {
-        //     messageId: messageId,
-        //     conversationId: friend.conversationId,
-        //     senderId: user._id,
-        // });
-        // console.log("ItemSelectedForward: ", itemSelected);
-        // const updatedList = listConversations.map(c => {
-        //     if (c._id === friend.conversation._id) {
-        //         return { ...c, sentStatus: true };
-        //     }
-        //     return { ...c, sentStatus: false };
-        // });
-        // console.log(updatedList);
-        // setConversations(updatedList);
+        connectSocket.emit('forward message', {
+            messageId: messageId,
+            conversationId: friend.conversationId,
+            senderId: user._id,
+        });
+        console.log("ItemSelectedForward: ", itemSelected);
+        const updatedList = listConversations.map(c => {
+            if (c._id === friend.conversation._id) {
+                return { ...c, sentStatus: true };
+            }
+            return { ...c, sentStatus: false };
+        });
+        console.log(updatedList);
+        setConversations(updatedList);
     };
 
     const handleShare = () => {

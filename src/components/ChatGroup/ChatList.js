@@ -17,13 +17,24 @@ export default function ChatList() {
   const accessToken = useSelector((state) => state.auth.accessToken);
   const dispatch = useDispatch();
   const conversations = useSelector((state) => state.conversation.conversationGroups);
+  const conversation = useSelector((state) => state.conversation.conversation);
 
   // console.log("Group: ", conversations);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    connectSocket.on('newGroupName', data => {
+    connectSocket.on('newConversationGroup', data => {
+      console.log("ngu");
       fetchData();
+    });
+    connectSocket.on('removeMember', data => {
+
+        fetchData();
+  });
+
+      connectSocket.on('leaveGroup', data => {
+        // if (!data.members.some(m => m._id === user._id) && conversation._id === data._id ) {
+          fetchData();
     });
   }, []);
 
