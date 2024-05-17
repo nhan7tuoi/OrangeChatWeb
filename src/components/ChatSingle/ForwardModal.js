@@ -14,13 +14,15 @@ const { Text } = Typography;
 
 export default function ForwardModal({ isOpen, toggleForwardModal }) {
 
+    const itemSelected = JSON.parse(localStorage.getItem('itemSelected'));
+    const conversation = JSON.parse(localStorage.getItem('conversation'));
     const [keyword, setKeyword] = useState("");
     const [selectedMembers, setSelectedMembers] = useState([]);
-    const [itemSelected, setItemSelected] = useState({});
+    // const [itemSelected, setItemSelected] = useState({});
 
     const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
-    const user = useSelector((state) => state.auth.user);
+    const user = JSON.parse(localStorage.getItem('user'));
     const dispatch = useDispatch();
 
     const friend = useSelector((state) => state.current.userId);
@@ -63,8 +65,8 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
 
     const forwardMessage = messageId => {
         connectSocket.emit('forward message', {
-            messageId: messageId,
-            conversationId: friend.conversationId,
+            msg: itemSelected,
+            conversation: conversation,
             senderId: user._id,
         });
         console.log("ItemSelectedForward: ", itemSelected);
@@ -83,6 +85,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
         forwardMessage();
         toggleForwardModal();
         setSelectedMembers([]);
+        localStorage.removeItem('itemSelected');
     };
 
     return (
@@ -107,7 +110,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
                                             </div>
 
                                             <Checkbox onChange={(e) => handleCheckboxChange(user, e.target.checked)}
-                                            setItemSelected={setItemSelected} />
+                                             />
                                             
                                             
                                         </div>

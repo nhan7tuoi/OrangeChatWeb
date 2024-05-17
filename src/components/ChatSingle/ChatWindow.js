@@ -326,6 +326,7 @@ export default function ChatWindow() {
           onClick={() => {
             toggleIcons();
             setItemSelected(itemSelected);
+            localStorage.setItem("itemSelected", JSON.stringify(itemSelected));
           }}
         />
         <div
