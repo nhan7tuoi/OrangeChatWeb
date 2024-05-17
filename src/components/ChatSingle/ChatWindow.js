@@ -10,7 +10,7 @@ import { FaSmile, FaFile } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
 import conversationApi from "../../apis/conversationApi";
 import connectSocket from "../../server/ConnectSocket";
-import {useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setConversations } from "../../redux/conversationSlice";
 import messageApi from "../../apis/messageApi";
 import "../../css/chatWindow.css";
@@ -19,6 +19,7 @@ import { TbMessageCircleX } from "react-icons/tb";
 import { RiShareForwardFill } from "react-icons/ri";
 import ForwardModal from "./ForwardModal";
 import EmojiPicker from "emoji-picker-react";
+import Icons from "../../themes/Icons";
 
 const { Text } = Typography;
 
@@ -26,9 +27,11 @@ export default function ChatWindow() {
   const user = JSON.parse(localStorage.getItem("user"));
   const conversation = JSON.parse(localStorage.getItem("conversation"));
   const receiverId = conversation.members?.filter(
-    member => member._id !== user._id,
+    (member) => member._id !== user._id
   );
-  const conversationId = useSelector((state) => state.current.conversationReload);
+  const conversationId = useSelector(
+    (state) => state.current.conversationReload
+  );
   const userId = user._id;
   const scrollRef = useRef(null);
   const dispatch = useDispatch();
@@ -38,6 +41,7 @@ export default function ChatWindow() {
   const fileImageRef = useRef(null);
   const fileRef = useRef(null);
   const [isShowReCall, setIsShowReCall] = useState(false);
+  const [showReactionIndex, setShowReactionIndex] = useState(-1);
 
   const formatTime = (time) => {
     const options = { hour: "numeric", minute: "numeric" };
@@ -200,6 +204,27 @@ export default function ChatWindow() {
       userDelete: user._id,
     });
     getConversation();
+  };
+
+  // Reaction message
+  //- Lấy index message
+  const toggleReaction = (index) => {
+    if (showReactionIndex === index) {
+      setShowReactionIndex(-1);
+    } else {
+      setShowReactionIndex(index);
+    }
+  };
+  //- send reaction lên socket
+  const onSelectReaction = (index, reaction) => {
+    connectSocket.emit("reaction message", {
+      messageId: index,
+      userId: user._id,
+      reactType: reaction,
+      receiverId: receiverId,
+      conversationId: conversationId,
+    });
+    setShowReactionIndex(-1);
   };
 
   //get conversation
@@ -503,19 +528,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-end",
-                              justifyContent: "flex-end",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-end",
+                                justifyContent: "flex-end",
+                              }
                             : {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-start",
-                              justifyContent: "flex-start",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-start",
+                                justifyContent: "flex-start",
+                              }
                         }
                       >
                         {item?.senderId._id !== userId && (
@@ -535,8 +560,9 @@ export default function ChatWindow() {
                             padding: "2px",
                             borderRadius: "10px",
                             margin: "10px",
-                            minWidth: "10%",
+                            minWidth: "15%",
                             border: "hidden",
+                            height: "100%",
                           }}
                         >
                           <Text
@@ -550,26 +576,80 @@ export default function ChatWindow() {
                             {item.isReCall === true
                               ? "Đã thu hồi"
                               : item.contentMessage}
+
+                            {item.isReCall === false && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  justifyContent: "flex-start",
+                                }}
+                              >
+                                <div>
+                                  <Text
+                                    style={
+                                      item?.senderId === userId
+                                        ? {
+                                            textAlign: "right",
+                                            fontSize: "12px",
+                                            padding: "2px",
+                                          }
+                                        : {
+                                            textAlign: "left",
+                                            fontSize: "12px",
+                                            padding: "2px",
+                                          }
+                                    }
+                                  >
+                                    {formatTime(item.createAt)}
+                                  </Text>
+                                </div>
+
+                                <div
+                                  // onClick={() => toggleReaction(item._id)}
+                                  style={
+                                    item?.senderId === userId
+                                      ? {
+                                          position: "absolute",
+                                          width: 18,
+                                          height: 18,
+                                          borderRadius: "100px",
+                                          backgroundColor: "grey",
+                                          display: "inline-flex",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                          left: 5,
+                                          bottom: -5,
+                                          cursor: "pointer",
+                                        }
+                                      : {
+                                          position: "absolute",
+                                          width: 18,
+                                          height: 18,
+                                          borderRadius: "100px",
+                                          backgroundColor: "grey",
+                                          display: "inline-flex",
+                                          justifyContent: "center",
+                                          alignItems: "center",
+                                          right: 5,
+                                          bottom: -5,
+                                          cursor: "pointer",
+                                        }
+                                  }
+                                >
+                                  {/* {Icons.Icons({
+                                    name:
+                                      item?.reaction.length === 0 ||
+                                      item?.reaction[0]?.type === "delete"
+                                        ? "iconTym"
+                                        : item?.reaction[0]?.type,
+                                    width: 13,
+                                    height: 13,
+                                  })} */}
+                                </div>
+                              </div>
+                            )}
                           </Text>
-                          {item.isReCall === false && (
-                            <Text
-                              style={
-                                item?.senderId === userId
-                                  ? {
-                                    textAlign: "right",
-                                    fontSize: "12px",
-                                    padding: "2px",
-                                  }
-                                  : {
-                                    textAlign: "left",
-                                    fontSize: "12px",
-                                    padding: "2px",
-                                  }
-                              }
-                            >
-                              {formatTime(item.createAt)}
-                            </Text>
-                          )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
                       </div>
@@ -589,19 +669,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-end",
-                              justifyContent: "flex-end",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-end",
+                                justifyContent: "flex-end",
+                              }
                             : {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-start",
-                              justifyContent: "flex-start",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-start",
+                                justifyContent: "flex-start",
+                              }
                         }
                       >
                         {item?.senderId !== userId && (
@@ -635,6 +715,76 @@ export default function ChatWindow() {
                                 minWidth: "10%",
                               }}
                             />
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "flex-start",
+                              }}
+                            >
+                              <div>
+                                <Text
+                                  style={
+                                    item?.senderId === userId
+                                      ? {
+                                          textAlign: "right",
+                                          fontSize: "12px",
+                                          padding: "2px",
+                                        }
+                                      : {
+                                          textAlign: "left",
+                                          fontSize: "12px",
+                                          padding: "2px",
+                                        }
+                                  }
+                                >
+                                  {formatTime(item.createAt)}
+                                </Text>
+                              </div>
+
+                              <div
+                                // onClick={() => toggleReaction(item._id)}
+                                style={
+                                  item?.senderId === userId
+                                    ? {
+                                        position: "absolute",
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: "100px",
+                                        backgroundColor: "grey",
+                                        display: "inline-flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        left: 5,
+                                        bottom: -5,
+                                        cursor: "pointer",
+                                      }
+                                    : {
+                                        position: "absolute",
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: "100px",
+                                        backgroundColor: "grey",
+                                        display: "inline-flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        right: 5,
+                                        bottom: -5,
+                                        cursor: "pointer",
+                                      }
+                                }
+                              >
+                                {/* {Icons.Icons({
+                                    name:
+                                      item?.reaction.length === 0 ||
+                                      item?.reaction[0]?.type === "delete"
+                                        ? "iconTym"
+                                        : item?.reaction[0]?.type,
+                                    width: 13,
+                                    height: 13,
+                                  })} */}
+                              </div>
+                            </div>
                           </Button>
                         ) : (
                           <Button
@@ -678,19 +828,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-end",
-                              justifyContent: "flex-end",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-end",
+                                justifyContent: "flex-end",
+                              }
                             : {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-start",
-                              justifyContent: "flex-start",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-start",
+                                justifyContent: "flex-start",
+                              }
                         }
                       >
                         {item?.senderId._id !== userId && (
@@ -703,11 +853,12 @@ export default function ChatWindow() {
                           style={{
                             display: "flex",
                             flexDirection: "row",
-                            padding: 5,
+                            padding: '2px',
                             maxWidth: "30%",
                             maxHeight: "20%",
                             alignItems: "center",
                             justifyContent: "center",
+                            margin: '10px'
                           }}
                         >
                           {item.isReCall === false ? (
@@ -747,6 +898,76 @@ export default function ChatWindow() {
                                   >
                                     {item.fileName}
                                   </Text>
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "row",
+                                      justifyContent: "flex-start",
+                                    }}
+                                  >
+                                    <div>
+                                      <Text
+                                        style={
+                                          item?.senderId === userId
+                                            ? {
+                                                textAlign: "right",
+                                                fontSize: "12px",
+                                                padding: "2px",
+                                              }
+                                            : {
+                                                textAlign: "left",
+                                                fontSize: "12px",
+                                                padding: "2px",
+                                              }
+                                        }
+                                      >
+                                        {formatTime(item.createAt)}
+                                      </Text>
+                                    </div>
+
+                                    <div
+                                      // onClick={() => toggleReaction(item._id)}
+                                      style={
+                                        item?.senderId === userId
+                                          ? {
+                                              position: "absolute",
+                                              width: 18,
+                                              height: 18,
+                                              borderRadius: "100px",
+                                              backgroundColor: "grey",
+                                              display: "inline-flex",
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              left: 5,
+                                              bottom: -5,
+                                              cursor: "pointer",
+                                            }
+                                          : {
+                                              position: "absolute",
+                                              width: 18,
+                                              height: 18,
+                                              borderRadius: "100px",
+                                              backgroundColor: "grey",
+                                              display: "inline-flex",
+                                              justifyContent: "center",
+                                              alignItems: "center",
+                                              right: 5,
+                                              bottom: -5,
+                                              cursor: "pointer",
+                                            }
+                                      }
+                                    >
+                                      {/* {Icons.Icons({
+                                    name:
+                                      item?.reaction.length === 0 ||
+                                      item?.reaction[0]?.type === "delete"
+                                        ? "iconTym"
+                                        : item?.reaction[0]?.type,
+                                    width: 13,
+                                    height: 13,
+                                  })} */}
+                                    </div>
+                                  </div>
                                 </div>
                               ) : (
                                 <Button
@@ -815,19 +1036,19 @@ export default function ChatWindow() {
                         style={
                           item?.senderId._id === userId
                             ? {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-end",
-                              justifyContent: "flex-end",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-end",
+                                justifyContent: "flex-end",
+                              }
                             : {
-                              display: "flex",
-                              flexDirection: "row",
-                              paddingLeft: "10px",
-                              alignItems: "flex-start",
-                              justifyContent: "flex-start",
-                            }
+                                display: "flex",
+                                flexDirection: "row",
+                                paddingLeft: "10px",
+                                alignItems: "flex-start",
+                                justifyContent: "flex-start",
+                              }
                         }
                       >
                         {item?.senderId._id !== userId && (
@@ -861,6 +1082,76 @@ export default function ChatWindow() {
                                 backgroundColor: "#F24E1E",
                               }}
                             />
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "row",
+                                justifyContent: "flex-start",
+                              }}
+                            >
+                              <div>
+                                <Text
+                                  style={
+                                    item?.senderId === userId
+                                      ? {
+                                          textAlign: "right",
+                                          fontSize: "12px",
+                                          padding: "2px",
+                                        }
+                                      : {
+                                          textAlign: "left",
+                                          fontSize: "12px",
+                                          padding: "2px",
+                                        }
+                                  }
+                                >
+                                  {formatTime(item.createAt)}
+                                </Text>
+                              </div>
+
+                              <div
+                                // onClick={() => toggleReaction(item._id)}
+                                style={
+                                  item?.senderId === userId
+                                    ? {
+                                        position: "absolute",
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: "100px",
+                                        backgroundColor: "grey",
+                                        display: "inline-flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        left: 5,
+                                        bottom: -5,
+                                        cursor: "pointer",
+                                      }
+                                    : {
+                                        position: "absolute",
+                                        width: 18,
+                                        height: 18,
+                                        borderRadius: "100px",
+                                        backgroundColor: "grey",
+                                        display: "inline-flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        right: 5,
+                                        bottom: -5,
+                                        cursor: "pointer",
+                                      }
+                                }
+                              >
+                                {/* {Icons.Icons({
+                                    name:
+                                      item?.reaction.length === 0 ||
+                                      item?.reaction[0]?.type === "delete"
+                                        ? "iconTym"
+                                        : item?.reaction[0]?.type,
+                                    width: 13,
+                                    height: 13,
+                                  })} */}
+                              </div>
+                            </div>
                           </Button>
                         ) : (
                           <Button

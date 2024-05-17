@@ -23,7 +23,11 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
     <>
       {isOpen && (
         <div className="modal-overlay">
-          <div className="modal" style={{ backgroundColor: "#242424" }}>
+          <div
+            className="modal"
+            style={{ backgroundColor: "#242424" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div
               className="modal-content"
               style={{
@@ -57,13 +61,13 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                     alt="avatar"
                   ></img>
                   <input
-                  type="file"
-                  multiple
-                  // ref={fileImageRef}
-                  // onChange={handleImageChange}
-                  // style={{ display: "none" }} // Ẩn input file
-                  accept="image/*"
-                />
+                    type="file"
+                    multiple
+                    // ref={fileImageRef}
+                    // onChange={handleImageChange}
+                    // style={{ display: "none" }} // Ẩn input file
+                    accept="image/*"
+                  />
                 </Col>
 
                 <Col
@@ -229,7 +233,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                           Giới tính:
                         </Text>
 
-                        <div style={{ display: "flex", flexDirection: "row"}}>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
                           <div style={{ marginTop: "20px" }}>
                             <input
                               type="radio"
@@ -237,7 +241,9 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                               value="male"
                               checked={user.gender === "male"}
                             />
-                            <Text style={{ color: "#FFF", fontSize: '18px' }}>Nam</Text>
+                            <Text style={{ color: "#FFF", fontSize: "18px" }}>
+                              Nam
+                            </Text>
                           </div>
 
                           <div style={{ marginTop: "20px" }}>
@@ -247,7 +253,9 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                               value="female"
                               checked={user.gender === "female"}
                             ></input>
-                            <Text style={{ color: "#FFF", fontSize: '18px' }}>Nữ</Text>
+                            <Text style={{ color: "#FFF", fontSize: "18px" }}>
+                              Nữ
+                            </Text>
                           </div>
                         </div>
                       </div>
