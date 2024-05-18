@@ -2,6 +2,9 @@ import "../../css/Modal.css"; // File CSS cho modal
 
 import { Button, Col, Row, Typography } from "antd";
 import { useSelector } from "react-redux";
+import { Formik } from "formik";
+import * as Yup from 'yup';
+import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
 
@@ -90,6 +93,24 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                     </Title>
                   </header>
                   <body style={{ width: "100%" }}>
+                    <Formik
+                      initialValues={{ name: user.name, gender: user.gender }}
+                      validationSchema={Yup.object({
+                        name: Yup.string().required(
+                          i18next.t("khongDuocBoTrong")
+                        ),
+                      })}
+                      validateOnMount={true}
+                      // onSubmit={(values) => {
+                      //   console.log("send");
+                      //   onEditProfile(values);
+                      // }}
+                    >
+                      {/* {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+                        
+                      )} */}
+
+                    </Formik>
                     <div
                       className="username"
                       style={{

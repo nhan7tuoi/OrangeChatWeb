@@ -58,6 +58,7 @@ export default function Profile() {
                                 console.log('user',user)
                                 connectSocket.emit('logout',user._id);
                                 navigate("/")
+                                localStorage.clear();
                               }}
                             style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
                                 <FaUser style={{ fontSize: '25', color: '#FFF' }} />

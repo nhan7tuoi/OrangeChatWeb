@@ -43,6 +43,7 @@ import fileGroup from "../assets/svgs/fileGroup.svg";
 import group from "../assets/svgs/group.svg";
 import leaveGroup from "../assets/svgs/leaveGroup.svg";
 import removeGroup from "../assets/svgs/removeGroup.svg";
+import { ReactSVG } from 'react-svg'
 const SVGs = {
     caNhan,
     caNhan2,
@@ -90,13 +91,30 @@ const SVGs = {
     removeGroup
 }
 
-export default {
-    Icons: ({ name = "", width, height }) => {
-        if(name in SVGs) {
-            const Icons = SVGs[name]
-            return <Icons width={width} height={height} />
-        }else {
-            return null;
-        }
+// export default {
+//     Icons: ({ name = "", width, height }) => {
+//         if(name in SVGs) {
+//             const Icons = SVGs[name]
+//             return <Icons width={width} height={height} />
+//         }else {
+//             return null;
+//         }
+//     }
+// }
+
+const Icons = ({ name, width, height }) => {
+    const SvgIcon = SVGs[name];
+    if (!SvgIcon) {
+      return null;
     }
-}
+    return (
+      <ReactSVG
+        src={SvgIcon}
+        beforeInjection={(svg) => {
+          svg.setAttribute('style', `width: ${width}; height: ${height};`);
+        }}
+      />
+    );
+  };
+  
+  export default Icons;
