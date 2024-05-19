@@ -8,7 +8,7 @@ import ChatWelcome from './ChatWelcome';
 export default function Chat() {
   const conversation = JSON.parse(localStorage.getItem('conversation'));
   const hi = JSON.parse(localStorage.getItem('hi'));
-  const currentPage = useSelector(state => state.current.currentPage);
+  const currentPage = useSelector(state => state.current.currentPage1);
   console.log("ChatConversation", conversation);
   return (
     <Row style={{ width: '100%', height: '100%', background: '#242424' }}>

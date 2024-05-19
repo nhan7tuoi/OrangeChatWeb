@@ -3,7 +3,7 @@ import { Button, Typography } from 'antd'
 import { useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
 import conversationApi from '../../apis/conversationApi';
-import { setConversationReload, setCurrentPage } from '../../redux/currentSlice';
+import { setConversationReload, setCurrentPage1 } from '../../redux/currentSlice';
 import { formatConversation } from '../../utils/formatConverstation';
 
 const { Text } = Typography;
@@ -53,7 +53,7 @@ export default function ChatList() {
   };
 
   const handleButtonClick = () => {
-    dispatch(setCurrentPage('ChatWindow'));
+    dispatch(setCurrentPage1('ChatWindow'));
   };
 
   return (

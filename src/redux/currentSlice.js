@@ -1,7 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  currentPage: 'ChatWelcome',
+  currentPage1: 'ChatWelcome',
+  currentPage2: 'ChatWelcome',
   userId: null,
   conversationReload:null
 };
@@ -10,8 +11,11 @@ const currentSlice = createSlice({
   name: 'current',
   initialState,
   reducers: {
-    setCurrentPage(state, action) {
-      state.currentPage = action.payload;
+    setCurrentPage1(state, action) {
+      state.currentPage1 = action.payload;
+    },
+    setCurrentPage2(state, action) {
+      state.currentPage2 = action.payload;
     },
     setUserId(state, action) {
       state.userId = action.payload;
@@ -22,5 +26,5 @@ const currentSlice = createSlice({
   }
 });
 
-export const { setCurrentPage, setUserId,setConversationReload } = currentSlice.actions;
+export const { setCurrentPage1, setUserId,setConversationReload,setCurrentPage2 } = currentSlice.actions;
 export default currentSlice.reducer;

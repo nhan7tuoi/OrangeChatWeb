@@ -5,7 +5,7 @@ import connectSocket from '../../server/ConnectSocket';
 import { setConversationGroups, setConversations, setCoversation } from '../../redux/conversationSlice';
 import conversationApi from '../../apis/conversationApi';
 import { useNavigate } from 'react-router-dom';
-import { setCurrentPage, setUserId } from '../../redux/currentSlice';
+import { setCurrentPage2, setConversationReload } from '../../redux/currentSlice';
 import { formatConversation } from './../../utils/formatConverstation';
 
 const { Text } = Typography;
@@ -13,49 +13,58 @@ const { Text } = Typography;
 export default function ChatList() {
 
   let navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
-  const accessToken = useSelector((state) => state.auth.accessToken);
+  const user = JSON.parse(localStorage.getItem('user'));
   const dispatch = useDispatch();
-  const conversations = useSelector((state) => state.conversation.conversationGroups);
-  const conversation = useSelector((state) => state.conversation.conversation);
+  // const listConversations = JSON.parse(localStorage.getItem('conversations'));
+  const conversation1 = JSON.parse(localStorage.getItem('conversation1'));
+  const accessToken = useSelector((state) => state.auth.accessToken);
+  const [conversations,setConversations] = useState([]);
 
-  // console.log("Group: ", conversations);
+  
   const scrollRef = useRef(null);
-
+  
   useEffect(() => {
+    fetchData();
+    connectSocket.initSocket(user._id);
+
     connectSocket.on('newConversationGroup', data => {
-      console.log("ngu");
+      fetchData();
+    });
+    connectSocket.on('addToGroup', data => {
+      fetchData();
+    });
+    connectSocket.on('updateConversation', data => {
+      fetchData();
+    });
+    connectSocket.on('chat message', () => {
+      fetchData();
+    });
+    connectSocket.on('disbandGroup', () => {
       fetchData();
     });
     connectSocket.on('removeMember', data => {
-
+      if (!conversation1._id || conversation1._id === data.conversation._id)
         fetchData();
-  });
-
-      connectSocket.on('leaveGroup', data => {
-        // if (!data.members.some(m => m._id === user._id) && conversation._id === data._id ) {
-          fetchData();
+    });
+    connectSocket.on('deletedMember', data => {
+      fetchData();
     });
   }, []);
 
-  useEffect(() => {
-    fetchData();
-    // console.log("data");
-  }, [])
+  
 
   const fetchData = async () => {
     try {
       const res = await conversationApi.getConversationGroups({
         userId: user._id,
       });   
-      // console.log("fecth");
       if (res) {
         const fConversation = formatConversation({
           data: res.data,
           userId: user._id,
         });
-        dispatch(setConversationGroups(fConversation));
-        // console.log(fConversation);
+        localStorage.setItem('conversations', JSON.stringify(fConversation));
+        setConversations(fConversation);
       }
     } catch (error) {
       console.error('Error fetching data a:', error);
@@ -65,12 +74,9 @@ export default function ChatList() {
 
 
   const handleButtonClick = () => {
-    dispatch(setCurrentPage('ChatWindow'));
+    dispatch(setCurrentPage2('ChatWindow'));
+      console.log('cc',conversation1);
   };
-
-  const currentPage = useSelector(state => state.current.currentPage);
-  // console.log("CurrentChat", currentPage);
-
   return (
 
     // <div style={{ height: '620px', width: '100%' }}>
@@ -85,8 +91,9 @@ export default function ChatList() {
               <Button
                 style={{ display: 'flex', width: '100%', height: '10%', background: '#242424', border: 'hidden' }}
                 onClick={() => {
-                  dispatch(setCoversation(item))
+                  localStorage.setItem('conversation1', JSON.stringify(item));
                   handleButtonClick();
+                  dispatch(setConversationReload(item._id))
                 }}
               >
                 <img src={item.image} style={{ width: '60px', height: '60px', borderRadius: '100%' }} alt="Avatar" />

@@ -19,6 +19,9 @@ import { RiShareForwardFill } from "react-icons/ri";
 import ForwardModal from "./ForwardModal";
 import EmojiPicker from "emoji-picker-react";
 import Icons from "../../themes/Icons";
+import { setSticker } from "../../redux/stickerSlice";
+import stickerApi from "../../apis/stickerApi";
+
 
 const { Text } = Typography;
 
@@ -31,6 +34,9 @@ export default function ChatWindow() {
   const conversationId = useSelector(
     (state) => state.current.conversationReload
   );
+
+  const stickerData = useSelector(state => state.sticker.stickers);
+  console.log('sticker', stickerData);
   const userId = user._id;
   const scrollRef = useRef(null);
   const dispatch = useDispatch();
@@ -43,6 +49,7 @@ export default function ChatWindow() {
   const [showReactionIndex, setShowReactionIndex] = useState(-1);
   const [openStiker, setOpenSticker] = useState(false);
   const [selectedPack, setSelectedPack] = useState(stickerData[0]);
+  console.log("pack",selectedPack);
 
   const formatTime = (time) => {
     const options = { hour: "numeric", minute: "numeric" };
@@ -50,9 +57,23 @@ export default function ChatWindow() {
   };
 
   useEffect(() => {
+    async function fetchStickers() {
+      try {
+        const stickers = await stickerApi.getSticker(); 
+        dispatch(setSticker(stickers)); 
+        // console.log("sticerfetch");
+      } catch (error) {
+        console.error("Error fetching stickers:", error);
+      }
+    }
+
+    fetchStickers(); 
+  }, [dispatch]);
+
+  useEffect(() => {
     getLastMessage();
     console.log("fetch message");
-    console.log("apiMess: ", messages);
+    // console.log("apiMess: ", messages);
   }, [conversationId]);
 
   const getLastMessage = async () => {
@@ -244,18 +265,17 @@ export default function ChatWindow() {
   const replyMessage = (message) => {
     setItemSelected(message);
     console.log("Rep mess:", message);
-    // hidePressOther();
   };
 
   // Reaction message
   //- Lấy index message
-  // const toggleReaction = (index) => {
-  //   if (showReactionIndex === index) {
-  //     setShowReactionIndex(-1);
-  //   } else {
-  //     setShowReactionIndex(index);
-  //   }
-  // };
+  const toggleReaction = (index) => {
+    if (showReactionIndex === index) {
+      setShowReactionIndex(-1);
+    } else {
+      setShowReactionIndex(index);
+    }
+  };
   //- send reaction lên socket
   const onSelectReaction = (index, reaction) => {
     connectSocket.emit("reaction message", {
@@ -407,7 +427,7 @@ export default function ChatWindow() {
               paddingLeft: "10px",
             }}
           >
-            {selectedPack.title}
+            {selectedPack?.title}
           </h3>
           {selectedPack && (
             <div
@@ -434,7 +454,7 @@ export default function ChatWindow() {
                 >
                   <img
                     src={item.url}
-                    alt={`sticker-${index}`}
+                    // alt={`sticker-${index}`}
                     style={{ width: "80px", height: "80px" }}
                   />
                 </div>
@@ -457,60 +477,62 @@ export default function ChatWindow() {
       setIsOpenReaction(!isOpenReaction);
     };
     return (
-      <div style={{ position: "relative" }}>
+      <div style={{ position: "absolute" }}>
         <div
           style={{
             borderRadius: "100%",
-            width: 20,
-            height: 20,
+            width: 18,
+            height: 18,
             justifyContent: "center",
             alignItems: "center",
+            // top: 10
           }}
           onClick={toggleOpenReaction}
         ></div>
         {isOpenReaction && item?.senderId._id !== userId && (
           <div
             style={{
-              position: "relative",
+              position: "absolute",
               display: "flex",
               flexDirection: "row",
               width: "100%",
-              marginTop: "30px",
-              marginLeft: "250px",
+              zIndex: 10,
+              // marginTop: "30px",
+              // marginLeft: "250px",
             }}
           >
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30 }}
               onClick={() => onSelectReaction(item._id, "like")}
             >
               {Icons({ name: "like", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, left: 30 }}
               onClick={() => onSelectReaction(item._id, "love")}
             >
               {Icons({ name: "love", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, left: 60 }}
               onClick={() => onSelectReaction(item._id, "haha")}
             >
               {Icons({ name: "haha", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, left: 90 }}
               onClick={() => onSelectReaction(item._id, "wow")}
             >
               {Icons({ name: "wow", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, left: 120 }}
               onClick={() => onSelectReaction(item._id, "sad")}
             >
               {Icons({ name: "sad", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, left: 150 }}
               onClick={() => onSelectReaction(item._id, "angry")}
             >
               {Icons({ name: "angry", width: "100%", height: "100%" })}
@@ -533,46 +555,57 @@ export default function ChatWindow() {
         {isOpenReaction && item?.senderId._id == userId && (
           <div
             style={{
-              position: "relative",
+              position: "absolute",
               display: "flex",
               flexDirection: "row",
               width: "100%",
-              marginTop: "30px",
-              marginRight: "150px",
+              zIndex: 10,
+              // marginTop: "30px",
+              // marginLeft: "250px",
             }}
           >
             <div
-              style={{ width: 30, height: 30 }}
+              style={{
+                position: "absolute",
+                width: 30,
+                height: 30,
+                right: 150,
+              }}
               onClick={() => onSelectReaction(item._id, "like")}
             >
               {Icons({ name: "like", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{
+                position: "absolute",
+                width: 30,
+                height: 30,
+                right: 120,
+              }}
               onClick={() => onSelectReaction(item._id, "love")}
             >
               {Icons({ name: "love", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, right: 90 }}
               onClick={() => onSelectReaction(item._id, "haha")}
             >
               {Icons({ name: "haha", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, right: 60 }}
               onClick={() => onSelectReaction(item._id, "wow")}
             >
               {Icons({ name: "wow", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, right: 30 }}
               onClick={() => onSelectReaction(item._id, "sad")}
             >
               {Icons({ name: "sad", width: "100%", height: "100%" })}
             </div>
             <div
-              style={{ width: 30, height: 30 }}
+              style={{ position: "absolute", width: 30, height: 30, right: 0 }}
               onClick={() => onSelectReaction(item._id, "angry")}
             >
               {Icons({ name: "angry", width: "100%", height: "100%" })}
@@ -582,7 +615,7 @@ export default function ChatWindow() {
                 position: "absolute",
                 width: 30,
                 height: 30,
-                left: -40,
+                right: 190,
               }}
             >
               <div onClick={() => onSelectReaction(item._id, "delete")}>
@@ -594,6 +627,8 @@ export default function ChatWindow() {
       </div>
     );
   };
+
+  const [isOpenShare, setIsOpenShare] = useState(false);
 
   const MessageWithIcons = ({ itemSelected }) => {
     const [showIcons, setShowIcons] = useState(false);
@@ -607,11 +642,12 @@ export default function ChatWindow() {
       setShowIcons(false);
     };
 
-    const [isOpen, setIsOpen] = useState(false);
+    
 
     const toggleForwardModal = () => {
-      setIsOpen(!isOpen);
+      setIsOpenShare(!isOpenShare);
     };
+    
 
     return (
       <div
@@ -685,7 +721,7 @@ export default function ChatWindow() {
             />
           </Button>
         </div>
-        <ForwardModal isOpen={isOpen} toggleForwardModal={toggleForwardModal} />
+        <ForwardModal isOpen={isOpenShare} toggleForwardModal={toggleForwardModal} />
       </div>
     );
   };
@@ -1045,15 +1081,15 @@ export default function ChatWindow() {
                                   }
                                 >
                                   <div
-                                  // style={{
-                                  //   borderRadius: "100%",
-                                  //   width: 20,
-                                  //   height: 20,
-                                  //   justifyContent: "center",
-                                  //   alignItems: "center",
-                                  //   position: 'relative'
-                                  // }}
-                                  // onClick={() => toggleOpenReaction()}
+                                    style={{
+                                      borderRadius: "100%",
+                                      width: 18,
+                                      height: 18,
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      position: "absolute",
+                                    }}
+                                    // onClick={() => toggleOpenReaction()}
                                   >
                                     {/* {item?.senderId === userId (
                                       
@@ -1266,17 +1302,19 @@ export default function ChatWindow() {
                                 </div>
 
                                 <div
-                                  // onClick={() => toggleReaction(item._id)}
+                                  // onClick={() => toggleOpenReaction()}
+
                                   style={
                                     item?.senderId === userId
                                       ? {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
-                                          justifyContent: "center",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           alignItems: "center",
                                           left: 5,
                                           bottom: -5,
@@ -1284,11 +1322,13 @@ export default function ChatWindow() {
                                         }
                                       : {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           justifyContent: "center",
                                           alignItems: "center",
                                           right: 5,
@@ -1297,15 +1337,53 @@ export default function ChatWindow() {
                                         }
                                   }
                                 >
-                                  {/* {Icons.Icons({
-                                    name:
-                                      item?.reaction.length === 0 ||
-                                      item?.reaction[0]?.type === "delete"
-                                        ? "iconTym"
-                                        : item?.reaction[0]?.type,
-                                    width: 13,
-                                    height: 13,
-                                  })} */}
+                                  <div
+                                    style={{
+                                      borderRadius: "100%",
+                                      width: 20,
+                                      height: 20,
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      position: "absolute",
+                                    }}
+                                    // onClick={() => toggleOpenReaction()}
+                                  >
+                                    {/* {item?.senderId === userId (
+                                      
+                                    )} */}
+                                    <Icons
+                                      name={
+                                        item?.reaction.length === 0 ||
+                                        item?.reaction[0]?.type === "delete"
+                                          ? "iconTym"
+                                          : item?.reaction[0]?.type
+                                      }
+                                      width={18}
+                                      height={18}
+                                    />
+
+                                    {item?.reaction.length > 1 && (
+                                      <div
+                                        style={{
+                                          position: "absolute",
+                                          left: 5,
+                                        }}
+                                      >
+                                        <Icons
+                                          name={item?.reaction[1]?.type}
+                                          width={18}
+                                          height={18}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* {showReactionIndex == item._id && ( */}
+                                  <Reaction
+                                    onSelectReaction={onSelectReaction}
+                                    item={item}
+                                  />
+                                  {/* )} */}
                                 </div>
                               </div>
                             </div>
@@ -1364,7 +1442,7 @@ export default function ChatWindow() {
                           />
                         )}
 
-<Button
+                        <Button
                           style={{
                             backgroundColor: "#F24E1E",
                             maxWidth: "30%",
@@ -1493,17 +1571,19 @@ export default function ChatWindow() {
                                 </div>
 
                                 <div
-                                  // onClick={() => toggleReaction(item._id)}
+                                  // onClick={() => toggleOpenReaction()}
+
                                   style={
                                     item?.senderId === userId
                                       ? {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
-                                          justifyContent: "center",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           alignItems: "center",
                                           left: 5,
                                           bottom: -5,
@@ -1511,11 +1591,13 @@ export default function ChatWindow() {
                                         }
                                       : {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           justifyContent: "center",
                                           alignItems: "center",
                                           right: 5,
@@ -1524,15 +1606,53 @@ export default function ChatWindow() {
                                         }
                                   }
                                 >
-                                  {/* {Icons.Icons({
-                                    name:
-                                      item?.reaction.length === 0 ||
-                                      item?.reaction[0]?.type === "delete"
-                                        ? "iconTym"
-                                        : item?.reaction[0]?.type,
-                                    width: 13,
-                                    height: 13,
-                                  })} */}
+                                  <div
+                                    style={{
+                                      borderRadius: "100%",
+                                      width: 20,
+                                      height: 20,
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      position: "absolute",
+                                    }}
+                                    // onClick={() => toggleOpenReaction()}
+                                  >
+                                    {/* {item?.senderId === userId (
+                                      
+                                    )} */}
+                                    <Icons
+                                      name={
+                                        item?.reaction.length === 0 ||
+                                        item?.reaction[0]?.type === "delete"
+                                          ? "iconTym"
+                                          : item?.reaction[0]?.type
+                                      }
+                                      width={18}
+                                      height={18}
+                                    />
+
+                                    {item?.reaction.length > 1 && (
+                                      <div
+                                        style={{
+                                          position: "absolute",
+                                          left: 5,
+                                        }}
+                                      >
+                                        <Icons
+                                          name={item?.reaction[1]?.type}
+                                          width={18}
+                                          height={18}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* {showReactionIndex == item._id && ( */}
+                                  <Reaction
+                                    onSelectReaction={onSelectReaction}
+                                    item={item}
+                                  />
+                                  {/* )} */}
                                 </div>
                               </div>
                             </div>
@@ -1589,16 +1709,17 @@ export default function ChatWindow() {
                             style={{ width: 32, height: 32, borderRadius: 16 }}
                           />
                         )}
-                        <div
+
+                        <Button
                           style={{
-                            display: "flex",
-                            flexDirection: "row",
-                            padding: "2px",
+                            backgroundColor: "#F24E1E",
                             maxWidth: "30%",
-                            maxHeight: "20%",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            height: "40%",
+                            padding: "2px",
+                            borderRadius: "10px",
                             margin: "10px",
+                            minWidth: "10%",
+                            border: "hidden",
                           }}
                         >
                           {item?.reply !== null && item.isReCall === false && (
@@ -1678,23 +1799,39 @@ export default function ChatWindow() {
                           )}
 
                           {item.isReCall === false ? (
-                            <Button
-                              onClick={() => {
-                                window.open(item.urlType, "_blank");
-                              }}
+                            <div
                               style={{
+                                display: "flex",
                                 flexDirection: "row",
+                                padding: "2px",
                                 width: "100%",
                                 height: "100%",
-                                backgroundColor: "#F24E1E",
-                                border: "hidden",
+                                alignItems: "center",
+                                justifyContent: "center",
                               }}
                             >
-                              {item.isReCall === false ? (
+                              {/* <Button
+                                onClick={() => {
+                                  window.open(item.urlType, "_blank");
+                                }}
+                                style={{
+                                  flexDirection: "row",
+                                  width: "100%",
+                                  height: "100%",
+                                  backgroundColor: "#FFF",
+                                  border: "hidden",
+                                }}
+                              > */}
+                              <div
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  // backgroundColor: "red",
+                                }}
+                              >
                                 <div
-                                  style={{
-                                    width: "100%",
-                                    height: "100%",
+                                  onClick={() => {
+                                    window.open(item.urlType, "_blank");
                                   }}
                                 >
                                   <FaFile
@@ -1714,126 +1851,140 @@ export default function ChatWindow() {
                                   >
                                     {item.fileName}
                                   </Text>
-                                  <div
-                                    style={{
-                                      display: "flex",
-                                      flexDirection: "row",
-                                      justifyContent: "flex-start",
-                                    }}
-                                  >
-                                    <div>
-                                      <Text
-                                        style={
-                                          item?.senderId === userId
-                                            ? {
-                                                textAlign: "right",
-                                                fontSize: "12px",
-                                                padding: "2px",
-                                              }
-                                            : {
-                                                textAlign: "left",
-                                                fontSize: "12px",
-                                                padding: "2px",
-                                              }
-                                        }
-                                      >
-                                        {formatTime(item.createAt)}
-                                      </Text>
-                                    </div>
+                                </div>
 
-                                    <div
-                                      // onClick={() => toggleReaction(item._id)}
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "flex-start",
+                                  }}
+                                >
+                                  <div>
+                                    <Text
                                       style={
                                         item?.senderId === userId
                                           ? {
-                                              position: "absolute",
-                                              width: 18,
-                                              height: 18,
-                                              borderRadius: "100px",
-                                              backgroundColor: "grey",
-                                              display: "inline-flex",
-                                              justifyContent: "center",
-                                              alignItems: "center",
-                                              left: 5,
-                                              bottom: -5,
-                                              cursor: "pointer",
+                                              textAlign: "right",
+                                              fontSize: "12px",
+                                              padding: "2px",
                                             }
                                           : {
-                                              position: "absolute",
-                                              width: 18,
-                                              height: 18,
-                                              borderRadius: "100px",
-                                              backgroundColor: "grey",
-                                              display: "inline-flex",
-                                              justifyContent: "center",
-                                              alignItems: "center",
-                                              right: 5,
-                                              bottom: -5,
-                                              cursor: "pointer",
+                                              textAlign: "left",
+                                              fontSize: "12px",
+                                              padding: "2px",
                                             }
                                       }
                                     >
-                                      {/* {Icons.Icons({
-                                    name:
-                                      item?.reaction.length === 0 ||
-                                      item?.reaction[0]?.type === "delete"
-                                        ? "iconTym"
-                                        : item?.reaction[0]?.type,
-                                    width: 13,
-                                    height: 13,
-                                  })} */}
+                                      {formatTime(item.createAt)}
+                                    </Text>
+                                  </div>
+
+                                  <div
+                                    // onClick={() => toggleOpenReaction()}
+
+                                    style={
+                                      item?.senderId === userId
+                                        ? {
+                                            position: "absolute",
+                                            width:
+                                              item.reaction.length > 0
+                                                ? 20
+                                                : 18,
+                                            height: 18,
+                                            borderRadius: "100px",
+                                            backgroundColor: "grey",
+                                            display: "flex",
+                                            // flexDirection: "row",
+                                            alignItems: "center",
+                                            left: 5,
+                                            bottom: -5,
+                                            cursor: "pointer",
+                                          }
+                                        : {
+                                            position: "absolute",
+                                            width:
+                                              item.reaction.length > 0
+                                                ? 20
+                                                : 18,
+                                            height: 18,
+                                            borderRadius: "100px",
+                                            backgroundColor: "grey",
+                                            display: "flex",
+                                            // flexDirection: "row",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            right: 5,
+                                            bottom: -5,
+                                            cursor: "pointer",
+                                          }
+                                    }
+                                  >
+                                    <div
+                                      style={{
+                                        borderRadius: "100%",
+                                        width: 20,
+                                        height: 20,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        position: "absolute",
+                                      }}
+                                      // onClick={() => toggleOpenReaction()}
+                                    >
+                                      {/* {item?.senderId === userId (
+                                      
+                                    )} */}
+                                      <Icons
+                                        name={
+                                          item?.reaction.length === 0 ||
+                                          item?.reaction[0]?.type === "delete"
+                                            ? "iconTym"
+                                            : item?.reaction[0]?.type
+                                        }
+                                        width={18}
+                                        height={18}
+                                      />
+
+                                      {item?.reaction.length > 1 && (
+                                        <div
+                                          style={{
+                                            position: "absolute",
+                                            left: 5,
+                                          }}
+                                        >
+                                          <Icons
+                                            name={item?.reaction[1]?.type}
+                                            width={18}
+                                            height={18}
+                                          />
+                                        </div>
+                                      )}
                                     </div>
+
+                                    {/* {showReactionIndex == item._id && ( */}
+                                    <Reaction
+                                      onSelectReaction={onSelectReaction}
+                                      item={item}
+                                    />
+                                    {/* )} */}
                                   </div>
                                 </div>
-                              ) : (
-                                <Button
-                                  style={{
-                                    backgroundColor: "#F24E1E",
-                                    maxWidth: "60%",
-                                    padding: "2px",
-                                    borderRadius: "10px",
-                                    margin: "10px",
-                                    minWidth: "10%",
-                                    border: "hidden",
-                                  }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontSize: "14px",
-                                      padding: "3px",
-                                      color: "#FFF",
-                                      fontWeight: "600",
-                                    }}
-                                  >
-                                    Đã thu hồi
-                                  </Text>
-                                </Button>
-                              )}
-                            </Button>
+                              </div>
+                              {/* </Button> */}
+                            </div>
                           ) : (
-                            <Button
+                            <Text
                               style={{
-                                backgroundColor: "#F24E1E",
-                                width: "100%",
-                                padding: "2px",
-                                borderRadius: "10px",
-                                margin: "10px",
-                                border: "hidden",
+                                fontSize: "14px",
+                                padding: "3px",
+                                color: "#FFF",
+                                fontWeight: "600",
                               }}
                             >
-                              <Text
-                                style={{
-                                  fontSize: "14px",
-                                  padding: "3px",
-                                  color: "#FFF",
-                                  fontWeight: "600",
-                                }}
-                              >
-                                Đã thu hồi
-                              </Text>
-                            </Button>
+                              Đã thu hồi
+                            </Text>
                           )}
-                        </div>
+                        </Button>
                         <MessageWithIcons itemSelected={item} />
                       </div>
                     );
@@ -1965,17 +2116,17 @@ export default function ChatWindow() {
                           {item.isReCall === false ? (
                             <div>
                               <video
-                              src={item.urlType[0]}
-                              controls
-                              muted
-                              style={{
-                                maxWidth: "95%",
-                                maxHeight: "95%",
-                                borderRadius: "10px",
-                                // margin: "10px",
-                                backgroundColor: "#F24E1E",
-                              }}
-                            />
+                                src={item.urlType[0]}
+                                controls
+                                muted
+                                style={{
+                                  maxWidth: "95%",
+                                  maxHeight: "95%",
+                                  borderRadius: "10px",
+                                  // margin: "10px",
+                                  backgroundColor: "#F24E1E",
+                                }}
+                              />
                               <div
                                 style={{
                                   display: "flex",
@@ -2004,17 +2155,19 @@ export default function ChatWindow() {
                                 </div>
 
                                 <div
-                                  // onClick={() => toggleReaction(item._id)}
+                                  // onClick={() => toggleOpenReaction()}
+
                                   style={
                                     item?.senderId === userId
                                       ? {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
-                                          justifyContent: "center",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           alignItems: "center",
                                           left: 5,
                                           bottom: -5,
@@ -2022,11 +2175,13 @@ export default function ChatWindow() {
                                         }
                                       : {
                                           position: "absolute",
-                                          width: 18,
+                                          width:
+                                            item.reaction.length > 0 ? 20 : 18,
                                           height: 18,
                                           borderRadius: "100px",
                                           backgroundColor: "grey",
-                                          display: "inline-flex",
+                                          display: "flex",
+                                          // flexDirection: "row",
                                           justifyContent: "center",
                                           alignItems: "center",
                                           right: 5,
@@ -2035,15 +2190,53 @@ export default function ChatWindow() {
                                         }
                                   }
                                 >
-                                  {/* {Icons.Icons({
-                                    name:
-                                      item?.reaction.length === 0 ||
-                                      item?.reaction[0]?.type === "delete"
-                                        ? "iconTym"
-                                        : item?.reaction[0]?.type,
-                                    width: 13,
-                                    height: 13,
-                                  })} */}
+                                  <div
+                                    style={{
+                                      borderRadius: "100%",
+                                      width: 20,
+                                      height: 20,
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      position: "absolute",
+                                    }}
+                                    // onClick={() => toggleOpenReaction()}
+                                  >
+                                    {/* {item?.senderId === userId (
+                                      
+                                    )} */}
+                                    <Icons
+                                      name={
+                                        item?.reaction.length === 0 ||
+                                        item?.reaction[0]?.type === "delete"
+                                          ? "iconTym"
+                                          : item?.reaction[0]?.type
+                                      }
+                                      width={18}
+                                      height={18}
+                                    />
+
+                                    {item?.reaction.length > 1 && (
+                                      <div
+                                        style={{
+                                          position: "absolute",
+                                          left: 5,
+                                        }}
+                                      >
+                                        <Icons
+                                          name={item?.reaction[1]?.type}
+                                          width={18}
+                                          height={18}
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* {showReactionIndex == item._id && ( */}
+                                  <Reaction
+                                    onSelectReaction={onSelectReaction}
+                                    item={item}
+                                  />
+                                  {/* )} */}
                                 </div>
                               </div>
                             </div>
@@ -2141,28 +2334,6 @@ export default function ChatWindow() {
                 </div>
               </div>
             )}
-
-            {/* Sticker */}
-            {/* <div
-              style={{
-                height: "300px",
-                width: "300px",
-                backgroundColor: "#36373A",
-                display: "flex",
-                flexDirection: "row",
-                // justifyContent: "flex-end",
-                padding: "10px",
-                borderTopWidth: "0.5px",
-                border: 'hidden',
-                position: "absolute",
-                borderRadius: '5%',
-                bottom: "8%",
-                right: '2%'
-              }}
-            >
-              
-            </div> */}
-
             <div
               style={{
                 display: "flex",
@@ -2429,63 +2600,63 @@ export default function ChatWindow() {
   );
 }
 
-const stickerData = [
-  {
-    title: "Animals",
-    data: [
-      {
-        id: 1,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 2,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-    ],
-  },
-  {
-    title: "Emotions",
-    data: [
-      {
-        id: 1,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 2,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 3,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 4,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 5,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 6,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 7,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 8,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 9,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-      {
-        id: 10,
-        url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-      },
-    ],
-  },
-];
+// const stickerData = [
+//   {
+//     title: "Animals",
+//     data: [
+//       {
+//         id: 1,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 2,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//     ],
+//   },
+//   {
+//     title: "Emotions",
+//     data: [
+//       {
+//         id: 1,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 2,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 3,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 4,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 5,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 6,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 7,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 8,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 9,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//       {
+//         id: 10,
+//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
+//       },
+//     ],
+//   },
+// ];

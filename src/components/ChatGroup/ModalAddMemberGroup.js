@@ -16,7 +16,8 @@ const { Text } = Typography;
 function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
 
-    const conversation = useSelector(state => state.conversation.conversation)
+    // const conversation = useSelector(state => state.conversation.conversation)
+    const conversation1 = JSON.parse(localStorage.getItem("conversation1"));
     const scrollRef = useRef(null);
     const [keyword, setKeyword] = useState("");
     const user = useSelector((state) => state.auth.user);
@@ -28,8 +29,8 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
     useEffect(() => {
         fetchData();
-        setNewList(listFriends.filter(
-            f => !conversation?.members?.some(m => m._id === f._id),
+        setNewList(listFriends?.filter(
+            f => !conversation1?.members?.some(m => m._id === f._id),
         ));
     }, []);
     
@@ -45,7 +46,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
     };
     const handleAddMember = member => {
         connectSocket.emit('add member to group', {
-            conversation: conversation,
+            conversation: conversation1,
             member: member,
 
         });

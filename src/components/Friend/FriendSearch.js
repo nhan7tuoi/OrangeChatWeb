@@ -21,6 +21,7 @@ import FriendApi from '../../apis/FriendApi';
 import i18next from '../../i18n/i18n';
 import StateButton from './stateButton';
 import { fetchFriends, searchUsers } from '../../redux/friendSilce';
+import connectSocket from '../../server/ConnectSocket';
 
 // import { IoPersonAddOutline } from "react-icons/io5";
 
@@ -40,22 +41,34 @@ export default function FriendsSearch() {
 
     const [listFriendRequests, setListFq] = useState([]);
     useEffect(() => {
-        // console.log("abc");
+        dispatch(searchUsers(user._id, keyword));
         fetchData();
-    }, [keyword]);
-
-    const fetchData = async () => {
+      }, [keyword]);
+    
+      const fetchData = async () => {
         try {
-            dispatch(searchUsers(user._id, keyword));
-            dispatch(fetchFriends(user._id));
-            const res = await FriendApi.getAllFriendRequests();
-            setListFq(res.data);
-            console.log(res.data);
+          dispatch(fetchFriends(user._id));
+          const res = await FriendApi.getAllFriendRequests({userId: user._id});
+          setListFq(res.data);
+          // dispatch(fetchFriendRequests(user._id));
         } catch (error) {
-            console.error('Error fetching friends:', error);
+          console.error('Error fetching friends:', error);
         }
-    };
-    console.log(keyword);
+      };
+
+    useEffect(() => {
+        connectSocket.on('rejectFriendRequest', data => {
+          console.log('rjdata', data);
+          if (data) fetchData();
+        });
+        connectSocket.on('acceptFriendRequest', data => {
+          console.log('accdata', data);
+          if (data) fetchData();
+        });
+        connectSocket.on('responseSendFriendRequest', data => {
+          if (data) fetchData();
+        });
+      }, []);
 
     return (
 
@@ -117,7 +130,7 @@ export default function FriendsSearch() {
                                 <div style={{ display: 'flex' }}>
                                     <StateButton
                                         itemId={user._id}
-                                        onClick={() => fetchData()}
+                                        onPressButton={() => fetchData()}
                                         listFriends={listFriends}
                                         listFriendRequests={listFriendRequests}
                                     />

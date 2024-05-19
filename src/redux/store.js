@@ -6,6 +6,7 @@ import currentSlice from './currentSlice';
 import friendSilce from './friendSilce';
 import authLogin from './authLogin';
 import {thunk} from 'redux-thunk';
+import stickerSlice from './stickerSlice';
 
 
 const store = configureStore({
@@ -16,6 +17,7 @@ const store = configureStore({
     current: currentSlice,
     friend: friendSilce,
     authLogin: authLogin,
+    sticker: stickerSlice,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(thunk),
 });

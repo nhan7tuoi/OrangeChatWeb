@@ -48,9 +48,14 @@ export default function Friends() {
 
     useEffect(() => {
         connectSocket.on('acceptFriendRequest', data => {
-          console.log(data);
-          if (data) dispatch(addFriend(data));
-        });
+            if (data) dispatch(addFriend(data));
+          });
+          connectSocket.on('responseDeleteFriend', data => {
+            if (data) dispatch(deleteFriend(data.receiverId));
+          });
+          connectSocket.on('deleteFriend', data => {
+            if (data) dispatch(deleteFriend(data.senderId));
+          });
       }, []);
 
     return (
