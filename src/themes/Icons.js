@@ -43,7 +43,7 @@ import fileGroup from "../assets/svgs/fileGroup.svg";
 import group from "../assets/svgs/group.svg";
 import leaveGroup from "../assets/svgs/leaveGroup.svg";
 import removeGroup from "../assets/svgs/removeGroup.svg";
-import { ReactSVG } from 'react-svg'
+import { ReactSVG } from 'react-svg';
 const SVGs = {
     caNhan,
     caNhan2,

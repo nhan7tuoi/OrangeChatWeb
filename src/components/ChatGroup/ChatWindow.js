@@ -33,7 +33,7 @@ import ForwardModal from "../ChatSingle/ForwardModal";
 import currentSlice, { setCurrentPage2 } from "../../redux/currentSlice";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/stickerApi";
+import stickerApi from "../../apis/StickerApi";
 
 const { Text } = Typography;
 

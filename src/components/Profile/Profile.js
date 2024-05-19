@@ -19,11 +19,12 @@ export default function Profile() {
 
     // const user = JSON.parse(localStorage.getItem('conversation'));
     const [isOpenInformation, setIsOpenInformation] = useState(false);
-
+    // const [user, setUser] = useState({});
 
     const toggleInformationModal = () => {
         setIsOpenInformation(!isOpenInformation);
       };
+    
 
     return (
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
@@ -33,7 +34,7 @@ export default function Profile() {
                     <ModalInformation
                         isOpen={isOpenInformation}
                         toggleModal={toggleInformationModal}
-                    ></ModalInformation>
+                    />
                 </Button>
 
 

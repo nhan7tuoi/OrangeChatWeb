@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Button, Typography } from 'antd'
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
 import conversationApi from '../../apis/conversationApi';
 import { setConversationReload, setCurrentPage1 } from '../../redux/currentSlice';
@@ -13,8 +13,11 @@ export default function ChatList() {
   const dispatch = useDispatch();
   // const listConversations = JSON.parse(localStorage.getItem('conversations'));
   const conversation = JSON.parse(localStorage.getItem('conversation'));
+  // const conversation = useSelector(state => state.conversation.conversation);
   const [conversations, setConversations] = useState([]);
   const scrollRef = useRef(null);
+
+
 
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export default function ChatList() {
     }
 
     getConversation();
-    connectSocket.initSocket(user._id);
+    connectSocket.initSocket(user._id); //null
   }, []);
 
   useEffect(() => {

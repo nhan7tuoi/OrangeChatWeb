@@ -20,7 +20,7 @@ import ForwardModal from "./ForwardModal";
 import EmojiPicker from "emoji-picker-react";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/stickerApi";
+import stickerApi from "../../apis/StickerApi";
 
 
 const { Text } = Typography;
