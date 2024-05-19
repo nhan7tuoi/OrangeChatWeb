@@ -9,7 +9,7 @@ export default function Chat() {
   const conversation = JSON.parse(localStorage.getItem('conversation'));
   const hi = JSON.parse(localStorage.getItem('hi'));
   const currentPage = useSelector(state => state.current.currentPage);
-  console.log("ChatConversation", hi);
+  console.log("ChatConversation", conversation);
   return (
     <Row style={{ width: '100%', height: '100%', background: '#242424' }}>
       <Col span={6}><SideBar /></Col>

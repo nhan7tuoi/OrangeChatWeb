@@ -8,42 +8,57 @@ import { setMembers } from '../../redux/conversationSlice';
 import { fetchFriends, setFriends } from '../../redux/friendSilce';
 import FriendApi from '../../apis/FriendApi';
 import connectSocket from '../../server/ConnectSocket';
+import conversationApi from '../../apis/conversationApi';
+import { formatConversation } from '../../utils/formatConverstation';
 
 
 const { Text } = Typography;
 
 export default function ForwardModal({ isOpen, toggleForwardModal }) {
 
+    const itemSelected = JSON.parse(localStorage.getItem('itemSelected'));
     const [keyword, setKeyword] = useState("");
     const [selectedMembers, setSelectedMembers] = useState([]);
-    const [itemSelected, setItemSelected] = useState({});
+    const [listFriends, setListFriends] = useState([]);
 
     const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
-    const user = useSelector((state) => state.auth.user);
+    const user = JSON.parse(localStorage.getItem('user'));
     const dispatch = useDispatch();
 
     const friend = useSelector((state) => state.current.userId);
-    const listFriends = useSelector(state => state.friend.listFriends);
 
+    // useEffect(() => {
+    //     if (keyword === '') {
+    //         fetchData();
+    //         dispatch(setMembers([]));
+    //     } else {
+    //         const resultSearch = temp.filter(
+    //             f => f.name.includes(keyword) || f.phone.includes(keyword),
+    //         );
+    //         // console.log(resultSearch);
+    //         dispatch(setFriends(resultSearch));
+    //     }
+    // }, [keyword]);
     useEffect(() => {
-        if (keyword === '') {
-            fetchData();
-            dispatch(setMembers([]));
-        } else {
-            const resultSearch = temp.filter(
-                f => f.name.includes(keyword) || f.phone.includes(keyword),
-            );
-            // console.log(resultSearch);
-            dispatch(setFriends(resultSearch));
-        }
-    }, [keyword]);
+        fetchData();
+    }, []);
 
     const fetchData = async () => {
         try {
-            dispatch(fetchFriends(user._id));
-            const friends = await FriendApi.getFriends({ userId: user._id });
-            setTemp(friends.data);
+            // dispatch(fetchFriends(user._id));
+            const response = await conversationApi.getAllConversation({
+                userId: user._id,
+            });
+            if (response) {
+                const fConversation = formatConversation({
+                    data: response.data,
+                    userId: user._id,
+                });
+                // setConversations(fConversation);
+                // setTemp(fConversation)
+                setListFriends(fConversation);
+            }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -53,7 +68,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     const handleCheckboxChange = (member, checked) => {
         if (checked) {
             setSelectedMembers([...selectedMembers, member]);
-            // console.log("Checkbox: ", member);
+            
         } else {
             setSelectedMembers(selectedMembers.filter(m => m._id !== member._id));
         }
@@ -62,10 +77,18 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     const [listConversations, setConversations] = useState([]);
 
     const forwardMessage = messageId => {
-        connectSocket.emit('forward message', {
-            messageId: messageId,
-            conversationId: friend.conversationId,
-            senderId: user._id,
+        console.log("senderId: ", user._id);
+        // connectSocket.emit('forward message', {
+        //     msg: itemSelected,
+        //     conversation: null,
+        //     senderId: user._id,
+        // });
+        selectedMembers.forEach(member => {
+            connectSocket.emit('forward message', {
+                msg: itemSelected,
+                conversation: member,
+                senderId: user._id,
+            });
         });
         console.log("ItemSelectedForward: ", itemSelected);
         const updatedList = listConversations.map(c => {
@@ -83,6 +106,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
         forwardMessage();
         toggleForwardModal();
         setSelectedMembers([]);
+        localStorage.removeItem('itemSelected');
     };
 
     return (
@@ -103,13 +127,13 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
                                         <div key={index} style={{ display: 'flex', width: '90%', background: '#242424', padding: '5px', alignItems: 'center', justifyContent: 'space-between', marginTop: '10px', marginLeft: '25px', border: '2px solid #2E2E2E', borderRadius: '10px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                                 <img src={user.image} style={{ height: '30px', width: '30px', borderRadius: '50%', marginLeft: '5px' }} alt='image'></img>
-                                                <Text style={{ marginLeft: '20px', color: 'white', fontSize: '16px' }}>{user.name}</Text>
+                                                <Text style={{ marginLeft: '20px', color: 'white', fontSize: '16px' }}>{user.nameGroup}</Text>
                                             </div>
 
                                             <Checkbox onChange={(e) => handleCheckboxChange(user, e.target.checked)}
-                                            setItemSelected={setItemSelected} />
-                                            
-                                            
+                                            />
+
+
                                         </div>
                                     ))}
                                 </div>
@@ -117,14 +141,14 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
 
                                 <div style={{ width: '470px', display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
                                     <Button style={{ width: '100px', height: '40px' }}
-                                        onClick={() => {toggleForwardModal(); setSelectedMembers([]);}}
+                                        onClick={() => { toggleForwardModal(); setSelectedMembers([]); }}
                                     >
                                         <Text>Hủy</Text>
                                     </Button>
 
 
                                     <Button style={{ width: '100px', height: '40px', marginLeft: '10px', backgroundColor: '#36373A' }}
-                                    onClick={() => {handleShare()}}
+                                        onClick={() => { handleShare() }}
                                     >
                                         <Text style={{ color: 'white' }}>Chia sẻ</Text>
                                     </Button>

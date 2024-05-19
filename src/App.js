@@ -40,7 +40,7 @@ function App() {
     }
   }, [dispatch]);
 
-
+  const isLoggedIn = Boolean(user && user.name);
 
 
   return (
@@ -68,15 +68,6 @@ function App() {
       </Routes>
 
       {token && <TabBar />} {/* Chỉ hiển thị TabBar khi đã đăng nhập */}
-      {/* <Routes>
-        <Route path='/chatGroup' element={<ChatGroup />} />
-        <Route path='/friend' element={ <Friend /> } />
-        <Route path='/friendrequest' element={ <FriendsRequest /> } />
-        <Route path='/friendSearch' element={ <FriendsSearch /> } />
-        <Route path='/chat' element={ <Chat /> } />
-        <Route path='/profile' element={ <Profile /> } />
-        <Route path='/information' element={ <Information /> } />
-      </Routes> */}
 
       <Routes>
         <Route path='/chatGroup' element={token ? <ChatGroup /> : <Login />} />
@@ -91,6 +82,18 @@ function App() {
 
 
       </Routes>
+
+      {/* {isLoggedIn && <TabBar />}
+
+      <Routes>
+        <Route path="/chatGroup" element={isLoggedIn ? <ChatGroup /> : <Login />} />
+        <Route path="/friend" element={isLoggedIn ? <Friend /> : <Login />} />
+        <Route path="/friendrequest" element={isLoggedIn ? <FriendsRequest /> : <Login />} />
+        <Route path="/friendSearch" element={isLoggedIn ? <FriendsSearch /> : <Login />} />
+        <Route path="/chat" element={isLoggedIn ? <Chat /> : <Login />} />
+        <Route path="/profile" element={isLoggedIn ? <Profile /> : <Login />} />
+        <Route path="/information" element={isLoggedIn ? <Information /> : <Login />} />
+      </Routes> */}
 
     </div>
   );

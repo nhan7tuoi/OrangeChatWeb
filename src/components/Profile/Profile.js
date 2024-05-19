@@ -16,6 +16,8 @@ export default function Profile() {
     let navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
+
+    // const user = JSON.parse(localStorage.getItem('conversation'));
     const [isOpenInformation, setIsOpenInformation] = useState(false);
     // const [user, setUser] = useState({});
 
@@ -57,6 +59,7 @@ export default function Profile() {
                                 console.log('user',user)
                                 connectSocket.emit('logout',user._id);
                                 navigate("/")
+                                localStorage.clear();
                               }}
                             style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
                                 <FaUser style={{ fontSize: '25', color: '#FFF' }} />
