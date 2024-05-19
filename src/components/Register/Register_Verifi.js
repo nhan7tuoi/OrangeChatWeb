@@ -29,28 +29,32 @@ export default function Register() {
   useEffect(() => {
     if (txtCode !== '' && txtCode.length == 6) {  
       setIsComfirm(true);
+      
     }
   }, [txtCode]);
 
+  
+
   const handleRegister = async () => {
     const userData = {
-      name: valueInfo.fullName,
-      phone: valuesRegister.phoneNumber,
+      // name: valueInfo.fullName,
+      // phone: valuesRegister.phoneNumber,
       email: valuesRegister.email,
-      username: valuesRegister.email,
-      password: valuesRegister.password,
-      dateOfBirth: dateOfBirth["$d"],
-      image: valueInfo.gender == 'male' ? URL_IMAGE_MALE : URL_IMAGE_FEMALE,
-      gender: valueInfo.gender
+      // username: valuesRegister.email,
+      // password: valuesRegister.password,
+      // dateOfBirth: dateOfBirth["$d"],
+      // image: valueInfo.gender == 'male' ? URL_IMAGE_MALE : URL_IMAGE_FEMALE,
+      // gender: valueInfo.gender
     }
     console.log(userData);
     try {
-      const response = await authApi.register({ ...userData });
-      console.log(response);
-      alert('Đăng ký thành công!');
-      navigate('/');
+      // const response = await authApi.register({ ...userData });
+      // console.log(response);
+      // alert('Đăng ký thành công!');
+      
+      navigate('/registerinf');
     } catch (error) {
-      alert('Đăng ký thất bại', error.message);
+      alert('err', error.message);
     }
 
   }

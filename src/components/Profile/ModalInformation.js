@@ -1,29 +1,78 @@
-import "../../css/Modal.css"; // File CSS cho modal
-
 import { Button, Col, Row, Typography } from "antd";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect, useState } from 'react';
+import { setUser } from "../../redux/authSlice"; 
+import authApi from "../../apis/authApi"; 
 
 const { Text, Title } = Typography;
 
-function ModalAddMemberGroup({ isOpen, toggleModal }) {
+function ModalInformation({ isOpen, toggleModal }) {
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
-  const dateOfBirth = new Date(user.dateOfBirth);
+  const [name, setName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [gender, setGender] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [image, setImage] = useState('');
 
-  // Trích xuất ngày, tháng và năm
-  const day = dateOfBirth.getDate();
-  const month = dateOfBirth.getMonth() + 1; // Lưu ý: Tháng trong JavaScript bắt đầu từ 0
-  const year = dateOfBirth.getFullYear();
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setDateOfBirth(user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().substring(0, 10) : '');
+      setGender(user.gender || '');
+      setPhone(user.phone || '');
+      setEmail(user.email || '');
+      setImage(user.image || '');
+    }
+  }, [user]);
 
-  // Định dạng lại thành ngày tháng năm
-  const formattedDateOfBirth = `${day}/${month}/${year}`;
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImage(event.target.result);
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
 
-  console.log(formattedDateOfBirth);
+  const handleSubmit = async () => {
+    try {
+      const response = await authApi.editProfile({
+        userId: user._id,
+        name,
+        dateOfBirth,
+        gender,
+        phone,
+        email,
+        image
+      });
+      if (response.message === 'ok') {
+        alert('Sửa thông tin thành công');
+        dispatch(setUser(response.user));
+        toggleModal();
+      } else {
+        alert('Sửa thông tin thất bại');
+      }
+    } catch (error) {
+      console.error('Error editing profile:', error);
+    }
+  };
+
+  if (!user) {
+    return null; // or render a loading spinner
+  }
 
   return (
     <>
       {isOpen && (
-        <div className="modal-overlay">
-          <div className="modal" style={{ backgroundColor: "#242424" }}>
+        <div className="modal-overlay" onClick={toggleModal}>
+          <div
+            className="modal"
+            style={{ backgroundColor: "#242424" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div
               className="modal-content"
               style={{
@@ -37,38 +86,33 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
             >
               <Row style={{ background: "#242424" }}>
                 <Col
-                  //   span={10}
                   style={{
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-evenly",
                     alignItems: "center",
-                    // border: "1px solid #2E2E2E",
                     width: "100%",
                   }}
                 >
                   <img
-                    src={user.image}
+                    src={image}
                     style={{
                       height: "150px",
                       width: "150px",
                       borderRadius: "100%",
                     }}
                     alt="avatar"
-                  ></img>
+                  />
                   <input
-                  type="file"
-                  multiple
-                  // ref={fileImageRef}
-                  // onChange={handleImageChange}
-                  // style={{ display: "none" }} // Ẩn input file
-                  accept="image/*"
-                />
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
                 </Col>
 
                 <Col
                   style={{
-                    // border: "1px solid #2E2E2E",
                     height: "100%",
                     width: "100%",
                   }}
@@ -85,13 +129,8 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                       Thông tin cá nhân
                     </Title>
                   </header>
-                  <body style={{ width: "100%" }}>
-                    <div
-                      className="username"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
+                  <div style={{ width: "100%" }}>
+                    <div className="username" style={{ width: "100%" }}>
                       <Text
                         style={{
                           fontSize: "20px",
@@ -102,32 +141,20 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                         Họ và tên:
                       </Text>
                       <input
-                        value={user.name}
-                        name="username"
+                        value={name}
+                        name="name"
                         type="text"
+                        onChange={(e) => setName(e.target.value)}
                         style={{
                           backgroundColor: "#2E2E2E",
                           width: "70%",
                           height: "40px",
                           borderRadius: "10px",
-                          // marginTop: "10px",
                           fontSize: "18px",
                           padding: "15px",
                           color: "#FFF",
                         }}
-
-                        // label={i18next.t('nhapSoDienThoai')}
-                        // onChange={handleChange("phoneNumber")}
-                        // onBlur={handleBlur("phoneNumber")}
-                        // value={values.phoneNumber}
-                        // error={errors.phoneNumber && touched.phoneNumber}
                       />
-
-                      {/* {errors.phoneNumber && touched.phoneNumber && (
-                        <Text style={{ color: "#FFF", fontSize: 12 }}>
-                          {errors.phoneNumber}
-                        </Text>
-                      )} */}
                     </div>
 
                     <div className="dateofbirth" style={{ width: "100%" }}>
@@ -135,16 +162,16 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                         style={{
                           fontSize: "20px",
                           color: "#FFF",
-                          //   width: "50%",
                           marginRight: "30px",
                         }}
                       >
                         Ngày sinh:
                       </Text>
                       <input
-                        value={formattedDateOfBirth}
-                        name="dateofbirth"
-                        type="text"
+                        value={dateOfBirth}
+                        name="dateOfBirth"
+                        type="date"
+                        onChange={(e) => setDateOfBirth(new Date(e.target.value))}
                         style={{
                           backgroundColor: "#2E2E2E",
                           width: "70%",
@@ -155,52 +182,12 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                           padding: "15px",
                           color: "#FFF",
                         }}
-
-                        // label={i18next.t('nhapSoDienThoai')}
-                        // onChange={handleChange("phoneNumber")}
-                        // onBlur={handleBlur("phoneNumber")}
-                        // value={values.phoneNumber}
-                        // error={errors.phoneNumber && touched.phoneNumber}
                       />
-
-                      {/* {errors.phoneNumber && touched.phoneNumber && (
-                        <Text style={{ color: "#FFF", fontSize: 12 }}>
-                          {errors.phoneNumber}
-                        </Text>
-                      )} */}
                     </div>
-
-                    {/* <div
-                      style={{
-                        display: "flex",
-                        // justifyContent: "space-between",
-                        width: "100%",
-                      }}
-                    >
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                          //   width: "20%",
-                        }}
-                      >
-                        Giới tính:
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                          width: "50%",
-                        }}
-                      >
-                        {user.gender ? "Nam" : "Nữ"}
-                      </Text>
-                    </div> */}
 
                     <div
                       style={{
                         display: "flex",
-                        // marginTop: '10px',
                         justifyContent: "center",
                         width: "200px",
                       }}
@@ -208,20 +195,13 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                       <div
                         style={{
                           display: "flex",
-                          // justifyContent: "space-between",
                           width: "200px",
-                          // alignItems: "start",
                         }}
-                        // onChange={(newValue) =>
-                        //   handleChange("gender")(newValue)
-                        // }
-                        // value={values.gender}
                       >
                         <Text
                           style={{
                             fontSize: "20px",
                             color: "#FFF",
-                            //   width: "20%",
                             marginRight: "40px",
                             marginTop: "15px",
                           }}
@@ -229,15 +209,16 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                           Giới tính:
                         </Text>
 
-                        <div style={{ display: "flex", flexDirection: "row"}}>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
                           <div style={{ marginTop: "20px" }}>
                             <input
                               type="radio"
                               name="gender"
                               value="male"
-                              checked={user.gender === "male"}
+                              checked={gender === "male"}
+                              onChange={(e) => setGender(e.target.value)}
                             />
-                            <Text style={{ color: "#FFF", fontSize: '18px' }}>Nam</Text>
+                            <Text style={{ color: "#FFF", fontSize: "18px" }}>Nam</Text>
                           </div>
 
                           <div style={{ marginTop: "20px" }}>
@@ -245,9 +226,10 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                               type="radio"
                               name="gender"
                               value="female"
-                              checked={user.gender === "female"}
-                            ></input>
-                            <Text style={{ color: "#FFF", fontSize: '18px' }}>Nữ</Text>
+                              checked={gender === "female"}
+                              onChange={(e) => setGender(e.target.value)}
+                            />
+                            <Text style={{ color: "#FFF", fontSize: "18px" }}>Nữ</Text>
                           </div>
                         </div>
                       </div>
@@ -258,15 +240,15 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                         style={{
                           fontSize: "20px",
                           color: "#FFF",
-                          //   width: "50%",
                         }}
                       >
                         Số điện thoại:
                       </Text>
                       <input
-                        value={user.phone}
-                        name="phoneNumber"
+                        value={phone}
+                        name="phone"
                         type="tel"
+                        onChange={(e) => setPhone(e.target.value)}
                         style={{
                           backgroundColor: "#2E2E2E",
                           width: "70%",
@@ -277,19 +259,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                           padding: "15px",
                           color: "#FFF",
                         }}
-
-                        // label={i18next.t('nhapSoDienThoai')}
-                        // onChange={handleChange("phoneNumber")}
-                        // onBlur={handleBlur("phoneNumber")}
-                        // value={values.phoneNumber}
-                        // error={errors.phoneNumber && touched.phoneNumber}
                       />
-
-                      {/* {errors.phoneNumber && touched.phoneNumber && (
-                        <Text style={{ color: "#FFF", fontSize: 12 }}>
-                          {errors.phoneNumber}
-                        </Text>
-                      )} */}
                     </div>
 
                     <div className="email" style={{ width: "100%" }}>
@@ -297,16 +267,16 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                         style={{
                           fontSize: "20px",
                           color: "#FFF",
-                          // width: "30%",
                           marginRight: "70px",
                         }}
                       >
                         Email:
                       </Text>
                       <input
-                        value={user.email}
+                        value={email}
                         name="email"
                         type="email"
+                        onChange={(e) => setEmail(e.target.value)}
                         style={{
                           backgroundColor: "#2E2E2E",
                           width: "70%",
@@ -317,21 +287,9 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                           padding: "15px",
                           color: "#FFF",
                         }}
-
-                        // label={i18next.t('nhapSoDienThoai')}
-                        // onChange={handleChange("phoneNumber")}
-                        // onBlur={handleBlur("phoneNumber")}
-                        // value={values.phoneNumber}
-                        // error={errors.phoneNumber && touched.phoneNumber}
                       />
-
-                      {/* {errors.phoneNumber && touched.phoneNumber && (
-                        <Text style={{ color: "#FFF", fontSize: 12 }}>
-                          {errors.phoneNumber}
-                        </Text>
-                      )} */}
                     </div>
-                  </body>
+                  </div>
                 </Col>
               </Row>
             </div>
@@ -356,7 +314,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
                   marginLeft: "10px",
                   backgroundColor: "#36373A",
                 }}
-                onClick={toggleModal}
+                onClick={handleSubmit}
               >
                 <Text style={{ color: "white" }}>Xong</Text>
               </Button>
@@ -368,4 +326,4 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
   );
 }
 
-export default ModalAddMemberGroup;
+export default ModalInformation;

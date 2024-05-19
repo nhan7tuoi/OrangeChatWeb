@@ -168,16 +168,24 @@ const StateButton = props => {
     const dispatch = useDispatch();
     const [isRequestSent, setIsRequestSent] = useState(false);
     const [isFriendDeleted, setIsFriendDeleted] = useState(false);
-    const sendFriendRequest = (receiverId) => {
+    // const sendFriendRequest = (receiverId) => {
+    //     console.log(receiverId);
+    //     const requestData = {
+    //         senderId: user._id,
+    //         receiverId: receiverId,
+    //     };
+    //     connectSocket.emit('send friend request', requestData);
+    //     // Cập nhật trạng thái sau khi gửi yêu cầu thành công
+    //     handleFriendRequestSent();
+    // };
+    const sendFriendRequest = receiverId => {
         console.log(receiverId);
         const requestData = {
-            senderId: user._id,
-            receiverId: receiverId,
+          senderId: user._id,
+          receiverId: receiverId,
         };
         connectSocket.emit('send friend request', requestData);
-        // Cập nhật trạng thái sau khi gửi yêu cầu thành công
-        handleFriendRequestSent();
-    };
+      };
     const handleFriendDelete = (receiverId) => {
         // Xóa bạn và cập nhật trạng thái sau khi xóa
         console.log(receiverId);
@@ -215,7 +223,7 @@ const StateButton = props => {
 
     const isFriend = props.listFriends.some(f => f._id === props.itemId);
     const isFriendRequestSender = props.listFriendRequests.some(fq => fq.senderId === props.itemId);
-    const isFriendRequestReceiver = props.listFriendRequests.some(fq => fq.receiverId === props.itemId && fq.senderId === user._id);
+    const isFriendRequestReceiver = props.listFriendRequests.some(fq => fq.senderId === user._id  && fq.receiverId === props.itemId);
 
     const handleRejectFriendRequest = (itemId) => {
         const fq = props.listFriendRequests.find(fq => fq.senderId === props.itemId);
@@ -255,8 +263,7 @@ const StateButton = props => {
                     <Button onClick={() => handleRejectFriendRequest(props.itemId)} style={{ background: 'none', border: 'none' }}>
                         <FiX style={{ fontSize: '40', color: '#FFF' }} />
                     </Button>
-                    <Button onClick={() => handleAcceptFriendRequest(props.itemId)} style={{ background: 'none', border: 'none' }}>
-                        
+                    <Button onClick={() => handleAcceptFriendRequest(props.itemId)} style={{ background: 'none', border: 'none' }}>    
                         <FaCheck style={{ fontSize: '40', color: '#FFF' }} />
                     </Button>
                     

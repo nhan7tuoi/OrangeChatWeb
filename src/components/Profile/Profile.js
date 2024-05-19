@@ -17,11 +17,12 @@ export default function Profile() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const [isOpenInformation, setIsOpenInformation] = useState(false);
-
+    // const [user, setUser] = useState({});
 
     const toggleInformationModal = () => {
         setIsOpenInformation(!isOpenInformation);
       };
+    
 
     return (
         <Row style={{ width: '100vw', height: '90vh', background: '#242424' }}>
@@ -31,7 +32,7 @@ export default function Profile() {
                     <ModalInformation
                         isOpen={isOpenInformation}
                         toggleModal={toggleInformationModal}
-                    ></ModalInformation>
+                    />
                 </Button>
 
 

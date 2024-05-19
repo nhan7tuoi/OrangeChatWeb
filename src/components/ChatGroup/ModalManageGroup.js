@@ -77,37 +77,35 @@ function ModalManageGroup({ isOpen, toggleModal }) {
   };
 // console.log("convers", conversation);
 // console.log("mem",mem.current);
-  const handleRemoveMember = () => {
-    try {
-      if (!connectSocket.on) {
-        console.error("Socket is not connected");
-        return; // Không thực hiện gửi emit nếu socket không được kết nối
-      }
-
-      if (!conversation || !mem.current) {
-        console.error("Conversation or member data is missing");
-        return; // Không thực hiện gửi emit nếu thiếu dữ liệu conversation hoặc member
-      }
-
-      connectSocket.emit("remove member", {
-        conversation: conversation,
-        member: mem.current,
-      });
-      setOptionVisible(false);
-    } catch (error) {
-      console.error("Error handling remove member:", error);
-      // Xử lí lỗi nếu có
+const handleRemoveMember = () => {
+  try {
+    if (!connectSocket.on) {
+      console.error("Socket is not connected");
+      return; // Không thực hiện gửi emit nếu socket không được kết nối
     }
-  };
-  // const handleRemoveMember = () => {
-  //   connectSocket.emit('remove member', {
-  //     conversation: conversation,
-  //     member: mem.current,
-  //   });
-  //   setOptionVisible(false);
-  // };
-  // console.log("aaa", conversation);
-  // console.log(conversation.members);
+
+    if (!conversation || !mem.current) {
+      console.error("Conversation or member data is missing");
+      return; // Không thực hiện gửi emit nếu thiếu dữ liệu conversation hoặc member
+    }
+
+    if (!conversation.members || !conversation.members.some) {
+      console.error("Conversation members data is missing or invalid");
+      return; // Không thực hiện gửi emit nếu dữ liệu conversation.members không tồn tại hoặc không hợp lệ
+    }
+
+    connectSocket.emit("remove member", {
+      conversation: conversation,
+      member: mem.current,
+    });
+    setOptionVisible(false);
+  } catch (error) {
+    console.error("Error handling remove member:", error);
+    // Xử lí lỗi nếu có
+  }
+};
+
+ 
 
   return (
     <>

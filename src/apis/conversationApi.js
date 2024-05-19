@@ -1,7 +1,6 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
-// import Conversation  from '../components/conversation';
-
+// import Conversation from ;
 
 const BASE_URL = `http://${IPV4}:3000/api/v1`;
 
@@ -42,6 +41,19 @@ const getConversationGroups = async ({userId}) => {
   }
 };
 
+const getOneConversation = async ({sendetId, receiverId}) => {
+  try {
+    const response = await instance.get(
+      `/getOneConversation/${sendetId}/${receiverId}`,
+    );
+    console.log("res data:",response.data);
+    return response.data;
+  } catch (error) {
+    console.log("can't fetch data", error);
+    throw error;
+  }
+};
+
 const uploadAvatar = async ({conversationId, image}) => {
   try {
     const response = await instance.post('/uploadAvatarGroup', {
@@ -59,4 +71,5 @@ export default {
   getAllConversation,
   getConversationGroups,
   uploadAvatar,
+  getOneConversation,
 };

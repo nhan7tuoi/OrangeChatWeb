@@ -62,13 +62,23 @@ export default function FriendsRequest() {
     }, [])
 
 
+    // useEffect(() => {
+    //     connectSocket.on('newFriendRequest', data => {
+    //         console.log('aaa');
+    //         dispatch(addFriendRequests(data));
+    //     });
+    //     connectSocket.on('rejectFriendRequest', data => {
+    //         console.log("bbb");
+    //         if (data) dispatch(deleteFriendRequest(data._id));
+    //     });
+    // }, []);
     useEffect(() => {
         connectSocket.on('newFriendRequest', data => {
-            console.log('aaa');
+            console.log('data: ' + data);
             dispatch(addFriendRequests(data));
         });
         connectSocket.on('rejectFriendRequest', data => {
-            console.log("bbb");
+            console.log(data);
             if (data) dispatch(deleteFriendRequest(data._id));
         });
     }, []);

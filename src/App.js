@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Chat from './components/ChatSingle/Chat';
 import Friend from './components/Friend/Friend';
 import Login from './components/Login/Login';
+import AdminLogin from './components/Login/AdminLogin';
+
 import Register from './components/Register/Register';
 import Register_Verifi from './components/Register/Register_Verifi';
 import Register_Inf from './components/Register/Register_Inf';
@@ -18,6 +20,12 @@ import FriendsRequest from './components/Friend/FriendRequest';
 import FriendsSearch from './components/Friend/FriendSearch';
 import ChatGroup from './components/ChatGroup/Chat';
 import { authenticateUser } from './redux/authLogin';
+
+import Admin from './components/Friend/Admin';
+
+import StickerManage from './components/Sticker/StickerManage';
+import OTPForgetPass from './components/Profile/OTPForgetPass';
+import NewPass from './components/Profile/NewPass';
 
 function App() {
   const user = useSelector((state) => state.auth.user);
@@ -45,10 +53,18 @@ function App() {
         <Route path='/forgotpassword' element={<ForgetPass />} />
         <Route path='/changepass' element={<ChangePass />} />
         {/* <Route path='/welcome' element={<Welcome />} /> */}
+        <Route exact path="/adminlogin" element={<AdminLogin />} />
+        <Route  path="/otppass" element={<OTPForgetPass />} />
+        <Route  path="/newpass" element={<NewPass />} />
+
+
+
+
       </Routes>
 
       <Routes>
         <Route path='/chatWindow' element={<ChatWindow />} />
+
       </Routes>
 
       {token && <TabBar />} {/* Chỉ hiển thị TabBar khi đã đăng nhập */}
@@ -70,6 +86,10 @@ function App() {
         <Route path='/chat' element={token ? <Chat /> : <Login />} />
         <Route path='/profile' element={token ? <Profile /> : <Login />} />
         <Route path='/information' element={token ? <Information /> : <Login />} />
+        <Route path='/adminma' element={token ? <Admin /> : <Login />} />
+        <Route path='/sticker' element={token ? <StickerManage /> : <Login />} />
+
+
       </Routes>
 
     </div>
