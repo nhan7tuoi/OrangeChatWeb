@@ -164,7 +164,7 @@ const StateButton = props => {
     //       </div>
     //     );
     //   }
-    const user = useSelector(state => state.auth.user);
+    const user = useSelector(state => state.authLogin.user);
     const dispatch = useDispatch();
     const [isRequestSent, setIsRequestSent] = useState(false);
     const [isFriendDeleted, setIsFriendDeleted] = useState(false);

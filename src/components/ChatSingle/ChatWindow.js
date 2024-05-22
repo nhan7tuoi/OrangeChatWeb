@@ -20,14 +20,15 @@ import ForwardModal from "./ForwardModal";
 import EmojiPicker from "emoji-picker-react";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/StickerApi";
-
+import stickerApi from "../../apis/stickerApi";
+import { formatConversation } from "../../utils/formatConverstation";
 
 const { Text } = Typography;
 
 export default function ChatWindow() {
-  const user = JSON.parse(localStorage.getItem("user"));
-  const conversation = JSON.parse(localStorage.getItem("conversation"));
+  const user = useSelector((state) => state.authLogin.user);
+  // const conversation = JSON.parse(localStorage.getItem("conversation"));
+  const conversation = useSelector((state) => state.conversation.conversation);
   const receiverId = conversation.members?.filter(
     (member) => member._id !== user._id
   );
@@ -35,8 +36,7 @@ export default function ChatWindow() {
     (state) => state.current.conversationReload
   );
 
-  const stickerData = useSelector(state => state.sticker.stickers);
-  console.log('sticker', stickerData);
+  const stickerData = useSelector((state) => state.sticker.stickers);
   const userId = user._id;
   const scrollRef = useRef(null);
   const dispatch = useDispatch();
@@ -49,7 +49,6 @@ export default function ChatWindow() {
   const [showReactionIndex, setShowReactionIndex] = useState(-1);
   const [openStiker, setOpenSticker] = useState(false);
   const [selectedPack, setSelectedPack] = useState(stickerData[0]);
-  console.log("pack",selectedPack);
 
   const formatTime = (time) => {
     const options = { hour: "numeric", minute: "numeric" };
@@ -59,21 +58,19 @@ export default function ChatWindow() {
   useEffect(() => {
     async function fetchStickers() {
       try {
-        const stickers = await stickerApi.getSticker(); 
-        dispatch(setSticker(stickers)); 
+        const stickers = await stickerApi.getSticker();
+        dispatch(setSticker(stickers));
         // console.log("sticerfetch");
       } catch (error) {
         console.error("Error fetching stickers:", error);
       }
     }
 
-    fetchStickers(); 
+    fetchStickers();
   }, [dispatch]);
 
   useEffect(() => {
     getLastMessage();
-    console.log("fetch message");
-    // console.log("apiMess: ", messages);
   }, [conversationId]);
 
   const getLastMessage = async () => {
@@ -102,7 +99,7 @@ export default function ChatWindow() {
   //- gửi tin nhắn lên Socket
   const sendMessage = (message) => {
     connectSocket.emit("chat message", message);
-    getConversation();
+    // getConversation();
   };
   //- gửi tin nhắn TEXT
   const onSend = () => {
@@ -248,7 +245,7 @@ export default function ChatWindow() {
       messageId: messageId,
       conversationId: conversation._id,
     });
-    getConversation();
+    // getConversation();
   };
 
   const deleteMessage = (messageId) => {
@@ -258,7 +255,7 @@ export default function ChatWindow() {
       conversationId: conversation._id,
       userDelete: user._id,
     });
-    getConversation();
+    // getConversation();
   };
 
   // Xử lý tin nhắn reply
@@ -289,20 +286,37 @@ export default function ChatWindow() {
   };
 
   //get conversation
-  const getConversation = async () => {
-    try {
-      const response = await conversationApi.getConversation({
-        userId: user._id,
-      });
+  // const getConversation = async () => {
+  //   try {
+  //     const response = await conversationApi.getConversation({
+  //       userId: user._id,
+  //     });
 
-      if (response) {
-        console.log("update");
-        dispatch(setConversations(response.data));
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
+  //     if (response) {
+  //       console.log("update");
+  //       dispatch(setConversations(response.data));
+  //     }
+  //   } catch (error) {
+  //     console.log("error", error);
+  //   }
+  // };
+  // const getConversation = async () => {
+  //   try {
+  //     const response = await conversationApi.getConversation({
+  //       userId: user._id,
+  //     });
+
+  //     if (response) {
+  //       const fmConversations = formatConversation({
+  //         data: response.data,
+  //         userId: user._id,
+  //       });
+  //       dispatch(setConversations(fmConversations));
+  //     }
+  //   } catch (error) {
+  //     console.log("error", error);
+  //   }
+  // };
 
   // Update data từ Socket gửi về
   useEffect(() => {
@@ -642,12 +656,9 @@ export default function ChatWindow() {
       setShowIcons(false);
     };
 
-    
-
     const toggleForwardModal = () => {
       setIsOpenShare(!isOpenShare);
     };
-    
 
     return (
       <div
@@ -721,7 +732,10 @@ export default function ChatWindow() {
             />
           </Button>
         </div>
-        <ForwardModal isOpen={isOpenShare} toggleForwardModal={toggleForwardModal} />
+        <ForwardModal
+          isOpen={isOpenShare}
+          toggleForwardModal={toggleForwardModal}
+        />
       </div>
     );
   };
@@ -1109,7 +1123,8 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 5,
+                                          left: 7,
+                                          top: 0,
                                         }}
                                       >
                                         <Icons

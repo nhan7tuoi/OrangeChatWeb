@@ -33,16 +33,15 @@ import ForwardModal from "../ChatSingle/ForwardModal";
 import currentSlice, { setCurrentPage2 } from "../../redux/currentSlice";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/StickerApi";
+import stickerApi from "../../apis/stickerApi";
 
 const { Text } = Typography;
 
 export default function ChatWindow() {
   const stickerData = useSelector((state) => state.sticker.stickers);
-  // console.log("sticker", stickerData);
-  const user = JSON.parse(localStorage.getItem("user"));
-  // console.log('us',user);
-  const conversation1 = JSON.parse(localStorage.getItem("conversation1"));
+  const user = useSelector((state) => state.authLogin.user);
+  const conversation1 = useSelector((state) => state.conversation.conversation);
+  console.log("conver", conversation1);
   const receiverId = conversation1?.members?.filter(
     (member) => member._id !== user._id
   );
@@ -107,7 +106,7 @@ export default function ChatWindow() {
 
   const getLastMessage = async () => {
     const response = await messageApi.getMessage({
-      conversationId: conversation1?.lastMessage?.conversationId,
+      conversationId: conversation1?._id,
     });
     if (response) {
       setMessages(response.data);
@@ -2923,7 +2922,7 @@ export default function ChatWindow() {
                 }}
                 onClick={() => {
                   if (
-                    conversation1.administrators.find((m) => m === user._id)
+                    conversation1?.administrators?.find((m) => m === user._id)
                   ) {
                     handleDisband();
                   }
@@ -2991,63 +2990,3 @@ export default function ChatWindow() {
   );
 }
 
-// const stickerData = [
-//   {
-//     title: "Animals",
-//     data: [
-//       {
-//         id: 1,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 2,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//     ],
-//   },
-//   {
-//     title: "Emotions",
-//     data: [
-//       {
-//         id: 1,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 2,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 3,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 4,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 5,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 6,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 7,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 8,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 9,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//       {
-//         id: 10,
-//         url: "https://uploadfile2002.s3.ap-southeast-1.amazonaws.com/sticker+(12).png",
-//       },
-//     ],
-//   },
-// ];

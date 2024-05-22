@@ -37,8 +37,17 @@ const authLogin = createSlice({
     token: null,
     status: 'idle',
     error: null,
+    connect: false,
   },
   reducers: {
+    setConnect: (state, action) => {
+      state.connect = action.payload;
+      },
+    setAuth: (state, action) => {
+      console.log('action', action.payload);
+      state.user = action.payload.user;
+      state.token = action.payload.accessToken;
+    },
     logout: (state) => {
       state.user = null;
       state.token = null;
@@ -74,5 +83,5 @@ const authLogin = createSlice({
   },
 });
 
-export const { logout } = authLogin.actions;
+export const { logout,setAuth,setConnect } = authLogin.actions;
 export default authLogin.reducer;

@@ -2,14 +2,15 @@ import { Button, Col, Row, Typography } from 'antd'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import authApi from '../../apis/authApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch ,useSelector} from 'react-redux';
 import "./Login.css";
-import { setAuth } from '../../redux/authSlice';
+import { setAuth } from '../../redux/authLogin'
 // import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
 
 export default function Login() {
+    const token = useSelector((state) => state.authLogin.token);
     const [error, setError] = useState("");
     const dispatch = useDispatch();
     const [data, setData] = useState({
@@ -27,16 +28,16 @@ export default function Login() {
                 password: data.password,
             });
             if (response) {
-                //luu token vao local storage
-                localStorage.setItem('accessToken', response.accessToken);
                 localStorage.setItem('user', JSON.stringify(response.user));
-
+                localStorage.setItem('accessToken', response.accessToken);
+                //luu vao redux
+                dispatch(setAuth({
+                    user: response.user,
+                    accessToken: response.accessToken
+                }));
+                console.log("response: ", token);
                 navigate('/chat');
             }
-            dispatch(setAuth({
-                user: response.user,
-                accessToken: response.accessToken
-            }));
         } catch (error) {
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")
         }

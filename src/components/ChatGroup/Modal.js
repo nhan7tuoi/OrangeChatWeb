@@ -24,7 +24,7 @@ function Modal({ isOpen, toggleModal }) {
     const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
     const [keyword, setKeyword] = useState("");
-    const user = useSelector((state) => state.auth.user);
+    const user = useSelector((state) => state.authLogin.user);
     const dispatch = useDispatch();
     const resultSearch = useSelector(state => state.friend.resultSearch);
     const listFriends = useSelector(state => state.friend.listFriends);

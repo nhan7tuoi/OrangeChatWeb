@@ -48,8 +48,10 @@ export const {
   deleteFriend
 } = friendSlice.actions;
 export const fetchFriends = userId => async dispatch => {
+  console.log('fetchFriends', userId);
   try {
     const friends = await FriendApi.getFriends({userId});
+    console.log('friends', friends.data);
     dispatch(setFriends(friends.data));
   } catch (error) {
     console.error('Error fetching friends:', error);

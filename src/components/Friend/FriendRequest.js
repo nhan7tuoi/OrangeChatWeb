@@ -24,7 +24,7 @@ import {
 const { Text, Title } = Typography;
 
 export default function FriendsRequest() {
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.authLogin.user);
   console.log(user._id);
   const dispatch = useDispatch();
   // const [friendsRequest, setFriendsRequest] = useState([]);
@@ -197,7 +197,7 @@ export default function FriendsRequest() {
           Lời mời kết bạn
         </header>
         {Array.isArray(listFriendRequests) &&
-          listFriendRequests.map((friends, index) => (
+          listFriendRequests?.map((friends, index) => (
             <div
               key={index}
               style={{

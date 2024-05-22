@@ -20,57 +20,70 @@ import { GrUserAdmin } from "react-icons/gr";
 const { Text } = Typography;
 
 function ModalManageGroup({ isOpen, toggleModal }) {
-  const conversation1 = JSON.parse(localStorage.getItem("conversation1"));
+  const conversation1 = useSelector((state) => state.conversation.conversation);
   const [optionVisible, setOptionVisible] = useState(false);
   const [temp, setTemp] = useState([]);
   const scrollRef = useRef(null);
   const [keyword, setKeyword] = useState("");
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.authLogin.user);
   const dispatch = useDispatch();
   const resultSearch = useSelector((state) => state.friend.resultSearch);
   const mem = useRef({}).current;
 
-  useEffect(() => {
-    connectSocket.on("updateConversation", (data) => {
-      const temp = formatOneConversation({
-        conversation: data,
-        userId: user._id,
-      });
-      dispatch(setCoversation(temp));
-    });
+  const [connect, setConnect] = useState(false);
 
-    connectSocket.on("removeMember", (data) => {
-      if (data.members.some((m) => m._id === user._id)) {
+  useEffect(() => {
+    if (!connect) {
+      connectSocket.initSocket(user._id);
+      setConnect(true);
+    }
+
+    if (connect) {
+      connectSocket.on("updateConversation", (data) => {
         const temp = formatOneConversation({
           conversation: data,
           userId: user._id,
         });
         dispatch(setCoversation(temp));
-      }
-    });
-    connectSocket.on("leaveGroup", (data) => {
-      if (data.members.some((m) => m._id === user._id)) {
-        const temp = formatOneConversation({
-          conversation: data,
-          userId: user._id,
-        });
-        dispatch(setCoversation(temp));
-      }
-    });
+      });
+
+      connectSocket.on("removeMember", (data) => {
+        if (data.members.some((m) => m._id === user._id)) {
+          const temp = formatOneConversation({
+            conversation: data,
+            userId: user._id,
+          });
+          dispatch(setCoversation(temp));
+        }
+      });
+      connectSocket.on("leaveGroup", (data) => {
+        if (data.members.some((m) => m._id === user._id)) {
+          const temp = formatOneConversation({
+            conversation: data,
+            userId: user._id,
+          });
+          dispatch(setCoversation(temp));
+        }
+      });
+    }
   }, []);
   const handleGrantAdmin = () => {
-    connectSocket.emit("grant admin", {
-      conversation: conversation1,
-      member: mem.current,
-    });
-    setOptionVisible(false);
+    if (connect) {
+      connectSocket.emit("grant admin", {
+        conversation: conversation1,
+        member: mem.current,
+      });
+      setOptionVisible(false);
+    }
   };
   const handleRevokeAdmin = () => {
-    connectSocket.emit("revoke admin", {
-      conversation: conversation1,
-      member: mem.current,
-    });
-    setOptionVisible(false);
+    if (connect) {
+      connectSocket.emit("revoke admin", {
+        conversation: conversation1,
+        member: mem.current,
+      });
+      setOptionVisible(false);
+    }
   };
   const handleRemoveMember = () => {
     try {
@@ -161,8 +174,8 @@ function ModalManageGroup({ isOpen, toggleModal }) {
                     height: "100%",
                   }}
                 >
-                  {Array.isArray(conversation1.members) &&
-                    conversation1.members.map((user, index) => (
+                  {Array.isArray(conversation1?.members) &&
+                    conversation1?.members?.map((user, index) => (
                       <div
                         key={index}
                         style={{

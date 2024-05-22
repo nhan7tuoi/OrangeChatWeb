@@ -28,19 +28,19 @@ import OTPForgetPass from './components/Profile/OTPForgetPass';
 import NewPass from './components/Profile/NewPass';
 
 function App() {
-  const user = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.authLogin.token);
+  console.log("token: ", token);
   const dispatch = useDispatch();
-  const token = localStorage.getItem('accessToken');
+  // const token = localStorage.getItem('accessToken');
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    console.log("token: ", token);
-    if (token) {
-      dispatch(authenticateUser(token));
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   const token = localStorage.getItem('accessToken');
+  //   console.log("token: ", token);
+  //   if (token) {
+  //     dispatch(authenticateUser(token));
+  //   }
+  // }, [dispatch]);
 
-  const isLoggedIn = Boolean(user && user.name);
 
 
   return (

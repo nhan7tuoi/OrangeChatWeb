@@ -27,7 +27,7 @@ const { Text, Title } = Typography;
 
 export default function Friends() {
 
-    const user = useSelector((state) => state.auth.user);
+    const user = useSelector((state) => state.authLogin.user);
     const dispatch = useDispatch();
     const listFriends = useSelector(state => state.friend.listFriends);
 
