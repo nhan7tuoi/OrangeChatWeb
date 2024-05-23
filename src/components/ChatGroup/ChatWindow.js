@@ -323,8 +323,8 @@ export default function ChatWindow() {
 
   // Update data từ Socket gửi về
   useEffect(() => {
-    connectSocket.initSocket(user._id);
-    console.log("connect", user._id);
+    // connectSocket.initSocket(user._id);
+    // console.log("connect", user._id);
 
     connectSocket.on("chat message", (msg) => {
       if (msg.conversationId === conversation1._id) {
@@ -366,26 +366,35 @@ export default function ChatWindow() {
         getLastMessage();
       }
     });
+
     connectSocket.on("removeMember", (data) => {
-      console.log("conId", conversation1._id);
-      console.log("dataid", data._id);
-      console.log(conversation1._id === data._id);
-      if (
-        !data.members.some((m) => m._id === user._id) &&
-        conversation1._id === data._id
-      ) {
-        dispatch(setCurrentPage2("ChatWelcome"));
+      setMessages((preMessage) => [...preMessage, data.notification]);
+    });
+    connectSocket.on("addMember", (data) => {
+      setMessages((preMessage) => [...preMessage, data]);
+    });
+    connectSocket.on("deletedMember", (data) => {
+      if (conversation1._id === data._id) {
+        Alert("Thông báo", "bạn đã bị xoá khỏi nhóm", [
+          {
+            text: "Đồng ý",
+            onPress: () => {
+              if (conversation1.isGroup) dispatch(setCurrentPage2("Welcome"));
+            },
+          },
+        ]);
       }
     });
-
-    connectSocket.on("leaveGroup", (data) => {
-      console.log("conId", conversation1._id);
-      console.log("dataid", data._id);
-      console.log(conversation1._id === data._id);
-      if (
-        !data.members.some((m) => m._id === user._id) &&
-        conversation1._id === data._id
-      ) {
+    connectSocket.on("disbandGroup", (data) => {
+      if (data._id === conversation1._id) {
+        Alert("Thông báo", "Nhóm không còn tồn tại", [
+          {
+            text: "Đồng ý",
+            style: "cancel",
+          },
+        ]);
+        // dispatch(setCoversation({}));
+        dispatch(setCurrentPage2("Welcome"));
       }
     });
   }, []);
@@ -2901,41 +2910,44 @@ export default function ChatWindow() {
                 toggleModal={toggleManageGroupModal}
               />
             </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-start",
-                width: "100%",
-                marginTop: "10px",
-              }}
-            >
-              <Button
+            {conversation1.administrators?.includes(user._id) && (
+              <div
                 style={{
                   display: "flex",
                   justifyContent: "flex-start",
                   width: "100%",
-                  alignItems: "center",
                   marginTop: "10px",
-                  background: "none",
-                  border: "none",
-                  height: "50px",
-                }}
-                onClick={() => {
-                  if (
-                    conversation1?.administrators?.find((m) => m === user._id)
-                  ) {
-                    handleDisband();
-                  }
                 }}
               >
-                <MdOutlineCloseFullscreen
-                  style={{ fontSize: 24, color: "#FFF", margin: "10px" }}
-                />
-                <Text style={{ color: "#FFF", fontSize: "18px" }}>
-                  Giải tán nhóm
-                </Text>
-              </Button>
-            </div>
+                <Button
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-start",
+                    width: "100%",
+                    alignItems: "center",
+                    marginTop: "10px",
+                    background: "none",
+                    border: "none",
+                    height: "50px",
+                  }}
+                  onClick={() => {
+                    if (
+                      conversation1?.administrators?.find((m) => m === user._id)
+                    ) {
+                      handleDisband();
+                    }
+                  }}
+                >
+                  <MdOutlineCloseFullscreen
+                    style={{ fontSize: 24, color: "#FFF", margin: "10px" }}
+                  />
+                  <Text style={{ color: "#FFF", fontSize: "18px" }}>
+                    Giải tán nhóm
+                  </Text>
+                </Button>
+              </div>
+            )}
+
             <div
               style={{
                 display: "flex",
@@ -2989,4 +3001,3 @@ export default function ChatWindow() {
     </div>
   );
 }
-

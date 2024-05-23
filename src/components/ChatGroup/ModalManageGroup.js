@@ -175,7 +175,7 @@ function ModalManageGroup({ isOpen, toggleModal }) {
                   }}
                 >
                   {Array.isArray(conversation1?.members) &&
-                    conversation1?.members?.map((user, index) => (
+                    conversation1?.members?.map((item, index) => (
                       <div
                         key={index}
                         style={{
@@ -193,7 +193,7 @@ function ModalManageGroup({ isOpen, toggleModal }) {
                       >
                         <div style={{ display: "flex", alignItems: "center" }}>
                           <img
-                            src={user.image}
+                            src={item.image}
                             style={{
                               height: "30px",
                               width: "30px",
@@ -209,54 +209,105 @@ function ModalManageGroup({ isOpen, toggleModal }) {
                               fontSize: "16px",
                             }}
                           >
-                            {user.name}
+                            {item.name}
+                          </Text>
+                          <Text
+                            style={{
+                              marginLeft: "20px",
+                              color: "white",
+                              fontSize: "16px",
+                            }}
+                          >
+                            {conversation1.administrators?.includes(item._id)
+                              ? "Admin"
+                              : ""}
+                          </Text>
+                          <Text
+                            style={{
+                              marginLeft: "20px",
+                              color: "white",
+                              fontSize: "16px",
+                            }}
+                          >
+                            {item._id === user._id ? "Bạn" : ""}
                           </Text>
                         </div>
-                        <div style={{ display: "flex" }}>
-                          <Button
-                            style={{
-                              display: "flex",
-                              width: "40px",
-                              height: "40px",
-                              background: "#36373A",
-                              borderRadius: "100%",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              border: "hidden",
-                            }}
-                            onClick={() => {
-                              console.log(user);
-                              mem.current = user;
-                              handleRemoveMember();
-                            }}
-                          >
-                            <MdOutlinePersonRemoveAlt1
-                              style={{ fontSize: "40", color: "#FFF" }}
-                            />
-                          </Button>
+                        {conversation1.administrators?.includes(user._id) ? (
+                          <div style={{ display: "flex" }}>
+                            {item._id == user._id ? null : (
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  width: "40px",
+                                  height: "40px",
+                                  background: "#36373A",
+                                  borderRadius: "100%",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  border: "hidden",
+                                }}
+                                onClick={() => {
+                                  mem.current = item;
+                                  handleRemoveMember();
+                                }}
+                              >
+                                <MdOutlinePersonRemoveAlt1
+                                  style={{ fontSize: "40", color: "#FFF" }}
+                                />
+                              </Button>
+                            )}
 
-                          <Button
-                            style={{
-                              display: "flex",
-                              width: "40px",
-                              height: "40px",
-                              background: "#FF6347",
-                              borderRadius: "100%",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              border: "hidden",
-                              marginLeft: "5px",
-                            }}
-                            onClick={() => {
-                              mem.current = user;
-                              handleGrantAdmin();
-                            }}
-                          >
-                            <GrUserAdmin
-                              style={{ fontSize: "40", color: "#FFF" }}
-                            />
-                          </Button>
-                        </div>
+                            {conversation1.administrators?.includes(
+                              item._id
+                            ) ? (
+                              item._id == user._id ? null : (
+                                <Button
+                                  style={{
+                                    display: "flex",
+                                    width: "40px",
+                                    height: "40px",
+                                    background: "#FF6347",
+                                    borderRadius: "100%",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    border: "hidden",
+                                    marginLeft: "5px",
+                                  }}
+                                  onClick={() => {
+                                    mem.current = item;
+                                    handleRevokeAdmin();
+                                  }}
+                                >
+                                  <GrUserAdmin
+                                    style={{ fontSize: "40", color: "red" }}
+                                  />
+                                </Button>
+                              )
+                            ) : (
+                              <Button
+                                style={{
+                                  display: "flex",
+                                  width: "40px",
+                                  height: "40px",
+                                  background: "#FF6347",
+                                  borderRadius: "100%",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  border: "hidden",
+                                  marginLeft: "5px",
+                                }}
+                                onClick={() => {
+                                  mem.current = item;
+                                  handleGrantAdmin();
+                                }}
+                              >
+                                <GrUserAdmin
+                                  style={{ fontSize: "40", color: "#FFF" }}
+                                />
+                              </Button>
+                            )}
+                          </div>
+                        ) : null}
                       </div>
                     ))}
                 </div>

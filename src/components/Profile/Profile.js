@@ -15,7 +15,7 @@ const { Text, Title } = Typography;
 export default function Profile() {
     let navigate = useNavigate();
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
+    const user = useSelector((state) => state.authLogin.user);
 
     // const user = JSON.parse(localStorage.getItem('conversation'));
     const [isOpenInformation, setIsOpenInformation] = useState(false);

@@ -23,18 +23,17 @@ export default function ChatList() {
   const dispatch = useDispatch();
   const accessToken = useSelector((state) => state.auth.accessToken);
   const [conversations, setConversations] = useState([]);
-  const [connect, setConnect] = useState(false);
+  // const [connect, setConnect] = useState(false);
 
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    if (!connect) {
+    // if (!connect) {
       fetchData();
-      connectSocket.initSocket(user._id);
-      setConnect(true);
-    }
+      // connectSocket.initSocket(user._id);
+      // setConnect(true);
+    // }
 
-    if (connect) {
       connectSocket.on("newConversationGroup", (data) => {
         fetchData();
       });
@@ -58,7 +57,7 @@ export default function ChatList() {
       connectSocket.on("deletedMember", (data) => {
         fetchData();
       });
-    }
+    
   }, []);
 
   const fetchData = async () => {

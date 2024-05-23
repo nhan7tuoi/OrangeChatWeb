@@ -23,15 +23,15 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
   const [connect, setConnect] = useState(false);
 
   useEffect(() => {
-    if (!connect) {
+    // if (!connect) {
       fetchData();
-      connectSocket.initSocket(user._id);
-      setConnect(true);
-    }
+      // connectSocket.initSocket(user._id);
+    //   setConnect(true);
+    // }
   }, []);
 
   useEffect(() => {
-    if (connect) {
+    // if (connect) {
       fetchData();
       setNewList(
         listFriends?.filter(
@@ -39,7 +39,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
         )
       );
       fetchData();
-    }
+    // }
   }, []);
 
   // Hàm lấy danh sách bạn bè của người dùng
@@ -53,17 +53,17 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
 
   // Xử lý khi người dùng muốn thêm thành viên vào nhóm
   const handleAddMember = (member) => {
-    if (connect) {
+    // if (connect) {
       connectSocket.emit("add member to group", {
         conversation: conversation,
         member: member,
       });
-    }
+    // }
   };
 
   useEffect(() => {
     // Lắng nghe sự kiện khi có phản hồi từ server sau khi thêm thành viên vào nhóm
-    if (connect) {
+    // if (connect) {
       connectSocket.on("respondAdd", (data) => {
         const fConversation = formatOneConversation({
           conversation: data,
@@ -71,7 +71,7 @@ function ModalAddMemberGroup({ isOpen, toggleModal }) {
         });
         dispatch(setCoversation(fConversation));
       });
-    }
+    // }
   }, []);
 
   useEffect(() => {

@@ -94,6 +94,10 @@ function Modal({ isOpen, toggleModal }) {
     };
 
     const handleCreateGroup = () => {
+        if (selectedMembers.length < 2) {
+            alert('Nhóm phải có ít nhất 3 thành viên');
+            return;
+        }
         let tempMembers = selectedMembers.map(m => m._id);
         tempMembers = [...tempMembers, user._id];
         connectSocket.emit('create new conversation', {
