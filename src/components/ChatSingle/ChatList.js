@@ -74,6 +74,7 @@ export default function ChatList() {
               height: "10%",
               background: "#242424",
               border: "hidden",
+              marginTop: '10px'
             }}
             onClick={() => {
               dispatch(setCoversation(item));
@@ -81,10 +82,12 @@ export default function ChatList() {
               dispatch(setConversationReload(item._id));
             }}
           >
-            <img
-              src={otherMember.image}
-              style={{ width: "60px", height: "60px", borderRadius: "100%" }}
-            ></img>
+            <div>
+              <img
+                src={otherMember.image}
+                style={{ width: "60px", height: "60px", borderRadius: "100%" }}
+              />
+            </div>
 
             <div
               style={{

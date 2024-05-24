@@ -5,6 +5,7 @@ import authApi from '../../apis/authApi';
 import { useDispatch ,useSelector} from 'react-redux';
 import "./Login.css";
 import { setAuth } from '../../redux/authLogin'
+import { setCurrentPage1 } from '../../redux/currentSlice';
 // import i18next from "../../i18n/i18n"
 
 const { Text, Title } = Typography;
@@ -37,6 +38,7 @@ export default function Login() {
                 }));
                 console.log("response: ", token);
                 navigate('/chat');
+                dispatch(setCurrentPage1("ChatWelcome"));
             }
         } catch (error) {
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")

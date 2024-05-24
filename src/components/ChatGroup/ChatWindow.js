@@ -33,7 +33,7 @@ import ForwardModal from "../ChatSingle/ForwardModal";
 import currentSlice, { setCurrentPage2 } from "../../redux/currentSlice";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/stickerApi";
+import stickerApi from "../../apis/StickerApi";
 
 const { Text } = Typography;
 
@@ -972,6 +972,12 @@ export default function ChatWindow() {
 
   const [repSelected, setRepSelected] = useState(itemSelected);
 
+  const getLastWord = (text) => {
+    const words = text.split(" ");
+    const last = words[words.length - 1];
+    return last;
+  };
+
   return (
     <div
       style={{
@@ -1200,15 +1206,33 @@ export default function ChatWindow() {
                         }
                       >
                         {item?.senderId._id !== userId && (
-                          <img
-                            src={item.senderId.image}
-                            style={{
-                              width: "32px",
-                              height: "32px",
-                              borderRadius: "16px",
-                            }}
-                          />
+                          <div>
+                            <img
+                              src={item.senderId.image}
+                              style={{
+                                width: "32px",
+                                height: "32px",
+                                borderRadius: "16px",
+                              }}
+                            />
+                            <div>
+                              <Text
+                                style={{
+                                  fontSize: 12,
+                                  paddingHorizontal: 2,
+                                  color: "grey",
+                                  // textAlign: "center",
+                                  // position: "relative",
+                                  // left: "10%",
+                                  // top: 0,
+                                }}
+                              >
+                                {getLastWord(item?.senderId.name)}
+                              </Text>
+                            </div>
+                          </div>
                         )}
+
                         <Button
                           style={{
                             backgroundColor: "#F24E1E",
@@ -1219,6 +1243,7 @@ export default function ChatWindow() {
                             minWidth: "15%",
                             border: "hidden",
                             height: "100%",
+                            marginTop: "20px",
                           }}
                         >
                           {item?.reply !== null && item.isReCall === false && (
@@ -1415,7 +1440,7 @@ export default function ChatWindow() {
                                           width={18}
                                           height={18}
                                         />
-                                        {/* <ReactionViewModel item={item} /> */}
+                                        <ReactionViewModel item={item} />
                                       </div>
                                     )}
                                   </div>

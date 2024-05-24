@@ -21,14 +21,14 @@ const getConversation = async ({userId}) => {
 };
 
 const getAllConversation = async ({userId}) => {
-  // console.log(userId);
-  // try {
-  //   const response = await instance.get(`/allConversations/${userId}`);
-  //   return response.data;
-  // } catch (error) {
-  //   console.log("can't fetch data", error);
-  //   throw error;
-  // }
+  console.log(userId);
+  try {
+    const response = await instance.get(`/allConversations/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.log("can't fetch data", error);
+    throw error;
+  }
 };
 
 const getConversationGroups = async ({userId}) => {

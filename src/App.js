@@ -19,7 +19,7 @@ import React, { useEffect } from 'react';
 import FriendsRequest from './components/Friend/FriendRequest';
 import FriendsSearch from './components/Friend/FriendSearch';
 import ChatGroup from './components/ChatGroup/Chat';
-import { authenticateUser } from './redux/authLogin';
+import { authenticateUser, logout } from './redux/authLogin';
 
 import Admin from './components/Friend/Admin';
 
@@ -41,7 +41,7 @@ function App() {
   //   }
   // }, [dispatch]);
 
-
+  // dispatch(logout());
 
   return (
     <div>

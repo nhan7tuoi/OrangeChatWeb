@@ -17,10 +17,11 @@ import { IoMdMore } from "react-icons/io";
 import { TbMessageCircleX } from "react-icons/tb";
 import { RiShareForwardFill } from "react-icons/ri";
 import ForwardModal from "./ForwardModal";
+import ReactionModal from "../Reaction/ReactionModal";
 import EmojiPicker from "emoji-picker-react";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/stickerApi";
+import stickerApi from "../../apis/StickerApi";
 import { formatConversation } from "../../utils/formatConverstation";
 
 const { Text } = Typography;
@@ -753,6 +754,11 @@ export default function ChatWindow() {
   // const repSelected = JSON.parse(localStorage.getItem('itemSelected'));
   const [repSelected, setRepSelected] = useState(itemSelected);
 
+  const [isOpenReaction, setIsOpenReaction] = useState(false);
+  const toggleReactionModal = () => {
+    setIsOpenReaction(!isOpenReaction);
+  };
+
   return (
     <div
       style={{
@@ -903,6 +909,9 @@ export default function ChatWindow() {
                     return (
                       <div
                         key={index}
+                        setItemSelected={setItemSelected}
+                        showReCall={showReCall}
+                        isShowReCall={isShowReCall}
                         style={
                           item?.senderId._id === userId
                             ? {
@@ -941,6 +950,11 @@ export default function ChatWindow() {
                             minWidth: "15%",
                             border: "hidden",
                             height: "100%",
+                          }}
+                          onClick={() => {
+                            setItemSelected(item);
+                            // console.log("Itemchat:", item);
+                            toggleReactionModal();
                           }}
                         >
                           {item?.reply !== null && item.isReCall === false && (
@@ -1073,7 +1087,7 @@ export default function ChatWindow() {
                                           display: "flex",
                                           // flexDirection: "row",
                                           alignItems: "center",
-                                          left: 5,
+                                          left: 10,
                                           bottom: -5,
                                           cursor: "pointer",
                                         }
@@ -1088,7 +1102,7 @@ export default function ChatWindow() {
                                           // flexDirection: "row",
                                           justifyContent: "center",
                                           alignItems: "center",
-                                          right: 5,
+                                          right: 10,
                                           bottom: -5,
                                           cursor: "pointer",
                                         }
@@ -1123,7 +1137,7 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 7,
+                                          left: 10,
                                           top: 0,
                                         }}
                                       >
@@ -1148,6 +1162,11 @@ export default function ChatWindow() {
                           </Text>
                         </Button>
                         <MessageWithIcons itemSelected={item} />
+                        <ReactionModal
+                          isOpen={isOpenReaction}
+                          toggleReactionModal={toggleReactionModal}
+                          reactionMsg={item}
+                        />
                       </div>
                     );
                   }
@@ -1180,6 +1199,11 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
+                        onClick={() => {
+                          setItemSelected(item);
+                          // console.log("Itemchat:", item);
+                          toggleReactionModal();
+                        }}
                       >
                         {item?.senderId !== userId && (
                           <src
@@ -1416,6 +1440,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
+                        <ReactionModal
+                          isOpen={isOpenReaction}
+                          toggleReactionModal={toggleReactionModal}
+                          reactionMsg={item}
+                        />
                       </div>
                     );
                   }
@@ -1449,6 +1478,11 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
+                        onClick={() => {
+                          setItemSelected(item);
+                          // console.log("Itemchat:", item);
+                          toggleReactionModal();
+                        }}
                       >
                         {item?.senderId !== userId && (
                           <src
@@ -1685,6 +1719,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
+                        <ReactionModal
+                          isOpen={isOpenReaction}
+                          toggleReactionModal={toggleReactionModal}
+                          reactionMsg={item}
+                        />
                       </div>
                     );
                   }
@@ -1717,6 +1756,11 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
+                        onClick={() => {
+                          setItemSelected(item);
+                          // console.log("Itemchat:", item);
+                          toggleReactionModal();
+                        }}
                       >
                         {item?.senderId._id !== userId && (
                           <src
@@ -2001,6 +2045,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
+                        <ReactionModal
+                          isOpen={isOpenReaction}
+                          toggleReactionModal={toggleReactionModal}
+                          reactionMsg={item}
+                        />
                       </div>
                     );
                   }
@@ -2033,6 +2082,11 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
+                        onClick={() => {
+                          setItemSelected(item);
+                          // console.log("Itemchat:", item);
+                          toggleReactionModal();
+                        }}
                       >
                         {item?.senderId._id !== userId && (
                           <src
@@ -2269,12 +2323,19 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
+                        <ReactionModal
+                          isOpen={isOpenReaction}
+                          toggleReactionModal={toggleReactionModal}
+                          reactionMsg={item}
+                        />
                       </div>
                     );
                   }
                 })}
               </div>
             </div>
+
+            
 
             {repSelected !== null && (
               <div
@@ -2608,6 +2669,46 @@ export default function ChatWindow() {
             >
               File, phương tiện và liên kết
             </Text>
+            <div>
+              <div
+                ref={scrollRef}
+                style={{
+                  overflowY: "auto",
+                  background: "#1B1B1B",
+                  width: "100%",
+                  height: "100%",
+                }}
+              >
+                {messages?.map((item, index) => {
+                  console.log("listImage: ", messages);
+                  if (
+                    item.type === "image" &&
+                    (item.deleteBy?.length == 0 ||
+                      item.deleteBy?.find((f) => f !== user._id))
+                    && item.isReCall == 'false'
+                  ) {
+                    return (
+                      <div
+                        key={index} 
+                        style={{
+                          width: '100%',
+                          height: '100%'
+                        }}
+                      >
+                        <img 
+                          src={item.urlType[0]}
+                          alt="Image"
+                          style={{
+                            width: '20px',
+                            height: '20px'
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+                })}
+              </div>
+            </div>
           </div> */}
         </Col>
       </Row>

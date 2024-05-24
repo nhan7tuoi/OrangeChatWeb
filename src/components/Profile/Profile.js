@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import connectSocket from '../../server/ConnectSocket';
 import { removeAuth } from '../../redux/authSlice';
 import ModalInformation from "./ModalInformation";
+import { logout } from '../../redux/authLogin';
 
 const { Text, Title } = Typography;
 
@@ -60,6 +61,7 @@ export default function Profile() {
                                 connectSocket.emit('logout',user._id);
                                 navigate("/")
                                 localStorage.clear();
+                                dispatch(logout());
                               }}
                             style={{ display: 'flex', width: '60px', height: '60px', background: '#36373A', borderRadius: '100%', justifyContent: 'center', alignItems: 'center', border: 'hidden' }}>
                                 <FaUser style={{ fontSize: '25', color: '#FFF' }} />

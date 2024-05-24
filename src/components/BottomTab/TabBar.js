@@ -5,6 +5,8 @@ import { FaPhoneSquareAlt, FaUser } from "react-icons/fa";
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useDispatch } from 'react-redux';
+import { setCurrentPage1, setCurrentPage2 } from '../../redux/currentSlice';
 
 const theme = createTheme({
     palette: {
@@ -19,8 +21,10 @@ const theme = createTheme({
 
 export default function TabBar() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const [value, setValue] = React.useState(0);
+    const [value, setValue] = React.useState('chat');
+
     return (
         <ThemeProvider theme={theme}>
             <BottomNavigation
@@ -29,29 +33,36 @@ export default function TabBar() {
                 value={value}
                 onChange={(event, newValue) => {
                     setValue(newValue);
-                }}>
+                }}
+            >
 
                 <BottomNavigationAction
                     label="Cá nhân"
                     value="chat"
-                    onClick={() => navigate("/chat")}
+                    onClick={() => {
+                        navigate("/chat");
+                        dispatch(setCurrentPage1("ChatWelcome"));
+                    }}
                     icon={<BsChatFill
                         style={{
-                            fontSize: '32',
-                            margin: '10',
-                            // color: '#36373A'
+                            fontSize: '32px',
+                            margin: '10px',
+                            color: value === 'chat' ? '#F24E1E' : '#36373A'
                         }} />}
                 />
 
                 <BottomNavigationAction
                     label="Nhóm"
                     value="chatGroup"
-                    onClick={() => navigate("/chatGroup")}
+                    onClick={() => {
+                        navigate("/chatGroup");
+                        dispatch(setCurrentPage2("ChatWelcome"));
+                    }}
                     icon={<HiUsers
                         style={{
-                            fontSize: '35',
-                            margin: '10',
-                            // color: '#36373A'
+                            fontSize: '35px',
+                            margin: '10px',
+                            color: value === 'chatGroup' ? '#F24E1E' : '#36373A'
                         }} />}
                 />
 
@@ -61,10 +72,11 @@ export default function TabBar() {
                     onClick={() => navigate("/friend")}
                     icon={<FaPhoneSquareAlt
                         style={{
-                            fontSize: '35',
-                            margin: '10',
-                            // color: '#36373A'
-                        }} />} />
+                            fontSize: '35px',
+                            margin: '10px',
+                            color: value === 'friend' ? '#F24E1E' : '#36373A'
+                        }} />}
+                />
 
                 <BottomNavigationAction
                     label="Tài khoản"
@@ -72,11 +84,12 @@ export default function TabBar() {
                     onClick={() => navigate("/profile")}
                     icon={<FaUser
                         style={{
-                            fontSize: '35',
-                            margin: '10',
-                            // color: '#36373A'
-                        }} />} />
+                            fontSize: '35px',
+                            margin: '10px',
+                            color: value === 'profile' ? '#F24E1E' : '#36373A'
+                        }} />}
+                />
             </BottomNavigation>
         </ThemeProvider>
-    )
+    );
 }
