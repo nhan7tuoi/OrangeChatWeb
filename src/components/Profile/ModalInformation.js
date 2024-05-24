@@ -1,57 +1,51 @@
-import { Button, Col, Row, Typography } from "antd";
-import { useSelector, useDispatch } from "react-redux";
-import { useEffect, useState } from 'react';
-import { setUser } from "../../redux/authSlice"; 
-import authApi from "../../apis/authApi"; 
+import { Button, Col, Row, Typography, Form, Input, Radio, Upload } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../redux/authSlice';
+import authApi from '../../apis/authApi';
+import { PlusOutlined } from '@ant-design/icons';
 
 const { Text, Title } = Typography;
 
-function ModalInformation({ isOpen, toggleModal }) {
+function ModalInformation({ isOpen, toggleModal, user, onUserUpdate }) {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-  const [name, setName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [gender, setGender] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [image, setImage] = useState('');
+  const [form] = Form.useForm();
+  const [image, setImage] = useState(user?.image || '');
 
   useEffect(() => {
-    if (user) {
-      setName(user.name || '');
-      setDateOfBirth(user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().substring(0, 10) : '');
-      setGender(user.gender || '');
-      setPhone(user.phone || '');
-      setEmail(user.email || '');
+    if (user && isOpen) {
+      form.setFieldsValue({
+        name: user.name || '',
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().substring(0, 10) : '',
+        gender: user.gender || '',
+        image: user.image || ''
+      });
       setImage(user.image || '');
     }
-  }, [user]);
+  }, [user, isOpen, form]);
 
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
+  const handleImageChange = ({ file }) => {
+    if (file && file.originFileObj) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setImage(event.target.result);
+      reader.onload = () => {
+        setImage(reader.result);
       };
-      reader.readAsDataURL(e.target.files[0]);
+      reader.readAsDataURL(file.originFileObj);
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (values) => {
     try {
       const response = await authApi.editProfile({
         userId: user._id,
-        name,
-        dateOfBirth,
-        gender,
-        phone,
-        email,
+        ...values,
         image
       });
       if (response.message === 'ok') {
         alert('Sửa thông tin thành công');
         dispatch(setUser(response.user));
         toggleModal();
+        onUserUpdate(response.user); // Call the callback with updated user data
       } else {
         alert('Sửa thông tin thất bại');
       }
@@ -60,270 +54,134 @@ function ModalInformation({ isOpen, toggleModal }) {
     }
   };
 
-  if (!user) {
-    return null; // or render a loading spinner
+  if (!isOpen) {
+    return null;
   }
 
   return (
-    <>
-      {isOpen && (
-        <div className="modal-overlay" onClick={toggleModal}>
-          <div
-            className="modal"
-            style={{ backgroundColor: "#242424" }}
-            onClick={(e) => e.stopPropagation()}
+    <div style={{ width: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="modal-overlay" onClick={toggleModal} >
+        <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: '#242424', padding: '50px', borderRadius: '20px' }}>
+          <Title style={{ fontSize: '24px', fontWeight: '700', color: '#FFF', padding: '20px' }}>Chỉnh sửa thông tin</Title>
+          <Form
+            form={form}
+            initialValues={{
+              name: user.name,
+              dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().substring(0, 10) : '',
+              gender: user.gender,
+              image: user.image
+            }}
+            onFinish={handleSubmit}
+            // layout="vertical"
+            style={{ width: '100%' }}
           >
-            <div
-              className="modal-content"
-              style={{
-                width: "400px",
-                height: "600px",
-                display: "flex",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                flexDirection: "column",
-              }}
+            <Form.Item
+              name="image"
+              label={<Text style={{ color: '#FFF' }}></Text>}
             >
-              <Row style={{ background: "#242424" }}>
-                <Col
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-evenly",
-                    alignItems: "center",
-                    width: "100%",
-                  }}
-                >
-                  <img
-                    src={image}
-                    style={{
-                      height: "150px",
-                      width: "150px",
-                      borderRadius: "100%",
-                    }}
-                    alt="avatar"
-                  />
-                  <input
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                  />
-                </Col>
-
-                <Col
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                  }}
-                >
-                  <header>
-                    <Title
-                      style={{
-                        fontSize: "24px",
-                        fontWeight: "700",
-                        color: "#FFF",
-                        padding: "10px",
-                      }}
-                    >
-                      Thông tin cá nhân
-                    </Title>
-                  </header>
-                  <div style={{ width: "100%" }}>
-                    <div className="username" style={{ width: "100%" }}>
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                          marginRight: "32px",
-                        }}
-                      >
-                        Họ và tên:
-                      </Text>
-                      <input
-                        value={name}
-                        name="name"
-                        type="text"
-                        onChange={(e) => setName(e.target.value)}
-                        style={{
-                          backgroundColor: "#2E2E2E",
-                          width: "70%",
-                          height: "40px",
-                          borderRadius: "10px",
-                          fontSize: "18px",
-                          padding: "15px",
-                          color: "#FFF",
-                        }}
-                      />
-                    </div>
-
-                    <div className="dateofbirth" style={{ width: "100%" }}>
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                          marginRight: "30px",
-                        }}
-                      >
-                        Ngày sinh:
-                      </Text>
-                      <input
-                        value={dateOfBirth}
-                        name="dateOfBirth"
-                        type="date"
-                        onChange={(e) => setDateOfBirth(new Date(e.target.value))}
-                        style={{
-                          backgroundColor: "#2E2E2E",
-                          width: "70%",
-                          height: "40px",
-                          borderRadius: "10px",
-                          marginTop: "20px",
-                          fontSize: "18px",
-                          padding: "15px",
-                          color: "#FFF",
-                        }}
-                      />
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        width: "200px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          width: "200px",
-                        }}
-                      >
-                        <Text
-                          style={{
-                            fontSize: "20px",
-                            color: "#FFF",
-                            marginRight: "40px",
-                            marginTop: "15px",
-                          }}
-                        >
-                          Giới tính:
-                        </Text>
-
-                        <div style={{ display: "flex", flexDirection: "row" }}>
-                          <div style={{ marginTop: "20px" }}>
-                            <input
-                              type="radio"
-                              name="gender"
-                              value="male"
-                              checked={gender === "male"}
-                              onChange={(e) => setGender(e.target.value)}
-                            />
-                            <Text style={{ color: "#FFF", fontSize: "18px" }}>Nam</Text>
-                          </div>
-
-                          <div style={{ marginTop: "20px" }}>
-                            <input
-                              type="radio"
-                              name="gender"
-                              value="female"
-                              checked={gender === "female"}
-                              onChange={(e) => setGender(e.target.value)}
-                            />
-                            <Text style={{ color: "#FFF", fontSize: "18px" }}>Nữ</Text>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="phoneNumber" style={{ width: "100%" }}>
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                        }}
-                      >
-                        Số điện thoại:
-                      </Text>
-                      <input
-                        value={phone}
-                        name="phone"
-                        type="tel"
-                        onChange={(e) => setPhone(e.target.value)}
-                        style={{
-                          backgroundColor: "#2E2E2E",
-                          width: "70%",
-                          height: "40px",
-                          borderRadius: "10px",
-                          marginTop: "20px",
-                          fontSize: "18px",
-                          padding: "15px",
-                          color: "#FFF",
-                        }}
-                      />
-                    </div>
-
-                    <div className="email" style={{ width: "100%" }}>
-                      <Text
-                        style={{
-                          fontSize: "20px",
-                          color: "#FFF",
-                          marginRight: "70px",
-                        }}
-                      >
-                        Email:
-                      </Text>
-                      <input
-                        value={email}
-                        name="email"
-                        type="email"
-                        onChange={(e) => setEmail(e.target.value)}
-                        style={{
-                          backgroundColor: "#2E2E2E",
-                          width: "70%",
-                          height: "40px",
-                          borderRadius: "10px",
-                          marginTop: "20px",
-                          fontSize: "18px",
-                          padding: "15px",
-                          color: "#FFF",
-                        }}
-                      />
-                    </div>
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                showUploadList={false}
+                beforeUpload={() => false}
+                onChange={handleImageChange}
+              >
+                {image ? (
+                  <img src={image} alt="avatar" style={imageStyle} />
+                ) : (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
                   </div>
-                </Col>
-              </Row>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                marginTop: "20px",
-              }}
+                )}
+              </Upload>
+            </Form.Item>
+            <Form.Item
+              name="name"
+              label={<Text style={{ color: '#FFF' , width:'100px', textAlign:'left'}}>Tên</Text>}
+              rules={[{ required: true, message: '' }]}
             >
-              <Button
-                style={{ width: "100px", height: "40px" }}
-                onClick={toggleModal}
-              >
-                <Text>Hủy</Text>
-              </Button>
+              <Input style={{ width: '100%' }} />
+            </Form.Item>
+            <Form.Item
+              name="dateOfBirth"
+              label={<Text style={{ color: '#FFF', width:'100px', textAlign:'left'}}>Ngày sinh</Text>}
+            >
+              <Input type="date" style={{ width: '300px' }} />
+            </Form.Item>
+            <Form.Item
+              name="gender"
+              label={<Text style={{ color: '#FFF' }}>Giới tính</Text>}
+            >
+              <Radio.Group style={{ color: 'white', width: '100%' }}>
+                <Radio value="male">Nam</Radio>
+                <Radio value="female">Nữ</Radio>
+              </Radio.Group>
+            </Form.Item>
 
-              <Button
-                style={{
-                  width: "100px",
-                  height: "40px",
-                  marginLeft: "10px",
-                  backgroundColor: "#36373A",
-                }}
-                onClick={handleSubmit}
-              >
-                <Text style={{ color: "white" }}>Xong</Text>
-              </Button>
-            </div>
-          </div>
+            <Form.Item
+              label={<Text style={{ color: '#FFF', width:'100px', textAlign:'left' }}>Số điện thoại</Text>}
+            >
+              <Text style={displayTextStyle}>{user.phone}</Text>
+            </Form.Item>
+            <Form.Item
+              label={<Text style={{ color: '#FFF' , width:'100px', textAlign:'left'}}>Email</Text>}
+            >
+              <Text style={displayTextStyle}>{user.email}</Text>
+            </Form.Item>
+            <Form.Item>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button onClick={toggleModal} style={{ ...cancelButtonStyle, marginLeft: '10px' }}>
+                  Hủy
+                </Button>
+                <Button type="primary" htmlType="submit" style={submitButtonStyle}>
+                  Lưu
+                </Button>
+               
+              </div>
+            </Form.Item>
+          </Form>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
+
 }
+
+const inputStyle = {
+  backgroundColor: '#2E2E2E',
+  color: '#FFF',
+  borderRadius: '5px',
+  border: '1px solid #2E2E2E',
+  padding: '10px'
+};
+
+const submitButtonStyle = {
+  backgroundColor: '#F24E1E',
+  color: '#FFF',
+  border: 'none',
+  marginLeft: '20px'
+};
+
+const cancelButtonStyle = {
+  backgroundColor: '#36373A',
+  color: '#FFF',
+  border: 'none'
+};
+
+const imageStyle = {
+  width: '58px',
+  height: '58px',
+  borderRadius: '50%',
+  objectFit: 'cover'
+};
+
+const displayTextStyle = {
+  color: '#FFF',
+  backgroundColor: '#2E2E2E',
+  borderRadius: '5px',
+  padding: '10px',
+  display: 'block'
+};
 
 export default ModalInformation;
