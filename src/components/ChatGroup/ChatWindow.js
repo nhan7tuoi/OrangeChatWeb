@@ -136,7 +136,7 @@ export default function ChatWindow() {
 
   const getLastMessage = async () => {
     const response = await messageApi.getMessage({
-      conversationId: conversation1?._id,
+      conversationId: conversationRef.current._id,
     });
     if (response) {
       setMessages(response.data);
@@ -384,7 +384,7 @@ export default function ChatWindow() {
         return message;
       });
       getLastMessage();
-      getConversation();
+      // getConversation();
     });
     connectSocket.on("recall message", (msg) => {
       console.log("recall message", msg);
@@ -397,7 +397,7 @@ export default function ChatWindow() {
         });
         getLastMessage();
       }
-      getConversation();
+      // getConversation();
     });
     connectSocket.on("delete message", (msg) => {
       console.log("delete message", msg);
@@ -410,7 +410,7 @@ export default function ChatWindow() {
         });
         getLastMessage();
       }
-      getConversation();
+      // getConversation();
     });
 
     // connectSocket.on("removeMember", (data) => {

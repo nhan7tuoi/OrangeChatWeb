@@ -102,7 +102,7 @@ export default function ChatWindow() {
 
   const getLastMessage = async () => {
     const response = await messageApi.getMessage({
-      conversationId: conversation._id,
+      conversationId: conversationRef.current._id,
     });
     if (response) {
       setMessages(response.data);
