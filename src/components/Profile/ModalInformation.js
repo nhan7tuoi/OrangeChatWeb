@@ -1,9 +1,12 @@
 import { Button, Col, Row, Typography, Form, Input, Radio, Upload } from 'antd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../redux/authSlice';
+// import {  setUser } from '../../redux/authSlice'
 import authApi from '../../apis/authApi';
 import { PlusOutlined } from '@ant-design/icons';
+import messageApi from '../../apis/messageApi';
+import userApi from '../../apis/userApi';
+import { setAvt, setUser } from '../../redux/authLogin';
 
 const { Text, Title } = Typography;
 
@@ -11,6 +14,7 @@ function ModalInformation({ isOpen, toggleModal, user, onUserUpdate }) {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [image, setImage] = useState(user?.image || '');
+  const fileImageRef = useRef(null);
 
   useEffect(() => {
     if (user && isOpen) {
@@ -24,13 +28,46 @@ function ModalInformation({ isOpen, toggleModal, user, onUserUpdate }) {
     }
   }, [user, isOpen, form]);
 
-  const handleImageChange = ({ file }) => {
-    if (file && file.originFileObj) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file.originFileObj);
+  // const handleImageChange = ({ file }) => {
+  //   if (file && file.originFileObj) {
+  //     const reader = new FileReader();
+  //     reader.onload = () => {
+  //       setImage(reader.result);
+  //     };
+  //     reader.readAsDataURL(file.originFileObj);
+  //     console.log("url:", image);
+  //   }
+  // };
+
+  const handleImageChange = async (event) => {
+    const file = event?.target?.files[0];
+    console.log("evbent", event);
+    console.log("Selected image: ", file);
+
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      console.log("formData", formData);
+
+      let uploadResponse = await messageApi.uploadImage(formData);
+
+      console.log("File Type: ", file.type);
+
+      const mediaUrl = uploadResponse.data;
+      console.log("Uploaded media URL: ", mediaUrl);
+
+      if (mediaUrl) {
+        setImage(mediaUrl);
+        const response = await userApi.uploadAvatar({ userId: user._id, image: mediaUrl });
+              // console.log('response', response);
+              dispatch(setAvt(mediaUrl));
+              console.log("URL",mediaUrl);
+        // console.log("ImageURL:", image);
+      } else {
+        console.log("No media URL returned, message not sent.");
+      }
+    } catch (error) {
+      console.error("Error processing media:", error);
     }
   };
 
@@ -63,6 +100,14 @@ function ModalInformation({ isOpen, toggleModal, user, onUserUpdate }) {
       <div className="modal-overlay" onClick={toggleModal} >
         <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: '#242424', padding: '50px', borderRadius: '20px' }}>
           <Title style={{ fontSize: '24px', fontWeight: '700', color: '#FFF', padding: '20px' }}>Chỉnh sửa thông tin</Title>
+          <input
+            type="file"
+            multiple
+            ref={fileImageRef}
+            onChange={handleImageChange}
+            // style={{ display: "none" }} // Ẩn input file
+            accept="image/*" // 
+          />
           <Form
             form={form}
             initialValues={{
@@ -84,7 +129,8 @@ function ModalInformation({ isOpen, toggleModal, user, onUserUpdate }) {
                 listType="picture-card"
                 showUploadList={false}
                 beforeUpload={() => false}
-                onChange={handleImageChange}
+                // ref={fileImageRef}
+                // onChange={handleImageChange}
               >
                 {image ? (
                   <img src={image} alt="avatar" style={imageStyle} />

@@ -183,11 +183,13 @@ export default function ChatWindow() {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    console.log("Selected image: ", file);
+    // console.log("event", event);
+    // console.log("Selected image: ", file);
 
     try {
       const formData = new FormData();
       formData.append("image", file);
+      // console.log("Form", formData);
 
       let uploadResponse = await messageApi.uploadImage(formData);
 
@@ -1173,7 +1175,7 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 10,
+                                          left: -10,
                                           top: 0,
                                         }}
                                       >
@@ -1437,7 +1439,8 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 5,
+                                          left: -10,
+                                          top: 0
                                         }}
                                       >
                                         <Icons
@@ -1712,7 +1715,8 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 5,
+                                          left: -10,
+                                          top: 0
                                         }}
                                       >
                                         <Icons
@@ -2032,7 +2036,8 @@ export default function ChatWindow() {
                                         <div
                                           style={{
                                             position: "absolute",
-                                            left: 5,
+                                            left: -10,
+                                            top: 0
                                           }}
                                         >
                                           <Icons
@@ -2308,7 +2313,8 @@ export default function ChatWindow() {
                                       <div
                                         style={{
                                           position: "absolute",
-                                          left: 5,
+                                          left: -10,
+                                          top: 0
                                         }}
                                       >
                                         <Icons
