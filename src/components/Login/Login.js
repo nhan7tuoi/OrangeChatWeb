@@ -28,7 +28,7 @@ export default function Login() {
                 username: data.username,
                 password: data.password,
             });
-            if (response) {
+            if (response.message == 'ok') {
                 localStorage.setItem('user', JSON.stringify(response.user));
                 localStorage.setItem('token', JSON.stringify(response.accessToken));
                 //luu vao redux
@@ -39,6 +39,10 @@ export default function Login() {
                 console.log("response: ", token);
                 navigate('/chat');
                 dispatch(setCurrentPage1("ChatWelcome"));
+            } else if(response.message == 'email'){
+                setError("Email chưa được đăng ký");
+            } else if(response.message == 'password'){
+                setError("Sai mật khẩu")
             }
         } catch (error) {
             setError("Đăng nhập thất bại. Tài khoản mật khẩu không chính xác!")

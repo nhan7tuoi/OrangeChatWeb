@@ -53,6 +53,7 @@ export default function ChatWindow() {
   const [showReactionIndex, setShowReactionIndex] = useState(-1);
   const [openStiker, setOpenSticker] = useState(false);
   const [selectedPack, setSelectedPack] = useState(stickerData[0]);
+  const [listFriends, setListFriends] = useState([]);
 
   const formatTime = (time) => {
     const options = { hour: "numeric", minute: "numeric" };
@@ -77,6 +78,27 @@ export default function ChatWindow() {
     conversationRef.current = conversation;
     getLastMessage();
   }, [conversationId]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await conversationApi.getAllConversation({
+        userId: user._id,
+      });
+      if (response) {
+        const fConversation = formatConversation({
+          data: response.data,
+          userId: user._id,
+        });
+        setListFriends(fConversation);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
   const getLastMessage = async () => {
     const response = await messageApi.getMessage({
@@ -323,7 +345,9 @@ export default function ChatWindow() {
   //   }
   // };
   const addMessageIfNotExists = (messages, newMessage) => {
-    const messageExists = messages.some(message => message._id === newMessage._id);
+    const messageExists = messages.some(
+      (message) => message._id === newMessage._id
+    );
     if (!messageExists) {
       return [...messages, newMessage];
     }
@@ -334,7 +358,7 @@ export default function ChatWindow() {
   useEffect(() => {
     connectSocket.on("chat message", (msg) => {
       if (msg.conversationId === conversationRef.current._id) {
-        console.log('hi');
+        console.log("hi");
         console.log("new message", msg);
         // setMessages((preMessage) => [...preMessage, msg]);
         setMessages((prevMessages) => addMessageIfNotExists(prevMessages, msg));
@@ -746,10 +770,13 @@ export default function ChatWindow() {
             />
           </Button>
         </div>
-        <ForwardModal
-          isOpen={isOpenShare}
-          toggleForwardModal={toggleForwardModal}
-        />
+        {isOpenShare && (
+          <ForwardModal
+            listFriend={listFriends}
+            isOpen={isOpenShare}
+            toggleForwardModal={toggleForwardModal}
+          />
+        )}
       </div>
     );
   };
@@ -964,11 +991,7 @@ export default function ChatWindow() {
                             border: "hidden",
                             height: "100%",
                           }}
-                          onClick={() => {
-                            setItemSelected(item);
-                            // console.log("Itemchat:", item);
-                            toggleReactionModal();
-                          }}
+                          onClick={() => {}}
                         >
                           {item?.reply !== null && item.isReCall === false && (
                             <div
@@ -1175,11 +1198,11 @@ export default function ChatWindow() {
                           </Text>
                         </Button>
                         <MessageWithIcons itemSelected={item} />
-                        <ReactionModal
+                        {/* <ReactionModal
                           isOpen={isOpenReaction}
                           toggleReactionModal={toggleReactionModal}
                           reactionMsg={item}
-                        />
+                        /> */}
                       </div>
                     );
                   }
@@ -1212,11 +1235,7 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
-                        onClick={() => {
-                          setItemSelected(item);
-                          // console.log("Itemchat:", item);
-                          toggleReactionModal();
-                        }}
+                        onClick={() => {}}
                       >
                         {item?.senderId !== userId && (
                           <src
@@ -1453,11 +1472,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
-                        <ReactionModal
+                        {/* <ReactionModal
                           isOpen={isOpenReaction}
                           toggleReactionModal={toggleReactionModal}
                           reactionMsg={item}
-                        />
+                        /> */}
                       </div>
                     );
                   }
@@ -1491,11 +1510,7 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
-                        onClick={() => {
-                          setItemSelected(item);
-                          // console.log("Itemchat:", item);
-                          toggleReactionModal();
-                        }}
+                        onClick={() => {}}
                       >
                         {item?.senderId !== userId && (
                           <src
@@ -1732,11 +1747,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
-                        <ReactionModal
+                        {/* <ReactionModal
                           isOpen={isOpenReaction}
                           toggleReactionModal={toggleReactionModal}
                           reactionMsg={item}
-                        />
+                        /> */}
                       </div>
                     );
                   }
@@ -1769,11 +1784,7 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
-                        onClick={() => {
-                          setItemSelected(item);
-                          // console.log("Itemchat:", item);
-                          toggleReactionModal();
-                        }}
+                        onClick={() => {}}
                       >
                         {item?.senderId._id !== userId && (
                           <src
@@ -2058,11 +2069,11 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
-                        <ReactionModal
+                        {/* <ReactionModal
                           isOpen={isOpenReaction}
                           toggleReactionModal={toggleReactionModal}
                           reactionMsg={item}
-                        />
+                        /> */}
                       </div>
                     );
                   }
@@ -2095,11 +2106,7 @@ export default function ChatWindow() {
                                 justifyContent: "flex-start",
                               }
                         }
-                        onClick={() => {
-                          setItemSelected(item);
-                          // console.log("Itemchat:", item);
-                          toggleReactionModal();
-                        }}
+                        onClick={() => {}}
                       >
                         {item?.senderId._id !== userId && (
                           <src
@@ -2336,11 +2343,6 @@ export default function ChatWindow() {
                           )}
                         </Button>
                         <MessageWithIcons itemSelected={item} />
-                        <ReactionModal
-                          isOpen={isOpenReaction}
-                          toggleReactionModal={toggleReactionModal}
-                          reactionMsg={item}
-                        />
                       </div>
                     );
                   }

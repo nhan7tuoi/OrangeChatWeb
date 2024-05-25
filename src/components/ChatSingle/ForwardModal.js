@@ -14,12 +14,12 @@ import { formatConversation } from '../../utils/formatConverstation';
 
 const { Text } = Typography;
 
-export default function ForwardModal({ isOpen, toggleForwardModal }) {
+export default function ForwardModal({listFriend, isOpen, toggleForwardModal}) {
 
     const itemSelected = JSON.parse(localStorage.getItem('itemSelected'));
     const [keyword, setKeyword] = useState("");
     const [selectedMembers, setSelectedMembers] = useState([]);
-    const [listFriends, setListFriends] = useState([]);
+    const [listFriends, setListFriends] = useState(listFriend);
 
     const [temp, setTemp] = useState(true);
     const scrollRef = useRef(null);
@@ -41,29 +41,11 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     //         dispatch(setFriends(resultSearch));
     //     }
     // }, [keyword]);
-    useEffect(() => {
-        fetchData();
-    }, [isOpen]);
+    // useEffect(() => {
+    //     fetchData();
+    // }, [isOpen,user._id]);
 
-    const fetchData = async () => {
-        try {
-            // dispatch(fetchFriends(user._id));
-            const response = await conversationApi.getAllConversation({
-                userId: user._id,
-            });
-            if (response) {
-                const fConversation = formatConversation({
-                    data: response.data,
-                    userId: user._id,
-                });
-                // setConversations(fConversation);
-                // setTemp(fConversation)
-                setListFriends(fConversation);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    };
+    
     // console.log(keyword);
 
     const handleCheckboxChange = (member, checked) => {
