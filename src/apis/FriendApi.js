@@ -1,6 +1,6 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
-const token = localStorage.getItem('token');
+const token = JSON.parse(localStorage.getItem('token'));
 
 const BASE_URL = `https://${IPV4}/api/friend`;
 

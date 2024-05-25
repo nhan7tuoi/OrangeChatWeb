@@ -1,6 +1,6 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
-const token = localStorage.getItem('token');
+const token = JSON.parse(localStorage.getItem('token'));
 // import Conversation from ;
 
 const BASE_URL = `https://${IPV4}/api/v1`;
@@ -12,6 +12,7 @@ const instance = axios.create({
 
 //get conversation by userId
 const getConversation = async ({userId}) => {
+  console.log("tokenn",token);
   const headers = {
     Authorization: `Bearer ${token}`,
   };

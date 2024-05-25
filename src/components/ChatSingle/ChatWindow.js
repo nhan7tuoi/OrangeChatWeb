@@ -30,7 +30,7 @@ export default function ChatWindow() {
   const user = useSelector((state) => state.authLogin.user);
   
   const conversation = useSelector((state) => state.conversation.conversation);
-  console.log("conversationxx", conversation);
+
   const receiverId = conversation.members?.filter(
     (member) => member._id !== user._id
   );

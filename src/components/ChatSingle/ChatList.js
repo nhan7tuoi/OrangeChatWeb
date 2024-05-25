@@ -90,8 +90,6 @@ export default function ChatList() {
               dispatch(setCoversation(item));
               handleButtonClick();
               dispatch(setConversationReload(item._id));
-              localStorage.setItem("conversationLocal", JSON.stringify(item));
-              localStorage.setItem("conversationIDD", JSON.stringify(item._id));
             }}
           >
             <div>
