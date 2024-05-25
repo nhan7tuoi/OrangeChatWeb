@@ -17,7 +17,7 @@ const friendSlice = createSlice({
       state.listFriendRequests = action.payload;
     },
     deleteFriendRequest: (state, action) => {
-      state.listFriendRequests = state.listFriendRequests.filter(
+      state.listFriendRequests = state?.listFriendRequests?.filter(
         fq => fq._id !== action.payload,
       );
     },
@@ -25,13 +25,13 @@ const friendSlice = createSlice({
       state.resultSearch = action.payload;
     },
     addFriendRequests: (state, action) => {
-      state.listFriendRequests = [...state.listFriendRequests, action.payload];
+      state.listFriendRequests = [...state?.listFriendRequests, action.payload];
     },
     addFriend: (state, action) => {
-      state.listFriends = [...state.listFriends, action.payload];
+      state.listFriends = [...state?.listFriends, action.payload];
     },
     deleteFriend: (state, action) => {
-      state.listFriends = state.listFriends.filter(
+      state.listFriends = state?.listFriends?.filter(
         f => f._id !== action.payload,
       );
     },

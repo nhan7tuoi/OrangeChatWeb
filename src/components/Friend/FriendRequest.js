@@ -51,6 +51,7 @@ export default function FriendsRequest() {
     const fetchData = async () => {
       try {
         dispatch(fetchFriendRequests(user._id));
+        console.log(listFriendRequests);
       } catch (error) {
         console.error("Error fetching data:", error);
       }

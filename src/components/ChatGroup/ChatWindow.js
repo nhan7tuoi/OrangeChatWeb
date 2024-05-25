@@ -10,6 +10,7 @@ import conversationApi from "../../apis/conversationApi";
 import connectSocket from "../../server/ConnectSocket";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  setConversationGroups,
   setConversations,
   setCoversation,
 } from "../../redux/conversationSlice";
@@ -346,16 +347,19 @@ export default function ChatWindow() {
   //get conversation
   const getConversation = async () => {
     try {
-      const response = await conversationApi.getConversation({
+      const res = await conversationApi.getConversationGroups({
         userId: user._id,
       });
-
-      if (response) {
-        console.log("update");
-        dispatch(setConversations(response.data));
+      if (res) {
+        const fConversation = formatConversation({
+          data: res.data,
+          userId: user._id,
+        });
+        // setConversations(fConversation);
+        dispatch(setConversationGroups(fConversation));
       }
     } catch (error) {
-      console.log("error", error);
+      console.error("Error fetching data a:", error);
     }
   };
 
@@ -365,6 +369,7 @@ export default function ChatWindow() {
     // console.log("connect", user._id);
 
     connectSocket.on("chat message", (msg) => {
+      getConversation();
       if (msg.conversationId === conversationRef.current._id) {
         console.log("new message", msg);
         setMessages((preMessage) => [...preMessage, msg]);
@@ -379,6 +384,7 @@ export default function ChatWindow() {
         return message;
       });
       getLastMessage();
+      getConversation();
     });
     connectSocket.on("recall message", (msg) => {
       console.log("recall message", msg);
@@ -391,6 +397,7 @@ export default function ChatWindow() {
         });
         getLastMessage();
       }
+      getConversation();
     });
     connectSocket.on("delete message", (msg) => {
       console.log("delete message", msg);
@@ -403,29 +410,35 @@ export default function ChatWindow() {
         });
         getLastMessage();
       }
+      getConversation();
     });
 
-    connectSocket.on("removeMember", (data) => {
-      setMessages((preMessage) => [...preMessage, data.notification]);
-    });
+    // connectSocket.on("removeMember", (data) => {
+    //   console.log('cc');
+    //   setMessages((preMessage) => [...preMessage, data.notification]);
+    //   getConversation();
+    // });
     connectSocket.on("addMember", (data) => {
       setMessages((preMessage) => [...preMessage, data]);
+      getConversation();
     });
     connectSocket.on("deletedMember", (data) => {
       if (conversationRef.current._id === data._id) {
-        Alert("Thông báo", "bạn đã bị xoá khỏi nhóm", [
+        alert("Thông báo", "bạn đã bị xoá khỏi nhóm", [
           {
             text: "Đồng ý",
             onPress: () => {
-              if (conversationRef.current.isGroup) dispatch(setCurrentPage2("ChatWelcome"));
+              if (conversationRef.current.isGroup) 
+                dispatch(setCurrentPage2("ChatWelcome"));
             },
           },
         ]);
       }
+      getConversation();
     });
     connectSocket.on("disbandGroup", (data) => {
       if (data._id === conversationRef.current._id) {
-        Alert("Thông báo", "Nhóm không còn tồn tại", [
+        alert("Thông báo", "Nhóm không còn tồn tại", [
           {
             text: "Đồng ý",
             style: "cancel",
@@ -433,7 +446,20 @@ export default function ChatWindow() {
         ]);
         // dispatch(setCoversation({}));
         dispatch(setCurrentPage2("ChatWelcome"));
+        getConversation();
       }
+    });
+    connectSocket.on("deletedMember", (data) => {
+      getConversation();
+    });
+    connectSocket.on("newConversationGroup", (data) => {
+      getConversation();
+    });
+    connectSocket.on("addToGroup", (data) => {
+      getConversation();
+    });
+    connectSocket.on("newConversationGroup", (data) => {
+      getConversation();
     });
   }, []);
 
@@ -948,24 +974,27 @@ export default function ChatWindow() {
 
   useEffect(() => {
     connectSocket.on("updateConversation", (data) => {
-      if (conversation1._id === data._id) {
+      if (conversationRef.current._id === data._id) {
         const temp = formatOneConversation({
           conversation: data,
           userId: user._id,
         });
         dispatch(setCoversation(temp));
       }
-    });
+    }); 
     connectSocket.on("removeMember", (data) => {
-      if (conversation1._id === data.conversation._id) {
+      setMessages((preMessage) => [...preMessage, data.notification]);
+      console.log("nhanm",data);
+      if (conversationRef.current._id === data.conversation._id) {
         const temp = formatOneConversation({
           conversation: data.conversation,
           userId: user._id,
         });
         console.log("test remove");
         dispatch(setCoversation(temp));
-        dispatch(setCurrentPage2("ChatWelcome"));
+        // if(data.conversation.members.find(m => m._id))
       }
+      
     });
   }, []);
 
@@ -977,11 +1006,14 @@ export default function ChatWindow() {
       if (
         (window.confirm(i18next.t("thongBao") + "\n" + i18next.t("xacNhanRoi")),
         dispatch(setCurrentPage2("ChatWelcome")))
+        
       ) {
+
         connectSocket.emit("remove member", {
           conversation: conversation1,
           member: user,
         });
+        getConversation();
       }
     } else {
       if (

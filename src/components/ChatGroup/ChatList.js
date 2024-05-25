@@ -23,7 +23,7 @@ export default function ChatList() {
   const dispatch = useDispatch();
   const accessToken = useSelector((state) => state.auth.accessToken);
   // const [conversations, setConversations] = useState([]);
-  const conversations = useSelector((state) => state.conversation.conversations);
+  const conversations = useSelector((state) => state.conversation.conversationGroups);
   // const [connect, setConnect] = useState(false);
 
   const scrollRef = useRef(null);
@@ -49,13 +49,16 @@ export default function ChatList() {
       fetchData();
     });
     connectSocket.on("disbandGroup", () => {
+      console.log("aaaa");
       fetchData();
     });
     connectSocket.on("removeMember", (data) => {
+      console.log('ccccc');
       if (!conversation._id || conversation._id === data.conversation._id)
         fetchData();
     });
     connectSocket.on("deletedMember", (data) => {
+      console.log("Roi nhom");
       fetchData();
     });
   }, []);
@@ -71,7 +74,7 @@ export default function ChatList() {
           userId: user._id,
         });
         // setConversations(fConversation);
-        dispatch(setConversations(fConversation));
+        dispatch(setConversationGroups(fConversation));
       }
     } catch (error) {
       console.error("Error fetching data a:", error);

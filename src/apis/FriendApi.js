@@ -26,8 +26,14 @@ const getFriends = async ({userId}) => {
 };
 
 const getFriendRequests = async ({userId}) => {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
-    const res = await instance.get(`/getFriendRequest/${userId}`);
+    const res = await instance.get(`/getFriendRequest/${userId}`,{
+      headers: headers,
+    
+    });
     return res.data;
   } catch (error) {
     console.log('error', error);
@@ -36,8 +42,14 @@ const getFriendRequests = async ({userId}) => {
 };
 
 const getAllFriendRequests = async({userId})=>{
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
-    const res = await instance.get(`/getAllFriendRequests/${userId}`);
+    const res = await instance.get(`/getAllFriendRequests/${userId}`,{
+      headers: headers,
+    
+    });
     return res.data;
   } catch (error) {
     console.log('error', error);
@@ -46,10 +58,16 @@ const getAllFriendRequests = async({userId})=>{
 }
 
 const sendFriendRequest = async ({receiverId, senderId}) => {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
     const res = await instance.post('/send', {
       senderId,
       receiverId,
+    },{
+      headers: headers,
+    
     });
   } catch (error) {
     throw error;
@@ -57,16 +75,28 @@ const sendFriendRequest = async ({receiverId, senderId}) => {
 };
 
 const accept = async ({friendRequestId}) => {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
-    const res = await instance.put(`/${friendRequestId}`);
+    const res = await instance.put(`/${friendRequestId}`,{
+      headers: headers,
+    
+    });
   } catch (error) {
     throw error;
   }
 };
 
 const reject = async ({friendRequestId}) => {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
-    const res = await instance.delete(`/${friendRequestId}`);
+    const res = await instance.delete(`/${friendRequestId}`,{
+      headers: headers,
+    
+    });
   } catch (error) {
     throw error;
   }

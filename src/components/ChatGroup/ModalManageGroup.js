@@ -48,7 +48,7 @@ function ModalManageGroup({ isOpen, toggleModal }) {
       });
 
       connectSocket.on("removeMember", (data) => {
-        if (data.members.some((m) => m._id === user._id)) {
+        if (data?.members?.some((m) => m._id === user._id)) {
           const temp = formatOneConversation({
             conversation: data,
             userId: user._id,
@@ -57,7 +57,7 @@ function ModalManageGroup({ isOpen, toggleModal }) {
         }
       });
       connectSocket.on("leaveGroup", (data) => {
-        if (data.members.some((m) => m._id === user._id)) {
+        if (data?.members?.some((m) => m._id === user._id)) {
           const temp = formatOneConversation({
             conversation: data,
             userId: user._id,
