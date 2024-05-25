@@ -417,7 +417,7 @@ export default function ChatWindow() {
           {
             text: "Đồng ý",
             onPress: () => {
-              if (conversationRef.current.isGroup) dispatch(setCurrentPage2("Welcome"));
+              if (conversationRef.current.isGroup) dispatch(setCurrentPage2("ChatWelcome"));
             },
           },
         ]);
@@ -432,7 +432,7 @@ export default function ChatWindow() {
           },
         ]);
         // dispatch(setCoversation({}));
-        dispatch(setCurrentPage2("Welcome"));
+        dispatch(setCurrentPage2("ChatWelcome"));
       }
     });
   }, []);
@@ -964,6 +964,7 @@ export default function ChatWindow() {
         });
         console.log("test remove");
         dispatch(setCoversation(temp));
+        dispatch(setCurrentPage2("ChatWelcome"));
       }
     });
   }, []);
