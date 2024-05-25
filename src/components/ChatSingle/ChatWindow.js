@@ -28,7 +28,7 @@ const { Text } = Typography;
 
 export default function ChatWindow() {
   const user = useSelector((state) => state.authLogin.user);
-  
+
   const conversation = useSelector((state) => state.conversation.conversation);
 
   const receiverId = conversation.members?.filter(
@@ -39,8 +39,6 @@ export default function ChatWindow() {
   );
 
   const conversationRef = useRef(conversation);
-
-  
 
   const stickerData = useSelector((state) => state.sticker.stickers);
   const userId = user._id;
@@ -76,8 +74,8 @@ export default function ChatWindow() {
   }, [dispatch]);
 
   useEffect(() => {
-    getLastMessage();
     conversationRef.current = conversation;
+    getLastMessage();
   }, [conversationId]);
 
   const getLastMessage = async () => {
@@ -2340,8 +2338,6 @@ export default function ChatWindow() {
                 })}
               </div>
             </div>
-
-            
 
             {repSelected !== null && (
               <div

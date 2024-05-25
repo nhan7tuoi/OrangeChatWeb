@@ -23,7 +23,8 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
 
     const [temp, setTemp] = useState([]);
     const scrollRef = useRef(null);
-    const user = JSON.parse(localStorage.getItem('user'));
+    // const user = JSON.parse(localStorage.getItem('user'));
+    const user = useSelector((state) => state.authLogin.user);
     const dispatch = useDispatch();
 
     const friend = useSelector((state) => state.current.userId);
