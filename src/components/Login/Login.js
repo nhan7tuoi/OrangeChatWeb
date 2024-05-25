@@ -31,7 +31,7 @@ export default function Login() {
         localStorage.setItem("user", JSON.stringify(response.user));
         localStorage.setItem("token", JSON.stringify(response.accessToken));
         //luu vao redux
-        dispatch(
+        dispatch( 
           setAuth({
             user: response.user,
             accessToken: response.accessToken,
