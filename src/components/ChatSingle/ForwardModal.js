@@ -21,7 +21,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     const [selectedMembers, setSelectedMembers] = useState([]);
     const [listFriends, setListFriends] = useState([]);
 
-    const [temp, setTemp] = useState([]);
+    const [temp, setTemp] = useState(true);
     const scrollRef = useRef(null);
     // const user = JSON.parse(localStorage.getItem('user'));
     const user = useSelector((state) => state.authLogin.user);
@@ -43,7 +43,7 @@ export default function ForwardModal({ isOpen, toggleForwardModal }) {
     // }, [keyword]);
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [isOpen]);
 
     const fetchData = async () => {
         try {

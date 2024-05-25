@@ -37,6 +37,7 @@ const getAllConversation = async ({userId}) => {
       headers: headers,
     
     });
+    console.log("res data:",response.data);
     return response.data;
   } catch (error) {
     console.log("can't fetch data", error);

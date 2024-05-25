@@ -322,13 +322,22 @@ export default function ChatWindow() {
   //     console.log("error", error);
   //   }
   // };
+  const addMessageIfNotExists = (messages, newMessage) => {
+    const messageExists = messages.some(message => message._id === newMessage._id);
+    if (!messageExists) {
+      return [...messages, newMessage];
+    }
+    return messages;
+  };
 
   // Update data từ Socket gửi về
   useEffect(() => {
     connectSocket.on("chat message", (msg) => {
       if (msg.conversationId === conversationRef.current._id) {
+        console.log('hi');
         console.log("new message", msg);
-        setMessages((preMessage) => [...preMessage, msg]);
+        // setMessages((preMessage) => [...preMessage, msg]);
+        setMessages((prevMessages) => addMessageIfNotExists(prevMessages, msg));
       }
     });
     connectSocket.on("reaction message", async (reaction) => {
