@@ -22,7 +22,8 @@ export default function ChatList() {
   const conversation = useSelector((state) => state.conversation.conversation);
   const dispatch = useDispatch();
   const accessToken = useSelector((state) => state.auth.accessToken);
-  const [conversations, setConversations] = useState([]);
+  // const [conversations, setConversations] = useState([]);
+  const conversations = useSelector((state) => state.conversation.conversations);
   // const [connect, setConnect] = useState(false);
 
   const scrollRef = useRef(null);
@@ -69,7 +70,7 @@ export default function ChatList() {
           data: res.data,
           userId: user._id,
         });
-        setConversations(fConversation);
+        // setConversations(fConversation);
         dispatch(setConversations(fConversation));
       }
     } catch (error) {
