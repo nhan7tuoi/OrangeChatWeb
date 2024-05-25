@@ -96,9 +96,14 @@ const searchUsers = async ({keyword,userId}) => {
 };
 
 const checkInfo = async ({email}) => {
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    };
     try {
         const response = await instance.post('/checkInfo', {
             email: email,
+        },{
+            headers: headers,
         });
         return response.data;
     } catch (error) {

@@ -29,35 +29,34 @@ export default function ChatList() {
 
   useEffect(() => {
     // if (!connect) {
-      fetchData();
-      // connectSocket.initSocket(user._id);
-      // setConnect(true);
+    fetchData();
+    // connectSocket.initSocket(user._id);
+    // setConnect(true);
     // }
 
-      connectSocket.on("newConversationGroup", (data) => {
+    connectSocket.on("newConversationGroup", (data) => {
+      fetchData();
+    });
+    connectSocket.on("addToGroup", (data) => {
+      fetchData();
+    });
+    connectSocket.on("updateConversation", (data) => {
+      fetchData();
+    });
+    connectSocket.on("chat message", () => {
+      console.log("update cvs");
+      fetchData();
+    });
+    connectSocket.on("disbandGroup", () => {
+      fetchData();
+    });
+    connectSocket.on("removeMember", (data) => {
+      if (!conversation._id || conversation._id === data.conversation._id)
         fetchData();
-      });
-      connectSocket.on("addToGroup", (data) => {
-        fetchData();
-      });
-      connectSocket.on("updateConversation", (data) => {
-        fetchData();
-      });
-      connectSocket.on("chat message", () => {
-        console.log("update cvs");
-        fetchData();
-      });
-      connectSocket.on("disbandGroup", () => {
-        fetchData();
-      });
-      connectSocket.on("removeMember", (data) => {
-        if (!conversation._id || conversation._id === data.conversation._id)
-          fetchData();
-      });
-      connectSocket.on("deletedMember", (data) => {
-        fetchData();
-      });
-    
+    });
+    connectSocket.on("deletedMember", (data) => {
+      fetchData();
+    });
   }, []);
 
   const fetchData = async () => {
@@ -106,11 +105,18 @@ export default function ChatList() {
                 dispatch(setConversationReload(item._id));
               }}
             >
-              <img
-                src={item.image}
-                style={{ width: "60px", height: "60px", borderRadius: "100%" }}
-                alt="Avatar"
-              />
+              <div>
+                <img
+                  src={item.image}
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                    borderRadius: "100%",
+                  }}
+                  alt="Avatar"
+                />
+              </div>
+
               <div
                 style={{
                   display: "flex",

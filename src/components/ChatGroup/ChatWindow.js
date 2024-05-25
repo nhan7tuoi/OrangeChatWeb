@@ -34,6 +34,7 @@ import currentSlice, { setCurrentPage2 } from "../../redux/currentSlice";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
 import stickerApi from "../../apis/stickerApi";
+import { formatConversation } from "../../utils/formatConverstation";
 
 const { Text } = Typography;
 
@@ -82,6 +83,29 @@ export default function ChatWindow() {
     console.log("fetch message");
   }, [conversationId]);
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const [listFriend, setListFriends] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const response = await conversationApi.getAllConversation({
+        userId: user._id,
+      });
+      if (response) {
+        const fConversation = formatConversation({
+          data: response.data,
+          userId: user._id,
+        });
+        setListFriends(fConversation);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   const toggleAddMemberModal = () => {
     setIsOpenAddMember(!isOpenAddMember);
   };
@@ -117,6 +141,15 @@ export default function ChatWindow() {
       setMessages(response.data);
     }
   };
+
+  useEffect(() => {
+    // Lấy phần tử div bên trong
+    const scrollElement = scrollRef.current;
+    // Nếu có phần tử và đã có tin nhắn mới, cuộn xuống dưới cùng của phần tử
+    if (scrollElement && messages?.length > 0) {
+      scrollElement.scrollTop = scrollElement.scrollHeight;
+    }
+  }, [messages]);
 
   const handleInputText = (text) => {
     setInputMessage(text);
@@ -902,10 +935,13 @@ export default function ChatWindow() {
             />
           </Button>
         </div>
-        <ForwardModal
-          isOpen={isOpenShare}
-          toggleForwardModal={toggleForwardModal}
-        />
+        {isOpenShare && (
+          <ForwardModal
+            listFriend={listFriend}
+            isOpen={isOpenShare}
+            toggleForwardModal={toggleForwardModal}
+          />
+        )}
       </div>
     );
   };

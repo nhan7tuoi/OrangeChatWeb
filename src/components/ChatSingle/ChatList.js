@@ -125,18 +125,18 @@ export default function ChatList() {
                 </Text>
                 {/* <Text style={{ fontSize: '14px', fontWeight: '400px', color: '#666' }}>{item.time}</Text> */}
               </div>
-              {item?.lastMessage?.senderId_id === user._id ? (
-                <Text
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "400px",
-                    color: "#666",
-                    textAlign: "left",
-                  }}
-                >
-                  Bạn: {item?.lastMessage?.contentMessage}
-                </Text>
-              ) : (
+              {item?.lastMessage?.senderId === user._id ? (
+                  <Text
+                    style={{
+                      fontSize: "14px",
+                      fontWeight: "400px",
+                      color: "#666",
+                      textAlign: "left",
+                    }}
+                  >
+                    Bạn: {item?.lastMessage?.contentMessage}
+                  </Text>
+                ) : (
                 <Text
                   style={{
                     fontSize: "14px",
