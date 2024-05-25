@@ -10,6 +10,14 @@ import stickerSlice from './stickerSlice';
 import { combineReducers } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import {
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist/es/constants';
 
 
 const rootReducer = combineReducers({
@@ -31,8 +39,13 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
   reducer: persistedReducer,
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(thunk),
-  // middleware: getDefaultMiddleware().concat(thunk),
+  // middleware: getDefaultMiddleware => getDefaultMiddleware().concat(thunk),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }).concat(thunk),
 });
 const persistor = persistStore(store);
 

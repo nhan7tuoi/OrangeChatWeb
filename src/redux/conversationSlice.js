@@ -11,6 +11,7 @@ const conversationSlice = createSlice({
   },
   reducers: {
     setCoversation: (state, action) => {
+      console.log('action.payload', action);
       state.conversation = action.payload;
     },
     setNameGroup: (state, action) => {

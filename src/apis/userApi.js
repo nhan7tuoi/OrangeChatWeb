@@ -1,8 +1,9 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
+const token = localStorage.getItem('token');
 
 
-const BASE_URL = `http://${IPV4}:3000/api/v1`;
+const BASE_URL = `https://${IPV4}/api/v1`;
 
 const instance = axios.create({
     baseURL: BASE_URL,
@@ -11,10 +12,16 @@ const instance = axios.create({
 
 //up avatar
 const uploadAvatar = async ({userId,image}) => {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
     try {
         const response = await instance.post('/uploadAvatar', {
             userId: userId,
             image: image,
+        },{
+            headers: headers
+        
         });
         return response.data;
     } catch (error) {

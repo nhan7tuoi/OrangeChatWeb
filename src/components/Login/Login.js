@@ -30,7 +30,7 @@ export default function Login() {
             });
             if (response) {
                 localStorage.setItem('user', JSON.stringify(response.user));
-                localStorage.setItem('accessToken', response.accessToken);
+                localStorage.setItem('token', JSON.stringify(response.accessToken));
                 //luu vao redux
                 dispatch(setAuth({
                     user: response.user,

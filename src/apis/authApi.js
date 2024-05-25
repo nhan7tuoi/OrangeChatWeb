@@ -1,8 +1,9 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
+const token = localStorage.getItem('token');
 
 
-const BASE_URL = `http://${IPV4}:3000/api/v1`;
+const BASE_URL = `https://${IPV4}/api/v1`;
 
 
 const instance = axios.create({
@@ -77,10 +78,16 @@ const refreshToken = async ({token}) => {
 };
 
 const searchUsers = async ({keyword,userId}) => {
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    };
   try {
     const data = {keyword:keyword,userId:userId}
     const queryParam = new URLSearchParams(data).toString();
-    const response = await instance.get(`/users?`+queryParam);
+    const response = await instance.get(`/users?`+queryParam,{
+        headers: headers,
+    
+    });
     return response.data;
   } catch (error) {
     console.log('error', error);
@@ -100,6 +107,9 @@ const checkInfo = async ({email}) => {
 }
 //ham chinh sua thong tin ca nhan
 const editProfile = async (data) => {
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    };
     console.log('data', data);
     try {
         const response = await instance.post('/editProfile', {
@@ -107,6 +117,8 @@ const editProfile = async (data) => {
             name: data.name,
             dateOfBirth: data.dateOfBirth,
             gender:data.gender,
+        },{
+            headers: headers,
         });
         return response.data;
     }
@@ -117,11 +129,17 @@ const editProfile = async (data) => {
 
 //ham change password
 const changePassword = async (data) => {
+    const headers = {
+        Authorization: `Bearer ${token}`,
+    };
     try {
         const response = await instance.post('/changePassword', {
             userId: data.userId,
             oldpassword: data.oldpassword,
             password: data.password,
+        },{
+            headers: headers,
+        
         });
         return response.data;
     }

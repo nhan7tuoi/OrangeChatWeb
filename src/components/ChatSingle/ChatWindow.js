@@ -21,21 +21,26 @@ import ReactionModal from "../Reaction/ReactionModal";
 import EmojiPicker from "emoji-picker-react";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/StickerApi";
+import stickerApi from "../../apis/stickerApi";
 import { formatConversation } from "../../utils/formatConverstation";
 
 const { Text } = Typography;
 
 export default function ChatWindow() {
   const user = useSelector((state) => state.authLogin.user);
-  // const conversation = JSON.parse(localStorage.getItem("conversation"));
+  
   const conversation = useSelector((state) => state.conversation.conversation);
+  console.log("conversationxx", conversation);
   const receiverId = conversation.members?.filter(
     (member) => member._id !== user._id
   );
   const conversationId = useSelector(
     (state) => state.current.conversationReload
   );
+
+  const conversationRef = useRef(conversation);
+
+  
 
   const stickerData = useSelector((state) => state.sticker.stickers);
   const userId = user._id;
@@ -72,6 +77,7 @@ export default function ChatWindow() {
 
   useEffect(() => {
     getLastMessage();
+    conversationRef.current = conversation;
   }, [conversationId]);
 
   const getLastMessage = async () => {
@@ -322,7 +328,7 @@ export default function ChatWindow() {
   // Update data từ Socket gửi về
   useEffect(() => {
     connectSocket.on("chat message", (msg) => {
-      if (msg.conversationId === conversation._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         console.log("new message", msg);
         setMessages((preMessage) => [...preMessage, msg]);
       }
@@ -339,7 +345,7 @@ export default function ChatWindow() {
     });
     connectSocket.on("recall message", (msg) => {
       console.log("recall message", msg);
-      if (msg.conversationId === conversation._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         const newMessages = messages.map((message) => {
           if (message._id === msg.messageId) {
             message.isRecall = true;
@@ -351,7 +357,7 @@ export default function ChatWindow() {
     });
     connectSocket.on("delete message", (msg) => {
       console.log("delete message", msg);
-      if (msg.conversationId === conversation._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         const newMessages = messages.map((message) => {
           if (message._id === msg.messageId) {
             message.deleteBy = [{ userDelete: msg.userDelete }];
@@ -361,7 +367,7 @@ export default function ChatWindow() {
         getLastMessage();
       }
     });
-  }, []);
+  }, [conversationId]);
 
   const handleImageClick = () => {
     fileImageRef.current.click(); // Kích hoạt input file khi button được nhấn

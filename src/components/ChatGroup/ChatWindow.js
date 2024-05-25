@@ -33,7 +33,7 @@ import ForwardModal from "../ChatSingle/ForwardModal";
 import currentSlice, { setCurrentPage2 } from "../../redux/currentSlice";
 import Icons from "../../themes/Icons";
 import { setSticker } from "../../redux/stickerSlice";
-import stickerApi from "../../apis/StickerApi";
+import stickerApi from "../../apis/stickerApi";
 
 const { Text } = Typography;
 
@@ -48,6 +48,10 @@ export default function ChatWindow() {
   const conversationId = useSelector(
     (state) => state.current.conversationReload
   );
+
+  const conversationRef = useRef(conversation1);
+
+
   const userId = user._id;
   const [isOpenAddMember, setIsOpenAddMember] = useState(false);
   const [isOpenManageGroup, setIsOpenManageGroup] = useState(false);
@@ -100,6 +104,7 @@ export default function ChatWindow() {
   };
 
   useEffect(() => {
+    conversationRef.current = conversation1;
     getLastMessage();
     console.log("fetch message");
   }, [conversationId]);
@@ -327,7 +332,7 @@ export default function ChatWindow() {
     // console.log("connect", user._id);
 
     connectSocket.on("chat message", (msg) => {
-      if (msg.conversationId === conversation1._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         console.log("new message", msg);
         setMessages((preMessage) => [...preMessage, msg]);
       }
@@ -344,7 +349,7 @@ export default function ChatWindow() {
     });
     connectSocket.on("recall message", (msg) => {
       console.log("recall message", msg);
-      if (msg.conversationId === conversation1._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         const newMessages = messages?.map((message) => {
           if (message._id === msg.messageId) {
             message.isRecall = true;
@@ -356,7 +361,7 @@ export default function ChatWindow() {
     });
     connectSocket.on("delete message", (msg) => {
       console.log("delete message", msg);
-      if (msg.conversationId === conversation1._id) {
+      if (msg.conversationId === conversationRef.current._id) {
         const newMessages = messages.map((message) => {
           if (message._id === msg.messageId) {
             message.deleteBy = [{ userDelete: msg.userDelete }];
@@ -374,19 +379,19 @@ export default function ChatWindow() {
       setMessages((preMessage) => [...preMessage, data]);
     });
     connectSocket.on("deletedMember", (data) => {
-      if (conversation1._id === data._id) {
+      if (conversationRef.current._id === data._id) {
         Alert("Thông báo", "bạn đã bị xoá khỏi nhóm", [
           {
             text: "Đồng ý",
             onPress: () => {
-              if (conversation1.isGroup) dispatch(setCurrentPage2("Welcome"));
+              if (conversationRef.current.isGroup) dispatch(setCurrentPage2("Welcome"));
             },
           },
         ]);
       }
     });
     connectSocket.on("disbandGroup", (data) => {
-      if (data._id === conversation1._id) {
+      if (data._id === conversationRef.current._id) {
         Alert("Thông báo", "Nhóm không còn tồn tại", [
           {
             text: "Đồng ý",

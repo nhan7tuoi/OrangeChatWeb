@@ -8,7 +8,7 @@ import {
   setCurrentPage1,
 } from "../../redux/currentSlice";
 import { formatConversation } from "../../utils/formatConverstation";
-import { setCoversation } from "../../redux/conversationSlice";
+import { setCoversation,setConversations } from "../../redux/conversationSlice";
 
 const { Text } = Typography;
 
@@ -18,7 +18,8 @@ export default function ChatList() {
   const dispatch = useDispatch();
   // const listConversations = JSON.parse(localStorage.getItem('conversations'));
   // const conversation = JSON.parse(localStorage.getItem("conversation"));
-  const [conversations, setConversations] = useState([]);
+  // const [conversations, setConversations1] = useState([]);
+  const conversations = useSelector((state) => state.conversation.conversations);
   const scrollRef = useRef(null);
   const [connect, setConnect] = useState(false);
 
@@ -36,6 +37,15 @@ export default function ChatList() {
         console.log("conversation updated");
         getConversation();
       });
+      connectSocket.on("recall message", () => {
+        console.log("conversation updated");
+        getConversation();
+      });
+      connectSocket.on("delete message", () => {
+        console.log("conversation updated");
+        getConversation();
+      });
+      
     }
   }, [connect]);
 
@@ -50,7 +60,7 @@ export default function ChatList() {
           data: response.data,
           userId: user._id,
         });
-        setConversations(fmConversations);
+        // setConversations(fmConversations);
         dispatch(setConversations(fmConversations));
       }
     } catch (error) {
@@ -80,6 +90,8 @@ export default function ChatList() {
               dispatch(setCoversation(item));
               handleButtonClick();
               dispatch(setConversationReload(item._id));
+              localStorage.setItem("conversationLocal", JSON.stringify(item));
+              localStorage.setItem("conversationIDD", JSON.stringify(item._id));
             }}
           >
             <div>

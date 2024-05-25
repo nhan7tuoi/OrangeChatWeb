@@ -1,7 +1,8 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
+const token = localStorage.getItem('token');
 
-const BASE_URL = `http://${IPV4}:3000/api/friend`;
+const BASE_URL = `https://${IPV4}/api/friend`;
 
 const instance = axios.create({
   baseURL: BASE_URL,
@@ -9,8 +10,14 @@ const instance = axios.create({
 });
 
 const getFriends = async ({userId}) => {
+  const headers = {
+    Authorization: `Bearer ${token}`,
+  };
   try {
-    const response = await instance.get(`/getFriends/${userId}`);
+    const response = await instance.get(`/getFriends/${userId}`,{
+      headers: headers,
+    
+    });
     return response.data;
   } catch (error) {
     console.log('error', error);

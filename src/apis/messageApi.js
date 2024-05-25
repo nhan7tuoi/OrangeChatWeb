@@ -1,7 +1,8 @@
 import axios from 'axios';
 import IPV4 from './ipv4';
+const token = localStorage.getItem('token');
 
-const BASE_URL = `http://${IPV4}:3000/api/v1`;
+const BASE_URL = `https://${IPV4}/api/v1`;
 
 const instance = axios.create({
     baseURL: BASE_URL,
@@ -11,8 +12,14 @@ const instance = axios.create({
 
 //ham get message theo conversationId
 const getMessage = async ({ conversationId }) => {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    }
     try {
-        const response = await instance.get(`/messages/${conversationId}`);
+        const response = await instance.get(`/messages/${conversationId}`,{
+            headers: headers
+        
+        });
         console.log("messs",response.data);
         return response.data;
     } catch (error) {
@@ -22,8 +29,13 @@ const getMessage = async ({ conversationId }) => {
 
 //get 20 tin nhan gan nhat
 const getLastMessage = async ({ conversationId }) => {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
     try {
-        const response = await instance.get(`/messages/last/${conversationId}`);
+        const response = await instance.get(`/messages/last/${conversationId}`,{
+            headers: headers
+        });
         return response.data;
     } catch (error) {
         throw error;
@@ -32,8 +44,14 @@ const getLastMessage = async ({ conversationId }) => {
 
 //get tat ca tin nhan tru 20 tin nhan gan nhat
 const getMoreMessage = async ({ conversationId }) => {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
     try {
-        const response = await instance.get(`/messages/more/${conversationId}`);
+        const response = await instance.get(`/messages/more/${conversationId}`,{
+            headers: headers
+        
+        });
         return response.data;
     } catch (error) {
         throw error;
@@ -42,8 +60,13 @@ const getMoreMessage = async ({ conversationId }) => {
 
 //post reaction
 const postReaction = async ({ messageId, userId,reactType }) => {
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
     try {
-        const response = await instance.post("/message/reaction", { messageId, userId,reactType });
+        const response = await instance.post("/message/reaction", { messageId, userId,reactType },{
+            headers: headers
+        });
         return response.data;
     } catch (error) {
         throw error;
@@ -56,7 +79,8 @@ const uploadImage = async (file) => {
         const response = await instance.post('/files/upload', file,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
                 }
             });
         return response.data;
@@ -70,7 +94,8 @@ const uploadFile = async (file) => {
         const response = await instance.post('/files/upload', file,
             {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`
                 }
             });
         return response.data;

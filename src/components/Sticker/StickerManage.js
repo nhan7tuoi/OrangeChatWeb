@@ -3,7 +3,7 @@ import { Button, Col, Row } from 'antd';
 import { Link } from 'react-router-dom';
 import { CloseOutlined } from '@ant-design/icons';
 // import stickerApi from './stickerApi'; // Đường dẫn đúng đến file chứa API
-import StickerApi from '../../apis/StickerApi';
+import StickerApi from '../../apis/stickerApi';
 
 export default function StickerManage() {
     const [stickerSets, setStickerSets] = useState([]);
